@@ -525,6 +525,51 @@ run();
 
 ---
 
+### What’s the difference between a normal function and an async function?
+
+* **Normal function:**
+  It works like a machine that gives you an answer right away.
+
+* **Async function:**
+  It’s like a magic box that promises to give you an answer later.
+  You can tell it to “wait” inside the box until the answer is ready.
+
+---
+
+### Simple example:
+
+**Normal function:**
+
+-------------------code----------------------
+function sayHello() {
+  return "Hello!";
+}
+
+console.log(sayHello());  // Prints "Hello!" right now
+-------------------code----------------------
+
+**Async function:**
+
+-------------------code----------------------
+async function sayHello() {
+  return "Hello!";
+}
+
+sayHello().then(message => {
+  console.log(message);  // Prints "Hello!" later because it’s a promise
+});
+-------------------code----------------------
+
+---
+
+### Imagine this:
+
+* Normal function = You ask your friend, they answer immediately.
+* Async function = You ask your friend, they say “I’ll tell you soon” and come back later with the answer.
+
+---
+
+
 *** 5- Installing Node ***
 
 ### How to Install Node.js
