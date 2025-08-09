@@ -26,3 +26,54 @@
 
 * Encouragement to start immediately: “Let’s jump in.”
 
+*** 2- What is Node ***
+## Lecture Notes – Introduction to Node.js
+
+### 1. What is Node.js?
+
+* **Definition**: Open-source, cross-platform runtime environment for executing JavaScript outside the browser.
+* **Primary Use**: Building backend services, also called APIs (Application Programming Interfaces).
+
+### 2. Role of Node.js in Applications
+
+* **Client Applications**:
+
+  * Examples: Web apps in browsers, mobile apps on devices.
+  * These are the *surface layer* — what the user sees and interacts with.
+* **Backend Services**:
+
+  * Store data, send emails, push notifications, initiate workflows, etc.
+  * Node.js is ideal for **highly scalable**, **data-intensive**, and **real-time** backend services.
+
+### 3. Why Choose Node.js Over Other Backend Tools?
+
+* **Alternative frameworks**: ASP.NET, Rails, Django, etc.
+* **Advantages of Node.js**:
+
+  1. Easy to start, good for prototyping and agile development.
+  2. Capable of building **fast** and **highly scalable** production services.
+  3. Used by large companies like PayPal, Uber, Netflix, Walmart.
+
+     * PayPal case study:
+
+       * Built twice as fast with fewer people.
+       * 33% fewer lines of code.
+       * 40% fewer files.
+       * Double requests per second.
+       * 35% lower average response time.
+
+### 4. Additional Benefits of Node.js
+
+* **JavaScript on both front-end and back-end**:
+
+  * Easier for front-end developers to transition to full-stack.
+  * No need to learn a new programming language.
+  * Cleaner, more consistent source code (same naming conventions, tools, and best practices).
+* **Largest ecosystem of open-source libraries**:
+
+  * Nearly any feature or building block can be added using free libraries.
+  * Reduces need to build from scratch, allowing focus on core application logic.
+
+### 5. Next Topic
+
+* Node.js architecture.
