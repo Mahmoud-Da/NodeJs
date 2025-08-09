@@ -524,3 +524,59 @@ run();
 * Meanwhile, other parts of your program can keep running normally.
 
 ---
+
+*** 5- Installing Node ***
+
+### How to Install Node.js
+
+1. **Open your terminal or command prompt:**
+
+   * On **Windows**, open Command Prompt.
+   * On **Mac** or **Linux**, open the Terminal.
+
+2. **Check if Node.js is already installed:**
+
+   * Run the command:
+
+     -------------------code----------------------
+     node --version
+     -------------------code----------------------
+   * On the example machine, the version is `6.10.3`, which is an earlier version.
+   * The latest stable version at the time of this lecture is `8.x`.
+
+3. **If Node.js is not installed or if your version is outdated:**
+
+   * Open your browser and go to [nodejs.org](https://nodejs.org).
+   * On the homepage, you will see two versions available:
+
+     * The **latest stable version** (recommended for most users).
+     * The **latest experimental version** (may not be stable).
+   * Download and install the **latest stable version**.
+   * Note: This course uses core Node.js modules that are stable and consistent across versions, so the code will work on future versions as well.
+
+4. **Installing Node.js:**
+
+   * Download the installer package from the website.
+   * Run the installer.
+   * Follow the installation prompts by clicking **Continue** several times.
+   * Enter your system password if prompted.
+   * The installation will complete in a few seconds.
+
+5. **Verify the installation:**
+
+   * Go back to your terminal.
+   * Run:
+
+     -------------------code----------------------
+     node --version
+     -------------------code----------------------
+   * Confirm that the version is now the latest stable version (e.g., `8.9.1`).
+
+---
+
+### Next Steps
+
+* After installing Node.js, you will build your first Node.js application.
+
+---
+
