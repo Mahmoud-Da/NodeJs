@@ -1,0 +1,28 @@
+*** 1- Welcome ***
+
+## Lecture Notes – Introduction to the Complete Node Course
+
+**Instructor:** Mosh Hamedani
+
+### Overview
+
+* Comprehensive and up-to-date Node.js course.
+* Focuses on **modern techniques** for building applications with Node.js.
+* Goal: Equip learners to become highly skilled Node developers.
+
+### Key Points
+
+1. **Instructor's Commitment**:
+
+   * Designed to be the most thorough and current Node.js course available.
+2. **Learning Outcome**:
+
+   * By the end, students should be able to confidently develop modern applications using Node.js.
+3. **Motivation**:
+
+   * The course aims to turn learners into “superstar” Node developers.
+
+### Closing of Intro
+
+* Encouragement to start immediately: “Let’s jump in.”
+
