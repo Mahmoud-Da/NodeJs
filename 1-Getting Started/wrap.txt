@@ -77,3 +77,68 @@
 ### 5. Next Topic
 
 * Node.js architecture.
+
+
+*** 3- Node Architecture ***
+
+## Lecture Notes – What is a Runtime Environment?
+
+### 1. Recap from Previous Video
+
+* **Node.js**: A runtime environment for executing JavaScript code.
+
+### 2. What is a Runtime Environment?
+
+* **Before Node.js**:
+
+  * JavaScript was used only for applications running inside browsers.
+  * Browsers include a **JavaScript engine** that converts JavaScript into machine code.
+* **Examples of JavaScript Engines**:
+
+  * Microsoft Edge → Chakra
+  * Firefox → SpiderMonkey
+  * Chrome → V8
+* **Browser Runtime Environment**:
+
+  * Provides built-in objects like `window` and `document`.
+  * Allows interaction with the browser environment.
+
+### 3. The Birth of Node.js (2009)
+
+* Created by **Ryan Dahl**.
+* Idea: Execute JavaScript **outside** the browser.
+* Approach:
+
+  * Took **Google’s V8 engine** (fastest JS engine at the time).
+  * Embedded it into a **C++ program**.
+  * Named the program **Node**.
+
+### 4. Node.js Runtime Environment vs Browser Runtime Environment
+
+* Both use **V8** JavaScript engine.
+* **Node.js** environment objects:
+
+  * No `document` object.
+  * Includes modules to:
+
+    * Work with the file system.
+    * Listen for network requests.
+    * Perform server-side tasks not possible in browsers.
+* **Browsers**: Limited to DOM manipulation, UI interaction, etc.
+
+### 5. Common Misconceptions
+
+* **Node.js is not a programming language**:
+
+  * JavaScript is the language; Node is the runtime.
+  * Comparing Node to C#, Ruby, etc., is incorrect.
+* **Node.js is not a framework**:
+
+  * Frameworks like ASP.NET, Rails, Django are for building applications.
+  * Node provides the runtime environment, not a development framework.
+
+### 6. Next Topic
+
+* How Node.js works.
+
+---
