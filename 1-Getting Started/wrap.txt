@@ -580,3 +580,87 @@ run();
 
 ---
 
+
+*** 6- Your First Node Program ***
+### Building Your First Node.js Application
+
+1. **Create a new project folder:**
+
+   * Name the folder `first-app`.
+   * Navigate to this folder in your terminal.
+
+2. **Open the folder in your code editor:**
+
+   * Use Visual Studio Code (VS Code) by running:
+
+     -------------------code----------------------
+     code .
+     -------------------code----------------------
+   * VS Code is a free and powerful editor, but you can use any editor you prefer such as Sublime Text, Atom, etc.
+
+3. **Create a new JavaScript file:**
+
+   * Inside the folder, create a file named `app.js`.
+
+4. **Write your first Node.js code:**
+
+   * In `app.js`, write regular JavaScript as you would for the browser.
+   * Define a function `sayHello` that takes a parameter `name` and logs a greeting message:
+
+     -------------------code----------------------
+     function sayHello(name) {
+       console.log("Hello " + name);
+     }
+
+     sayHello("Mosh");
+     -------------------code----------------------
+
+5. **Run your Node.js application:**
+
+   * Go back to the terminal.
+   * Run the following command:
+
+     -------------------code----------------------
+     node app.js
+     -------------------code----------------------
+   * Node.js uses the V8 JavaScript engine (from Chrome) to execute your code.
+   * You should see the output:
+
+     -------------------code----------------------
+     Hello Mosh
+     -------------------code----------------------
+
+6. **Experiment with environment differences:**
+
+   * Back in `app.js`, comment out the `sayHello("Mosh")` line.
+   * Add:
+
+     -------------------code----------------------
+     console.log(window);
+     -------------------code----------------------
+   * Run the code again:
+
+     -------------------code----------------------
+     node app.js
+     -------------------code----------------------
+   * You will get an error:
+
+     -------------------code----------------------
+     ReferenceError: window is not defined
+     -------------------code----------------------
+   * This happens because `window` and `document` objects are part of the browser environment and do not exist in Node.js.
+
+7. **Understanding Node.js environment:**
+
+   * Node.js provides objects and modules to work with files, operating system, network, and more.
+   * These will be covered in the next section.
+
+---
+
+### Summary
+
+* You created and ran a basic Node.js app.
+* You learned that Node.js environment differs from the browser environment.
+* Node.js does not have browser-specific objects like `window` or `document`.
+
+---
