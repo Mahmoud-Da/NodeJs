@@ -31,3 +31,115 @@ Throughout this section, the following built-in Node.js modules will be explored
 * They make it easier to structure, maintain, and extend applications.
 * Understanding both built-in and custom modules is essential for effective Node.js development.
 
+
+*** 2- Global Object ***
+**Lecture Notes: Global Objects in Node.js**
+
+---
+
+### 1. Introduction
+
+* In the previous section, the `console.log` function was used to log messages to the console.
+* The `console` object is an example of a **global object** in Node.js.
+* **Global objects** are accessible **from anywhere** in your code without the need to import them.
+
+---
+
+### 2. Global Objects in JavaScript
+
+* JavaScript provides several **globally available functions** and objects that can be used both:
+
+  * In the **browser** environment.
+  * In **Node.js**.
+
+**Common examples include:**
+
+* `setTimeout()` – Calls a function after a specified delay (e.g., 1 or 2 seconds).
+* `clearTimeout()` – Cancels a timeout created with `setTimeout()`.
+* `setInterval()` – Calls a function repeatedly after a given delay.
+* `clearInterval()` – Stops a repeating function created with `setInterval()`.
+
+These functions are part of the **standard JavaScript environment** and can be used in both browsers and Node.js.
+
+---
+
+### 3. Global Scope in Browsers
+
+* In the browser, the **`window` object** represents the **global scope**.
+* All globally declared variables and functions are accessible through the `window` object.
+
+**Examples:**
+
+* `window.console.log()` or simply `console.log()`
+
+* `window.setTimeout()` or simply `setTimeout()`
+
+* When you declare a variable, for example:
+
+  -------------------code----------------------
+  var message = "Hello";
+  -------------------code----------------------
+
+  It becomes accessible via `window.message`.
+
+---
+
+### 4. Global Scope in Node.js
+
+* Node.js does **not** have the `window` object.
+* Instead, it has another global object called **`global`**.
+
+**Examples:**
+
+* `global.console.log()`
+* `global.setTimeout()`
+
+However, in practice, developers usually omit the `global` prefix since these functions are directly accessible.
+
+---
+
+### 5. Difference Between Browser and Node.js Globals
+
+* In browsers:
+
+  * Variables defined globally are **added** to the `window` object.
+  * Example:
+
+    -------------------code----------------------
+    var message = "Hello";
+    console.log(window.message); // Output: Hello
+    -------------------code----------------------
+* In Node.js:
+
+  * Variables defined in a file are **not** added to the `global` object.
+  * They are **scoped to the specific file** (module).
+  * Example:
+
+    -------------------code----------------------
+    var message = "Hello";
+    console.log(global.message); // Output: undefined
+    -------------------code----------------------
+
+When running `node app.js`, the console will show `undefined`, proving that the variable is not global.
+
+---
+
+### 6. Reason for This Behavior
+
+* This scoping behavior in Node.js is intentional and part of the **Node.js module system**.
+* Each file in Node.js is treated as a **separate module**, meaning:
+
+  * Variables and functions are **private** to that module.
+  * They are **not automatically shared** with other files.
+* This prevents naming conflicts and improves code maintainability.
+
+---
+
+### 7. Summary
+
+* **Global objects** (like `console`, `setTimeout`, etc.) are available everywhere in Node.js.
+* **Browsers use `window`**, while **Node.js uses `global`** as the global scope object.
+* In Node.js, user-defined variables are **not attached** to `global`.
+* Each file has its own **module scope**, forming the foundation of Node.js’s modular system.
+
+---
