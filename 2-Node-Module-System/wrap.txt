@@ -551,3 +551,117 @@ log('Message');
 * This modular structure keeps Node.js applications organized, reusable, and maintainable.
 
 ---
+
+*** 6- Module Wrapper Function ***
+### Lecture Notes: How Node.js Wraps Modules
+
+---
+
+#### 1. **Scope of Variables and Functions in Modules**
+
+* In Node.js, any variable or function defined inside a module is **scoped only to that module**.
+* These variables and functions are **private** and **not visible outside** the file unless explicitly exported.
+* This encapsulation helps prevent naming conflicts between different files.
+
+---
+
+#### 2. **How Node.js Implements Module Scope**
+
+* Node does **not execute the contents of a module directly**.
+* Instead, it **wraps each module’s code inside a function** before execution.
+* This hidden function is known as the **Module Wrapper Function**.
+
+Example (conceptual representation):
+
+-------------------code----------------------
+(function (exports, require, module, __filename, __dirname) {
+  var url = "http://mylogger.io/log";
+
+  function log(message) {
+    console.log(message);
+  }
+  
+  module.exports = log;
+
+});
+-------------------code----------------------
+
+* When Node executes a file, it wraps the entire code within this function.
+* This makes variables and functions **local** to the module, not global.
+
+---
+
+#### 3. **Demonstration of the Wrapper Function**
+
+* By intentionally creating a syntax error at the top of a module, Node shows the internal wrapper function in the error message.
+* Example error message reveals:
+
+  -------------------code----------------------
+  function (exports, require, module, __filename, __dirname) {
+  -------------------code----------------------
+* This proves Node wraps every file inside a function before executing it.
+
+---
+
+#### 4. **Parameters Passed to the Wrapper Function**
+
+Each module receives five parameters automatically:
+
+1. **`exports`** – A shortcut reference to `module.exports`.
+2. **`require`** – A function to import other modules.
+3. **`module`** – Represents the current module and its metadata.
+4. **`__filename`** – The absolute path of the current module file.
+5. **`__dirname`** – The absolute path of the directory containing the current module.
+
+Example:
+
+-------------------code----------------------
+console.log(__filename);
+console.log(__dirname);
+-------------------code----------------------
+
+Output:
+
+-------------------code----------------------
+/path/to/logger.js
+/path/to
+-------------------code----------------------
+
+---
+
+#### 5. **Relationship Between `exports` and `module.exports`**
+
+* Both refer to the same object initially:
+
+  -------------------code----------------------
+  exports.log = function() { };
+  // is equivalent to
+  module.exports.log = function() { };
+  -------------------code----------------------
+* However:
+
+  * You **can modify properties** on `exports`.
+  * You **cannot reassign** `exports` directly (e.g., `exports = log`) because that breaks the reference to `module.exports`.
+
+---
+
+#### 6. **Purpose of the Wrapper Function**
+
+* Keeps module variables private.
+* Provides access to:
+
+  * `require` for importing other modules.
+  * `exports` and `module.exports` for exporting functionality.
+  * File and directory metadata (`__filename`, `__dirname`).
+
+---
+
+#### 7. **Summary**
+
+* Node wraps each module in a function called the **Module Wrapper Function**.
+* This ensures that:
+
+  * Variables and functions inside a file are **not global**.
+  * Each file has its own local scope.
+* The wrapper passes important objects like `exports`, `require`, `module`, `__filename`, and `__dirname`.
+* Understanding this mechanism helps explain how Node manages module isolation and scope safely.
