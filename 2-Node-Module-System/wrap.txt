@@ -1,0 +1,33 @@
+*** 1- Introduction  ***
+**Lecture Notes: Node.js Module System**
+
+**1. Overview**
+
+* This section introduces the **module system** in Node.js.
+* It explains what **modules** are, why they are **necessary**, and how they **function**.
+
+**2. Purpose of Modules**
+
+* Modules help organize code into **separate, reusable components**.
+* They allow developers to maintain **clean and manageable** codebases.
+* Modules prevent **naming conflicts** and support **encapsulation** of functionality.
+
+**3. Core Node.js Modules Covered**
+Throughout this section, the following built-in Node.js modules will be explored:
+
+* **Operating System (os):** Provides information about the operating system.
+* **File System (fs):** Enables reading from and writing to files.
+* **Events:** Allows handling and emitting of custom events.
+* **HTTP:** Enables building web servers and handling HTTP requests and responses.
+
+**4. Creating Custom Modules**
+
+* In addition to using built-in modules, you will learn how to **create your own modules**.
+* This includes **defining**, **exporting**, and **importing** custom functionality for reuse across files.
+
+**5. Summary**
+
+* Modules are a fundamental part of Node.js architecture.
+* They make it easier to structure, maintain, and extend applications.
+* Understanding both built-in and custom modules is essential for effective Node.js development.
+
