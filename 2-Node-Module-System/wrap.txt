@@ -928,3 +928,110 @@ const pathObj = path.parse(filePath);
 #### 9. **Next Topic**
 
 * In the next lecture, we will explore another core Node.js module: **the `os` module**, which provides information about the **operating system and system resources**.
+
+*** 8- OS Module ***
+**Lecture Notes: Node.js OS Module and Template Strings**
+
+---
+
+### 1. Overview
+
+This lecture explains how to get information about the current operating system using Node.js and introduces the concept of **template strings** from ECMAScript 6 (ES6 / 2015).
+
+---
+
+### 2. The OS Module
+
+* Node.js provides a built-in module called **`os`** that allows access to operating system-related information.
+* You can find this module in the official Node.js documentation under the list of core modules.
+
+**Common OS Module Methods:**
+
+* `os.freemem()` → Returns the amount of free system memory.
+* `os.totalmem()` → Returns the total system memory.
+* `os.userInfo()` → Provides information about the current user.
+* `os.uptime()` → Returns the system uptime.
+
+---
+
+### 3. Loading the OS Module
+
+To use the OS module, load it using `require()` just like other Node.js modules.
+
+-------------------code----------------------
+const os = require('os');
+-------------------code----------------------
+
+---
+
+### 4. Using OS Methods
+
+You can call the methods and log the results to the console.
+
+-------------------code----------------------
+const totalMemory = os.totalmem();
+const freeMemory = os.freemem();
+
+console.log('Total Memory: ' + totalMemory);
+console.log('Free Memory: ' + freeMemory);
+-------------------code----------------------
+
+However, this uses string concatenation, which can be simplified using **template strings**.
+
+---
+
+### 5. Template Strings (ES6 / ECMAScript 2015)
+
+**Purpose:**
+Template strings provide a cleaner way to include variables inside strings without concatenation.
+
+**Syntax:**
+
+* Use backticks (`` ` ``) instead of quotes.
+* Use `${variableName}` as placeholders inside the string.
+
+**Example:**
+
+-------------------code----------------------
+console.log(`Total Memory: ${totalMemory}`);
+console.log(`Free Memory: ${freeMemory}`);
+-------------------code----------------------
+
+**Explanation:**
+
+* Backtick (`` ` ``) is located before the number **1** key on the keyboard.
+* `${}` allows embedding dynamic values directly inside a string.
+
+---
+
+### 6. Running the Application
+
+1. Save the file as `app.js`.
+2. Run it in the terminal:
+
+   -------------------code----------------------
+   node app.js
+   -------------------code----------------------
+3. The console will display the total and free memory of your machine.
+
+---
+
+### 7. Why This Matters
+
+Before Node.js, JavaScript could only run in browsers and had no access to system-level information such as memory or file data.
+With Node.js, JavaScript runs **outside the browser** (on the server or local environment), allowing:
+
+* Access to the file system.
+* Network operations (e.g., building web servers).
+* Interaction with the operating system.
+
+---
+
+### 8. Summary
+
+* The **`os`** module provides system-level information.
+* **`require('os')`** is used to load it.
+* **Template strings** (from ES6) simplify string formatting.
+* Node.js expands JavaScript’s capability beyond browsers, enabling system and server-side operations.
+
+---
