@@ -1449,3 +1449,132 @@ This practice helps reinforce the syntax and flow of emitting and handling event
 
 ---
 
+*** 12- Extending EventEmitter ***
+**Lecture Notes: Working with Event Emitters through Custom Classes in Node.js**
+
+---
+
+### 1. Direct Use of EventEmitter
+
+* In real-world applications, it is uncommon to work directly with the `EventEmitter` object.
+* Instead, developers create a **class** that inherits all the capabilities of `EventEmitter`, then use that class in their code.
+
+---
+
+### 2. Problem Setup
+
+* In the `logger` module, a simple `log()` function logs a message to the console.
+* After logging, we want to **raise an event** to signal that a message has been logged.
+* In `app.js`, we will later **listen** for this event and perform an action.
+
+---
+
+### 3. Initial Implementation
+
+1. In `logger.js`, import the EventEmitter:
+
+   -------------------code----------------------
+   const EventEmitter = require('events');
+   const emitter = new EventEmitter();
+   -------------------code----------------------
+2. After logging the message, raise an event:
+
+   -------------------code----------------------
+   emitter.emit('messageLogged', { id: 1, url: 'http://' });
+   -------------------code----------------------
+3. In `app.js`, listen for the event:
+
+   -------------------code----------------------
+   emitter.on('messageLogged', (arg) => {
+     console.log('Listener called', arg);
+   });
+   -------------------code----------------------
+
+**Issue:**
+The listener in `app.js` is **not triggered** because `app.js` and `logger.js` each have **different EventEmitter instances**.
+
+---
+
+### 4. Understanding the Problem
+
+* `app.js` has one EventEmitter object, and `logger.js` has another.
+* A listener registered on one instance cannot detect events emitted by another.
+* Thus, we need **a shared emitter instance** or **a class-based design**.
+
+---
+
+### 5. Creating a Class that Extends EventEmitter
+
+To solve the issue, we create a class that **inherits from EventEmitter**.
+
+1. Define a class:
+
+   -------------------code----------------------
+   const EventEmitter = require('events');
+
+   class Logger extends EventEmitter {
+     log(message) {
+       console.log(message);
+       this.emit('messageLogged', { id: 1, url: 'http://' });
+     }
+   }
+
+   module.exports = Logger;
+   -------------------code----------------------
+
+2. Key points:
+
+   * Use the `class` keyword (ES6 syntax).
+   * Function keyword is **not used** inside a class.
+   * Functions inside a class are called **methods**.
+   * Use **PascalCase** (e.g., `Logger`) for class names.
+   * `extends` allows inheritance of all EventEmitter capabilities.
+   * `this.emit()` is used to raise events from within the class.
+
+---
+
+### 6. Using the Logger Class in app.js
+
+-------------------code----------------------
+const Logger = require('./logger');
+const logger = new Logger();
+
+logger.on('messageLogged', (arg) => {
+  console.log('Listener called', arg);
+});
+
+logger.log('Message');
+-------------------code----------------------
+
+* Now, both the event emitter and listener are working on **the same instance (`logger`)**.
+* The listener successfully reacts to the emitted event.
+
+---
+
+### 7. Program Output
+
+When running:
+
+-------------------code----------------------
+node app.js
+-------------------code----------------------
+
+Output:
+
+-------------------code----------------------
+Message
+Listener called { id: 1, url: 'http://' }
+-------------------code----------------------
+
+---
+
+### 8. Recap
+
+* To raise and handle events correctly:
+
+  1. Create a **custom class** that **extends EventEmitter**.
+  2. Define additional methods (e.g., `log()`) inside this class.
+  3. Use `this.emit()` inside the class to raise events.
+  4. In the main module, **instantiate the class** and **register listeners** on that instance.
+
+* This approach keeps the code modular, reusable, and consistent with real-world Node.js design patterns.
