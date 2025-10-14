@@ -1242,8 +1242,8 @@ Although `EventEmitter` provides many methods, two are most commonly used:
    * Example:
 
      -------------------code----------------------
-     emitter.on('messageLogged', () => {
-       console.log('Listener called');
+     emitter.on("messageLogged", function () {
+      console.log("Listener called");
      });
      -------------------code----------------------
 
@@ -1301,3 +1301,151 @@ In this context, calling `emit()` means sending out a signal that an event has o
 * The order of registration matters: listeners must be registered **before** emitting events.
 
 ---
+
+*** 11- Event Arguments ***
+**Lecture Notes: Passing Event Arguments and Using Arrow Functions in Node.js**
+
+---
+
+### 1. Overview
+
+In Node.js, when raising an event, it is often necessary to send **additional data** about that event.
+For example, a logger module might:
+
+* Generate a unique **ID** for each message.
+* Return a **URL** to access the logged message.
+
+This lecture explains how to send such data (called **event arguments**) and how to simplify listener syntax using **arrow functions**.
+
+---
+
+### 2. Sending Data with Events
+
+When raising an event using the `emit()` method, you can pass **extra arguments** that provide context or details about the event.
+
+**Example (basic form):**
+
+-------------------code----------------------
+emitter.emit('messageLogged', 1, 'http://example.com');
+-------------------code----------------------
+
+However, passing multiple values like this is not ideal, since it can become confusing.
+A better practice is to **encapsulate data in an object**.
+
+---
+
+### 3. Encapsulating Event Data in an Object
+
+Instead of passing multiple separate values, send a **single object** containing descriptive properties.
+
+**Example:**
+
+-------------------code----------------------
+emitter.emit('messageLogged', { id: 1, url: 'http://example.com' });
+-------------------code----------------------
+
+This object is known as the **event argument**.
+It allows you to pass structured data about the event that occurred.
+
+---
+
+### 4. Receiving Event Arguments in the Listener
+
+When registering a listener with `on()`, you can add a parameter to capture the event argument passed by `emit()`.
+
+**Example:**
+
+-------------------code----------------------
+emitter.on('messageLogged', (arg) => {
+  console.log('Listener called', arg);
+});
+-------------------code----------------------
+
+**Output:**
+
+-------------------code----------------------
+Listener called { id: 1, url: 'http://example.com' }
+-------------------code----------------------
+
+**Notes:**
+
+* The parameter name (`arg`, `eventArg`, or `e`) is arbitrary.
+* By convention, developers often use `arg` or `eventArg`.
+
+---
+
+### 5. Using Arrow Functions (ES6 Feature)
+
+To simplify function syntax, ES6 introduced **arrow functions**, which provide a shorter way to define callbacks.
+
+**Before (using traditional function syntax):**
+
+-------------------code----------------------
+emitter.on('messageLogged', function(arg) {
+  console.log('Listener called', arg);
+});
+-------------------code----------------------
+
+**After (using arrow function syntax):**
+
+-------------------code----------------------
+emitter.on('messageLogged', (arg) => {
+  console.log('Listener called', arg);
+});
+-------------------code----------------------
+
+**Explanation:**
+
+* Arrow functions remove the need for the `function` keyword.
+* The `=>` symbol separates the parameter list and the function body.
+* They make event listener code cleaner and easier to read.
+
+---
+
+### 6. Example: Complete Event with Data
+
+-------------------code----------------------
+const EventEmitter = require('events');
+const emitter = new EventEmitter();
+
+// Register a listener
+emitter.on('messageLogged', (arg) => {
+  console.log('Listener called', arg);
+});
+
+// Raise an event with data
+emitter.emit('messageLogged', { id: 1, url: 'http://example.com' });
+-------------------code----------------------
+
+**Output:**
+
+-------------------code----------------------
+Listener called { id: 1, url: 'http://example.com' }
+-------------------code----------------------
+
+---
+
+### 7. Practice Exercise
+
+Imagine you have a **logger module** that calls a remote service to log messages.
+Before sending the message, raise an event called **`logging`**, and pass the message data to listeners.
+
+**Exercise:**
+
+* Raise an event named `logging`.
+* Pass an object containing `{ message: 'Your log message here' }`.
+* Register a listener to display that message when the event is raised.
+
+This practice helps reinforce the syntax and flow of emitting and handling events with data.
+
+---
+
+### 8. Summary
+
+* You can send data with an event using `emit(eventName, eventArg)`.
+* Encapsulate multiple values inside an **object** instead of passing them separately.
+* Listeners can access the event data through a parameter in their callback.
+* Use **arrow functions** to write cleaner and more modern JavaScript code.
+
+---
+
