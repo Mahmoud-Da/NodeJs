@@ -1167,3 +1167,137 @@ This simple error logging is only for demonstration. A complete section on **err
 * Asynchronous methods require a **callback** function to handle results and errors.
 
 ---
+
+*** 10- Events Module ***
+**Lecture Notes: Working with Events in Node.js**
+
+---
+
+### 1. Overview
+
+Events are one of the **core concepts** in Node.js.
+Much of Node’s internal functionality is built around the idea of **event-driven programming**.
+
+An **event** is a signal that something has happened in the application.
+For example:
+
+* When an HTTP server receives a request, it raises an event.
+* Our code can **listen** for that event and **respond** accordingly.
+
+---
+
+### 2. The Events Module
+
+Node.js provides a built-in module called **`events`**, which contains the **`EventEmitter`** class.
+This class is the foundation of Node’s event system and is used by many other core modules (such as HTTP, streams, and sockets).
+
+**Importing the module:**
+
+-------------------code----------------------
+const EventEmitter = require('events');
+-------------------code----------------------
+
+---
+
+### 3. The EventEmitter Class
+
+* `EventEmitter` is a **class**, meaning it defines a blueprint for creating objects that can **emit** and **listen** to events.
+* Naming convention: `EventEmitter` starts with an uppercase letter because it is a class.
+
+To use it, you must create an **instance** of the class:
+
+-------------------code----------------------
+const emitter = new EventEmitter();
+-------------------code----------------------
+
+**Class vs. Object Analogy:**
+
+* A **class** is like a blueprint (for example, "Human").
+* An **object** is a specific instance of that class (for example, "John" or "Mary").
+
+Here:
+
+* `EventEmitter` → class (blueprint)
+* `emitter` → object (instance you actually use)
+
+---
+
+### 4. Commonly Used Methods
+
+Although `EventEmitter` provides many methods, two are most commonly used:
+
+1. **`emit(eventName, ...args)`**
+
+   * Raises or triggers an event.
+   * Think of it as sending a signal that something has happened.
+   * Example:
+
+     -------------------code----------------------
+     emitter.emit('messageLogged');
+     -------------------code----------------------
+
+2. **`on(eventName, listener)`** (alias for `addListener`)
+
+   * Registers a **listener** (callback function) that runs when the specified event is emitted.
+   * Example:
+
+     -------------------code----------------------
+     emitter.on('messageLogged', () => {
+       console.log('Listener called');
+     });
+     -------------------code----------------------
+
+---
+
+### 5. Example: Emitting and Listening for Events
+
+**Complete Example:**
+
+-------------------code----------------------
+const EventEmitter = require('events');
+const emitter = new EventEmitter();
+
+// Register a listener
+emitter.on('messageLogged', () => {
+  console.log('Listener called');
+});
+
+// Raise an event
+emitter.emit('messageLogged');
+-------------------code----------------------
+
+**Explanation:**
+
+1. The listener is registered using `on()`.
+2. The event `messageLogged` is raised using `emit()`.
+3. When `emit()` is called, Node.js synchronously invokes all listeners registered for that event.
+4. Output:
+
+   -------------------code----------------------
+   Listener called
+   -------------------code----------------------
+
+**Important:**
+If you call `emit()` **before** registering the listener, nothing will happen, because at the time of emitting, no listener is available.
+
+---
+
+### 6. Meaning of “Emit”
+
+The term **emit** means “to produce” or “to send out.”
+In this context, calling `emit()` means sending out a signal that an event has occurred.
+
+---
+
+### 7. Key Takeaways
+
+* Events are central to Node.js architecture.
+* The **`EventEmitter`** class allows objects to:
+
+  * **Emit events** when something happens.
+  * **Listen for events** and respond to them.
+* Use the **`on()`** method to register listeners.
+* Use the **`emit()`** method to raise events.
+* The order of registration matters: listeners must be registered **before** emitting events.
+
+---
