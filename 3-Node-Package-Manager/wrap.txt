@@ -893,3 +893,92 @@ If you only want to see the **top-level dependencies** (those directly listed in
 | Check version manually                     | Open `node_modules/<package>/package.json` | Shows exact installed version |
 
 This makes it easy to monitor which versions of libraries are installed and ensure consistency across development environments.
+
+
+*** 9- Viewing Registry Info for a Package ***
+### Lecture Notes: Viewing Package Metadata with npm
+
+**1. Learning about an npm package**
+
+* To learn about any npm package, go to **[npmjs.com](https://www.npmjs.com)** and search for the desired package.
+* Example: Search for **mongoose**.
+* On the package page, you can view detailed metadata, including **version**, **description**, **dependencies**, and other properties.
+
+---
+
+**2. Viewing dependencies on the npm website**
+
+* Scroll down the package page to find the **dependencies** section.
+* Here, you can see all packages that the library depends on.
+* Example:
+
+  * `mongoose` depends on packages like **async** and **bson**.
+
+---
+
+**3. Viewing metadata using the terminal**
+
+* You can access package metadata directly from the terminal using:
+
+  -------------------code----------------------
+  npm view mongoose
+  -------------------code----------------------
+* This displays the **package.json** content of the Mongoose library.
+* Within the output, you can see key properties like:
+
+  * **dependencies**
+  * **versions**
+  * **description**
+  * **repository**
+  * **license**
+
+---
+
+**4. Understanding dependency syntax**
+
+* Example dependencies from the output:
+
+  * `"async": "2.1.4"` — exact version (no caret or tilde).
+  * `"bson": "~1.0.4"` — uses a tilde, meaning it allows updates for patch versions (1.0.x).
+* If there’s a patch available, it may be compatible with the existing version of the package.
+
+---
+
+**5. Viewing specific properties**
+
+* To view only certain properties (e.g., dependencies):
+
+  -------------------code----------------------
+  npm view mongoose dependencies
+  -------------------code----------------------
+* This shows only the **dependencies** object from the package.json file.
+
+---
+
+**6. Viewing version history**
+
+* To list all released versions of a package:
+
+  -------------------code----------------------
+  npm view mongoose versions
+  -------------------code----------------------
+* This displays all published versions (e.g., version history of Mongoose).
+* Useful for:
+
+  * **Downgrading** to a stable or older version.
+  * **Upgrading** to a newer version.
+
+---
+
+**7. Summary**
+
+* `npm view <package>` → shows complete metadata (like package.json).
+* `npm view <package> dependencies` → shows only dependencies.
+* `npm view <package> versions` → shows version history.
+* These commands help developers explore, analyze, and manage npm packages efficiently without visiting the website.
+
+---
+
+**Next Lecture:**
+
+* How to **downgrade or upgrade** a Node package.
