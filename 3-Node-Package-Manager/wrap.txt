@@ -1247,3 +1247,77 @@ npm install
 
 * Use `npm uninstall` (or `npm un`) to remove unnecessary packages.
 * Always check `package.json` and `node_modules` to verify that the package has been successfully removed.
+
+*** 14- Working with Global Packages ***
+### Lecture Notes: Local vs. Global npm Packages
+
+**1. Local packages**
+
+* Installed in a specific project folder.
+* Examples: `underscore`, `jshint`
+* Only accessible within that project.
+
+---
+
+**2. Global packages**
+
+* Not tied to a specific project or folder.
+* Accessible from anywhere in the system via the command line.
+* Examples:
+
+  * `npm` (command-line tool itself)
+  * `Angular CLI` (used to create Angular projects)
+
+---
+
+**3. Installing global packages**
+
+* Command syntax:
+
+  -------------------code----------------------
+  npm install -g <package-name>
+  -------------------code----------------------
+* Example:
+
+  -------------------code----------------------
+  npm install -g npm
+  -------------------code----------------------
+* On macOS, you may need `sudo` if permissions are not configured properly:
+
+  -------------------code----------------------
+  sudo npm install -g <package-name>
+  -------------------code----------------------
+* Removing the version specifier upgrades the package to the latest version.
+
+---
+
+**4. Managing global packages**
+
+* **Check outdated global packages:**
+
+  -------------------code----------------------
+  npm -g outdated
+  -------------------code----------------------
+
+  * Example:
+
+    * Angular CLI: current version 1.3.2, latest version 1.6.0
+* **Uninstall global packages:**
+
+  -------------------code----------------------
+  npm uninstall -g <package-name>
+  -------------------code----------------------
+
+---
+
+**5. Summary**
+
+* Local packages: project-specific, stored in `node_modules`.
+* Global packages: system-wide, accessible from any folder.
+* All npm commands like `outdated`, `install`, and `uninstall` work with the `-g` flag for global packages.
+
+---
+
+**Next Lecture:**
+
+* How to **publish your own packages** to the npm registry.
