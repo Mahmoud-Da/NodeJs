@@ -430,3 +430,162 @@ console.log(result);
 
 **Next Lecture:**
 How to manage global packages and understand versioning in NPM.
+
+*** 5- Package Dependencies ***
+**Lecture Notes: Installing and Understanding Package Dependencies (Example: Mongoose)**
+
+---
+
+### 1. Exercise Overview
+
+* The task: **Install a Node package called Mongoose**.
+* **Mongoose** is a popular Node.js library used for working with **MongoDB** databases.
+* You will learn about MongoDB later, but for now, the goal is to:
+
+  1. Install the package.
+  2. Inspect how it affects the **`package.json`** file and the **`node_modules`** folder.
+
+---
+
+### 2. Installing Mongoose
+
+Run the following command in your terminal:
+
+-------------------code----------------------
+npm install mongoose
+-------------------code----------------------
+
+or using the shorthand:
+
+-------------------code----------------------
+npm i mongoose
+-------------------code----------------------
+
+* After installation:
+
+  * The **`package.json`** file is automatically updated.
+  * Under **`dependencies`**, a new entry appears:
+
+    -------------------code----------------------json
+    "dependencies": {
+      "underscore": "^1.8.3",
+      "mongoose": "^4.13.6"
+    }
+    -------------------code----------------------
+  * The version shown here (4.13.6 in this example) may differ based on the latest release.
+
+---
+
+### 3. Exploring the `node_modules` Folder
+
+* Open the **`node_modules`** folder after installing Mongoose.
+* You will see many folders inside it — far more than just **`mongoose`** and **`underscore`**.
+* Question: Why are there so many?
+
+**Explanation:**
+
+* These additional folders represent **dependencies of Mongoose**.
+* When you install a Node package, NPM automatically installs all **packages that it depends on**.
+* So while you explicitly installed **Mongoose**, it internally depends on several other packages (such as `mongodb`, `bson`, etc.), which are installed automatically.
+
+---
+
+### 4. How Dependency Storage Used to Work
+
+In **older versions of NPM**, the dependency structure was **nested**:
+
+* Each package stored its own dependencies inside its own `node_modules` folder.
+* Example (old behavior):
+
+  -------------------code----------------------
+  node_modules/
+  ├── underscore/
+  │   └── node_modules/
+  │       └── dependencyA/
+  └── mongoose/
+      └── node_modules/
+          └── dependencyB/
+  -------------------code----------------------
+* This caused several problems:
+
+  * **Duplicate packages**: The same dependency could be installed multiple times in different places.
+  * **Deeply nested structures**, making it difficult to manage.
+  * **Windows path length limitations**: Windows restricts the number of characters allowed in file paths, leading to errors with deeply nested folders.
+
+---
+
+### 5. How NPM Handles Dependencies Now (Modern Behavior)
+
+In **newer versions of NPM**, this issue has been solved:
+
+* All dependencies (both direct and indirect) are installed **flatly** under the root **`node_modules`** folder.
+
+  -------------------code----------------------
+  node_modules/
+  ├── mongoose/
+  ├── underscore/
+  ├── mongodb/
+  ├── bson/
+  └── async/
+  -------------------code----------------------
+* This structure avoids duplication and long paths.
+
+**However**, there is one important exception:
+
+---
+
+### 6. The Version Conflict Exception
+
+* If two packages depend on **different versions** of the same dependency, NPM will install **multiple versions** as needed.
+
+**Example:**
+
+* Your application depends on:
+
+  -------------------code----------------------
+  async@1.x
+  -------------------code----------------------
+* Mongoose depends on:
+
+  -------------------code----------------------
+  async@2.x
+  -------------------code----------------------
+
+**Resulting structure:**
+
+-------------------code----------------------
+node_modules/
+├── async/        → version 1 (used by your app)
+├── mongoose/
+│   └── node_modules/
+│       └── async/ → version 2 (used internally by Mongoose)
+-------------------code----------------------
+
+So, the flat structure is used **as much as possible**, but NPM still installs local copies when version conflicts occur.
+
+---
+
+### 7. Summary
+
+* Installing **Mongoose** adds both the package itself and all its dependencies.
+* Modern NPM versions use a **flat dependency structure** to:
+
+  * Reduce duplication.
+  * Avoid deep nesting.
+  * Prevent path length issues (especially on Windows).
+* If two packages depend on **different versions** of the same dependency, NPM installs both versions — one globally under `node_modules` and one locally within the dependent package’s folder.
+
+---
+
+**Key Commands Reviewed**
+
+-------------------code----------------------
+npm install mongoose        # Install Mongoose and dependencies
+npm list                    # View dependency tree
+npm list --depth=0          # View only top-level dependencies
+-------------------code----------------------
+
+---
+
+**Next Lecture:**
+Understanding semantic versioning and the meaning of symbols like the caret (`^`) and tilde (`~`) in `package.json`.
