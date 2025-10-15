@@ -982,3 +982,54 @@ This makes it easy to monitor which versions of libraries are installed and ensu
 **Next Lecture:**
 
 * How to **downgrade or upgrade** a Node package.
+
+
+*** 10- Installing a Specific Version of a Package ***
+### Lecture Notes: Installing Specific Versions of npm Packages
+
+**1. Installing a specific version**
+
+* Sometimes, you may need to install a specific version of a package instead of the latest.
+* Command syntax:
+
+  -------------------code----------------------
+  npm install <package>@<version>
+  -------------------code----------------------
+* Example: Install Mongoose version 2.4.2
+
+  -------------------code----------------------
+  npm install mongoose@2.4.2
+  -------------------code----------------------
+
+---
+
+**2. Verifying installation**
+
+* After installation, your **package.json** is updated with the specific version.
+* To verify the installed version in your `node_modules` folder:
+
+  -------------------code----------------------
+  npm list --depth=0
+  -------------------code----------------------
+* Example output will show:
+
+  -------------------code----------------------
+  mongoose@2.4.2
+  -------------------code----------------------
+
+---
+
+**3. Practice Exercise**
+
+* Task: Install **underscore** version **1.4.0** using the same method.
+* Command example:
+
+  -------------------code----------------------
+  npm install underscore@1.4.0
+  -------------------code----------------------
+
+---
+
+**Next Lecture:**
+
+* How to handle **two outdated packages** and manage version updates.
