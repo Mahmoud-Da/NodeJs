@@ -1,0 +1,100 @@
+*** 1- Introduction ***
+**Lecture Notes: NPM (Node Package Manager)**
+
+---
+
+### 1. Introduction to NPM
+
+* **NPM** stands for **Node Package Manager**.
+* It is both:
+
+  1. A **command-line tool** used for managing Node.js packages.
+  2. A **registry** that hosts third-party libraries and modules.
+
+NPM allows developers to easily add functionality to Node.js applications through reusable open-source packages.
+
+---
+
+### 2. NPM Registry Overview
+
+* The official NPM registry website is **[npmjs.com](https://www.npmjs.com)**.
+* It contains hundreds of thousands of free, reusable Node modules.
+* As of the lecture’s recording, there were **about 475,000 packages** available.
+* These packages act as **building blocks** for Node.js applications.
+* Developers can also **create and publish their own Node modules** to share with others.
+
+---
+
+### 3. Using NPM Command-Line Tool
+
+* NPM is automatically installed with **Node.js**.
+* To check your installed NPM version:
+
+  -------------------code----------------------
+  npm -v
+  -------------------code----------------------
+* To check your Node.js version:
+
+  -------------------code----------------------
+  node -v
+  -------------------code----------------------
+
+  Note that **Node.js and NPM have independent version numbers** since they are developed separately.
+
+---
+
+### 4. Matching NPM Versions
+
+* Your NPM version might differ from the one used in the tutorial.
+* To match the instructor’s version (**5.5.1**), you can install it globally using:
+
+  -------------------code----------------------
+  npm i -g npm@5.5.1
+  -------------------code----------------------
+
+  * `i` stands for **install**.
+  * `-g` means install **globally**, not limited to a single project.
+  * `@5.5.1` specifies the exact version number.
+
+---
+
+### 5. Permissions and Installation Notes
+
+* **Mac users:**
+
+  * If you encounter permission errors when installing globally, use `sudo`:
+
+    -------------------code----------------------
+    sudo npm i -g npm@5.5.1
+    -------------------code----------------------
+  * You’ll need to enter your system password.
+* **Windows users:**
+
+  * Run the **Command Prompt as Administrator** if you get permission errors.
+
+---
+
+### 6. Verifying the Installation
+
+After installation, confirm the version with:
+
+-------------------code----------------------
+npm -v
+-------------------code----------------------
+
+You should now see:
+
+-------------------code----------------------
+5.5.1
+-------------------code----------------------
+
+---
+
+### Summary
+
+* **NPM** is the essential tool for managing and sharing Node.js packages.
+* It enables quick integration of open-source modules into your applications.
+* You can both **consume** existing packages and **publish** your own.
+* Always ensure your NPM version matches your project or tutorial environment to avoid compatibility issues.
+
+---
