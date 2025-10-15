@@ -685,3 +685,125 @@ Now, `node_modules` will no longer appear in the tracked files list.
 * Dependencies can be restored using `npm install`.
 * The `.gitignore` file prevents unnecessary or large files from being tracked.
 * This keeps your repository clean, lightweight, and professional.
+
+*** 7- Semantic Versioning ***
+### Lecture Notes: Semantic Versioning and Version Control Characters in Node.js
+
+---
+
+#### 1. Understanding Semantic Versioning (SemVer)
+
+**Definition:**
+Semantic Versioning, or **SemVer**, is a system for managing version numbers of software packages.
+A version number follows the format:
+
+-------------------code----------------------
+MAJOR.MINOR.PATCH
+-------------------code----------------------
+
+**Example:**
+
+-------------------code----------------------
+4.13.6
+-------------------code----------------------
+
+* **Major Version (4)**: Indicates breaking changes that are not backward compatible.
+* **Minor Version (13)**: Indicates new features that do not break existing functionality.
+* **Patch Version (6)**: Indicates bug fixes or minor improvements that do not affect compatibility.
+
+---
+
+#### 2. How Version Numbers Change
+
+| Situation                              | Example Version Change | Description                                  |
+| -------------------------------------- | ---------------------- | -------------------------------------------- |
+| Bug fix                                | 4.13.6 → 4.13.7        | Increment the patch version for small fixes. |
+| New feature without breaking changes   | 4.13.6 → 4.14.0        | Increment the minor version.                 |
+| Major change that breaks compatibility | 4.13.6 → 5.0.0         | Increment the major version.                 |
+
+This structured approach ensures clear communication of what has changed between versions.
+
+---
+
+#### 3. The Caret Character (`^`)
+
+The **caret (`^`)** symbol is commonly seen in the `package.json` file, for example:
+
+-------------------code----------------------
+"mongoose": "^4.13.6"
+-------------------code----------------------
+
+**Meaning:**
+
+* NPM is allowed to install any newer version **as long as the major version (4)** remains the same.
+* In this case, versions like `4.14.0` or `4.13.7` are acceptable updates, but `5.0.0` is not.
+
+**Example:**
+
+* Current version: `4.13.6`
+* Six months later, if version `4.15.2` is released, running `npm install` will automatically install that newer version since it’s still within the same major version.
+
+**Equivalent syntax:**
+
+-------------------code----------------------
+"mongoose": "4.x"
+-------------------code----------------------
+
+---
+
+#### 4. The Tilde Character (`~`)
+
+The **tilde (`~`)** symbol works similarly but is more restrictive.
+Example:
+
+-------------------code----------------------
+"underscore": "~1.8.3"
+-------------------code----------------------
+
+**Meaning:**
+
+* Accept updates that do not change the **minor version** (1.8).
+* Only patch updates are allowed, such as `1.8.4` or `1.8.5`.
+* Minor version updates (like `1.9.0`) will **not** be installed automatically.
+
+**Equivalent syntax:**
+
+-------------------code----------------------
+"underscore": "1.8.x"
+-------------------code----------------------
+
+---
+
+#### 5. Comparison Between `^` and `~`
+
+| Symbol | Equivalent Syntax | Allows updates to       | Example Allowed Versions | Example Blocked Versions |
+| ------ | ----------------- | ----------------------- | ------------------------ | ------------------------ |
+| `^`    | `4.x`             | Minor and patch updates | 4.13.7, 4.14.0           | 5.0.0                    |
+| `~`    | `1.8.x`           | Patch updates only      | 1.8.4, 1.8.5             | 1.9.0                    |
+
+
+---
+
+#### 6. When to Lock Versions
+
+While the caret and tilde characters help keep your dependencies up to date, they can occasionally cause **unintended issues**:
+
+* A new patch or minor release may introduce breaking behavior or conflicts.
+
+To prevent this, you can **lock the version** to an exact number by **removing** the `^` or `~`:
+
+-------------------code----------------------
+"underscore": "1.8.3"
+-------------------code----------------------
+
+This ensures that everyone using your code installs **the exact same version** of the dependency, guaranteeing consistent behavior across environments.
+
+---
+
+#### 7. Summary
+
+* Semantic versioning consists of **major**, **minor**, and **patch** versions.
+* The **caret (`^`)** allows updates within the same major version.
+* The **tilde (`~`)** allows updates within the same minor version.
+* Removing both locks the version to an exact number.
+* Proper version control ensures stability and compatibility across different development environments.
