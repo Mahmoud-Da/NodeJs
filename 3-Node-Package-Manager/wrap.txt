@@ -1149,3 +1149,59 @@ npm install
 * `npm update` → update minor and patch versions within the same major release.
 * `npm-check-updates (ncu)` → upgrade packages to the very latest versions, including major releases.
 * Always verify compatibility when upgrading major versions to avoid breaking your application.
+
+*** 12- DevDependencies ***
+### Lecture Notes: Development Dependencies in npm
+
+**1. Application dependencies vs. development dependencies**
+
+* **Application dependencies**: Required for the application to function in production.
+
+  * Examples: `mongoose`, `underscore`
+* **Development dependencies**: Only used during development, not needed in production.
+
+  * Examples:
+
+    * Unit testing tools
+    * Static analysis tools
+    * Code bundlers
+
+---
+
+**2. Installing a development dependency**
+
+* Example: Install **JSHint**, a static analysis tool for JavaScript:
+
+  -------------------code----------------------
+  npm install jshint --save-dev
+  -------------------code----------------------
+* The flag `--save-dev` marks the package as a **development dependency**.
+
+---
+
+**3. package.json structure**
+
+* After installation, `jshint` appears under the `devDependencies` property in `package.json`:
+
+  -------------------code----------------------
+  "devDependencies": {
+    "jshint": "^version"
+  }
+  -------------------code----------------------
+* This tells Node that this dependency is only for development and should not be included in production.
+
+---
+
+**4. Node modules folder**
+
+* All dependencies, whether application or development, are stored in `node_modules`.
+* The distinction is **only reflected in `package.json`**; physically, they exist in the same folder.
+
+---
+
+**5. Summary**
+
+* Use `--save-dev` for development-only packages.
+* Application dependencies go under `dependencies` and are required in production.
+* Development dependencies go under `devDependencies` and are used only during development.
+* Both types are stored in `node_modules` but are managed differently in `package.json`.
