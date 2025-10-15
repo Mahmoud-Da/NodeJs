@@ -1321,3 +1321,113 @@ npm install
 **Next Lecture:**
 
 * How to **publish your own packages** to the npm registry.
+
+*** 15- Publishing a Package ***
+### Lecture Notes: Creating and Publishing Your Own npm Package
+
+**1. Setting up a new Node package**
+
+* Create a new folder for your library, e.g., `lion-lib`.
+* Initialize a Node project and create `package.json`:
+
+  -------------------code----------------------
+  npm init -y
+  -------------------code----------------------
+* Open the folder in VS Code and create `index.js` as the entry point.
+
+**2. Writing a simple function**
+
+* Export a function using `module.exports`:
+
+  -------------------code----------------------
+  // index.js
+  module.exports.add = function(a, b) {
+    return a + b;
+  };
+  -------------------code----------------------
+
+---
+
+**3. Creating an npm account**
+
+* If you don’t have an account on npm, run:
+
+  -------------------code----------------------
+  npm adduser
+  -------------------code----------------------
+* If you already have an account, log in with:
+
+  -------------------code----------------------
+  npm login
+  -------------------code----------------------
+* Provide your username, password, and email.
+
+---
+
+**4. Publishing the package**
+
+* Run:
+
+  -------------------code----------------------
+  npm publish
+  -------------------code----------------------
+* If you get a permission error, it may be because the package name already exists.
+
+  * Make the package name unique in `package.json` by adding a number or unique string.
+* Run `npm publish` again to successfully publish the package.
+
+---
+
+**5. Using the published package in another project**
+
+* Create a new folder for the application, e.g., `node-app`.
+* Initialize it:
+
+  -------------------code----------------------
+  npm init -y
+  -------------------code----------------------
+* Install the published package:
+
+  -------------------code----------------------
+  npm install lion-lib
+  -------------------code----------------------
+* Open in VS Code. In `node_modules`, you will see:
+
+  * `lion-lib` folder
+  * `index.js` with the exported function
+  * `package.json` (contains metadata added by npm)
+
+---
+
+**6. Using the module in your application**
+
+* Create `index.js` in the root of the project:
+
+  -------------------code----------------------
+  const lion = require('lion-lib');
+  const result = lion.add(1, 2);
+  console.log(result); // Output: 3
+  -------------------code----------------------
+* Run the application:
+
+  -------------------code----------------------
+  node index.js
+  -------------------code----------------------
+
+---
+
+**7. Summary**
+
+* Steps to create and publish a package:
+
+  1. Create project folder and initialize `package.json`.
+  2. Write functions in `index.js` and export them.
+  3. Create or log in to your npm account.
+  4. Ensure package name is unique and run `npm publish`.
+  5. Install and use the package in other Node projects.
+
+---
+
+**Next Lecture:**
+
+* How to **publish newer versions** of your npm package.
