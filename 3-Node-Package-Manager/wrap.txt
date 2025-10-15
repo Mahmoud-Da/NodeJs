@@ -98,3 +98,109 @@ You should now see:
 * Always ensure your NPM version matches your project or tutorial environment to avoid compatibility issues.
 
 ---
+
+*** 2- Package.json ***
+**Lecture Notes: Creating a Node Project and `package.json`**
+
+---
+
+### 1. Setting Up the Project Folder
+
+* Create a new folder named **`npm-demo`**.
+* This folder will be used throughout the section for demonstrations.
+* Navigate into the folder using the terminal:
+
+  -------------------code----------------------
+  cd npm-demo
+  -------------------code----------------------
+
+---
+
+### 2. The Role of `package.json`
+
+* The **`package.json`** file is a **JSON file** that contains metadata about your Node.js application.
+
+* It includes important information such as:
+
+  * **Name** of the project
+  * **Version**
+  * **Description**
+  * **Author**
+  * **License**
+  * **Git repository address**
+  * **Dependencies** (external packages your project uses)
+
+* Every Node.js project should have a `package.json` file.
+  It defines the configuration and dependencies of the project in a standardized way.
+
+---
+
+### 3. Creating `package.json`
+
+* To create this file, run:
+
+  -------------------code----------------------
+  npm init
+  -------------------code----------------------
+
+* This command will start an **interactive setup process** that asks a series of questions:
+
+  1. **Package name:** Default is the current folder name (`npm-demo`).
+  2. **Version:** Default is `1.0.0`.
+  3. **Description:** Optional project description.
+  4. **Entry point:** Default is `index.js`.
+  5. **Test command:** Optional (can be left blank).
+  6. **Git repository:** Optional (for version control).
+  7. **Keywords:** Optional (for search tags).
+  8. **Author:** Your name or organization.
+  9. **License:** Default is usually `ISC`.
+
+* After you answer these questions, NPM will display a **preview** of the generated JSON object:
+
+  -------------------code----------------------
+  {
+    "name": "npm-demo",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC"
+  }
+  -------------------code----------------------
+
+* Confirm by pressing **Enter**, and the file will be created.
+
+---
+
+### 4. Best Practice
+
+* Always create a **`package.json`** file before adding any Node packages.
+* It allows NPM to record and manage your project’s dependencies properly.
+* In summary:
+
+  * Before installing any Node modules, **run**:
+
+    -------------------code----------------------
+    npm init
+    -------------------code----------------------
+
+---
+
+### 5. Creating `package.json` Quickly
+
+* You can skip the interactive questions by adding the **`--yes`** (or `-y`) flag:
+
+  -------------------code----------------------
+  npm init --yes
+  -------------------code----------------------
+* This command creates a `package.json` file instantly using **default values**.
+
+---
+
+### 6. Next Step
+
+* Once your project has a `package.json` file, you can proceed to **install Node packages** using NPM commands.
+* The next part of the lecture covers **how to install a Node package**.
