@@ -1,0 +1,28 @@
+*** 1- Introduction ***
+**Lecture Notes: Express Framework Introduction**
+
+**1. Recap of the HTTP Module**
+
+* In Section 2, we learned about Node’s module system and the use of the built-in **HTTP module**.
+* The HTTP module allows us to create a **web server** that listens on a specific port (e.g., port **3000**) and responds to requests sent to various **endpoints** such as:
+
+  * `/` (root)
+  * `/api/courses`
+
+**2. Limitation of the HTTP Module Approach**
+
+* While using the HTTP module directly works for small projects, it becomes inefficient and difficult to manage in **large or complex applications**.
+* The main problem is the need to **hard-code multiple `if` statements** to handle different routes and endpoints, which quickly makes the code messy and hard to maintain.
+
+**3. Introduction to Express**
+
+* **Express** is a **fast, lightweight, and flexible framework** for building web applications and APIs in Node.js.
+* It simplifies the process of:
+
+  * Handling routes
+  * Managing HTTP requests and responses
+  * Organizing code in a clean and modular way
+
+**4. Next Topic**
+
+* The next section will cover **RESTful services**, a key concept in building structured and scalable web APIs using Express.
