@@ -200,3 +200,145 @@ Imagine a company called **Vidly** that rents movies.
 **6. Next Step**
 
 * In the next lecture, you will learn how to **build your first web server using Express**.
+
+*** 4- Building Your First Web Server ***
+**Lecture Notes: Building the First Express Web Server**
+
+---
+
+### **1. Setting Up the File**
+
+* Create a new file in VS Code named **`index.js`** (or **`app.js`**, the name does not matter).
+* This file will contain the code for the Express application.
+
+---
+
+### **2. Loading and Initializing Express**
+
+-------------------code----------------------
+const express = require('express');
+const app = express();
+-------------------code----------------------
+
+* The `require('express')` statement **loads the Express module**.
+* Calling `express()` **returns an application object**, which represents the Express app.
+* By convention, this object is stored in a constant named **`app`**.
+
+---
+
+### **3. Understanding Express Methods**
+
+* The `app` object provides several methods that correspond to **HTTP verbs**:
+
+  * `app.get()` → Handle HTTP **GET** requests
+  * `app.post()` → Handle HTTP **POST** requests
+  * `app.put()` → Handle HTTP **PUT** requests
+  * `app.delete()` → Handle HTTP **DELETE** requests
+* These methods are used to define **routes** (endpoints) for the application.
+
+---
+
+### **4. Defining the First Route**
+
+-------------------code----------------------
+app.get('/', (req, res) => {
+  res.send('Hello World');
+});
+-------------------code----------------------
+
+* The `app.get()` method defines a route for **GET requests** to the **root URL (`/`)**.
+* It takes two arguments:
+
+  1. **Path/URL** – `"/"` in this case represents the root of the site.
+  2. **Callback function** – called when the route is requested.
+
+     * It receives two parameters:
+
+       * `req`: The **request object**, containing details about the incoming request.
+       * `res`: The **response object**, used to send data back to the client.
+* In this example, the server responds with `"Hello World"`.
+
+---
+
+### **5. Exploring the Request Object**
+
+* The `req` (request) object contains many useful properties, such as:
+
+  * `baseUrl`
+  * `body`
+  * `cookies`
+  * `hostname`
+  * `ip`
+  * `method`
+  * `originalUrl`
+  * `params`
+* To see all available properties, refer to the **Express documentation** at
+  [expressjs.com → API Reference (version 4)](https://expressjs.com/en/4x/api.html).
+
+---
+
+### **6. Listening on a Port**
+
+-------------------code----------------------
+app.listen(3000, () => {
+  console.log('Listening on port 3000...');
+});
+-------------------code----------------------
+
+* The `app.listen()` method starts the web server on the specified port (e.g., **3000**).
+* The optional callback function runs once the server starts listening, logging a confirmation message.
+
+---
+
+### **7. Running the Server**
+
+In the terminal:
+
+-------------------code----------------------bash
+node index.js
+-------------------code----------------------
+
+* Open a browser and navigate to **`http://localhost:3000`**.
+* You should see the **“Hello World”** message.
+
+---
+
+### **8. Adding Another Route**
+
+-------------------code----------------------
+app.get('/api/courses', (req, res) => {
+  res.send([1, 2, 3]);
+});
+-------------------code----------------------
+
+* Defines a new **GET** route for `/api/courses`.
+* In a real-world scenario, this endpoint would retrieve data from a database.
+* For simplicity, it currently returns an **array of numbers** `[1, 2, 3]`.
+* To apply changes:
+
+  1. Stop the running process with **Ctrl + C**.
+  2. Restart with **`node index.js`**.
+  3. Visit **`http://localhost:3000/api/courses`** in your browser.
+
+  * You should see the array `[1, 2, 3]`.
+
+---
+
+### **9. Advantages of Using Express**
+
+* Unlike the earlier HTTP module approach, Express allows defining routes cleanly without **nested `if` statements**.
+* It provides a **structured and scalable** way to organize code.
+* As the application grows:
+
+  * Different routes can be moved into **separate files** (e.g., `courses.js` for course-related routes).
+  * This improves maintainability and modularity.
+
+---
+
+### **Summary**
+
+* `express()` initializes the app.
+* `app.get()` defines routes for GET requests.
+* `res.send()` sends a response to the client.
+* `app.listen()` starts the server.
+* Express gives structure to Node.js web applications, making them easier to scale and manage.
