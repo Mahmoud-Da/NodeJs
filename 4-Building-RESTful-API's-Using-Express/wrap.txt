@@ -843,3 +843,86 @@ This means that when a client sends a JSON object (like `{"name": "New Course"}`
 
 **In the next lecture:**
 Testing this endpoint using a REST client (such as Postman or an HTTP request tool) to verify that POST requests successfully create and return new course objects.
+
+*** 10- Calling Endpoints Using Postman ***
+### Lecture Notes: Testing HTTP POST Requests with Postman
+
+#### 1. Introduction to Postman
+
+* To **call and test HTTP services**, we use a Chrome extension called **Postman**.
+* Postman allows developers to send various types of HTTP requests (GET, POST, PUT, DELETE) to a server and inspect the responses.
+
+---
+
+#### 2. Installing Postman
+
+1. Open Chrome and search for **“Postman Chrome extension”**.
+2. Click **Add to Chrome** to install it.
+3. Once installed, open it from the **Chrome Apps** menu.
+4. When prompted to sign up, you can skip registration by clicking the link to go directly to the app interface.
+
+---
+
+#### 3. Creating a New HTTP Request
+
+1. In Postman, click to create a **new request**.
+2. From the **method dropdown**, choose **POST** (since we are sending data to the server).
+3. In the **URL field**, enter your server’s address. For example:
+
+   -------------------code----------------------
+   http://localhost:3000/api/courses
+   -------------------code----------------------
+
+   * `localhost` refers to your own computer.
+   * `3000` is the port where the Express app is running.
+   * `/api/courses` is the endpoint that accepts POST requests.
+
+---
+
+#### 4. Setting the Request Body
+
+1. In the request settings, go to the **Body** tab.
+2. Select **raw** (to send raw data).
+3. From the small dropdown next to “Text”, select **JSON**.
+4. Enter a JSON object representing the new course:
+
+   -------------------code----------------------
+   {
+     "name": "new course"
+   }
+   -------------------code----------------------
+
+---
+
+#### 5. Sending the Request and Viewing the Response
+
+1. Click **Send** to make the request.
+2. Look at the **response section** below:
+
+   * The **status code** should be **200**, indicating the request was handled successfully.
+   * The **response body** should display the newly created course object, for example:
+
+     -------------------code----------------------
+     {
+       "id": 4,
+       "name": "new course"
+     }
+     -------------------code----------------------
+
+     Here, the `id` is automatically assigned based on the existing courses in the array.
+
+---
+
+#### 6. Summary of What Happened
+
+* The **client (Postman)** sent an HTTP POST request with JSON data to the Express server.
+* The **server** read the data, created a new course object, added it to the `courses` array, and returned that object in the response.
+* The **status code 200** indicates success.
+
+---
+
+#### 7. Next Topic: Input Validation
+
+* In this example, we assumed that the client always sends a valid object containing a `name` property.
+* However, a client might forget to include `name`, or send an invalid or too-short name.
+* To handle such cases, we need **input validation**, which will be covered in the next lecture.
