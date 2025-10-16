@@ -926,3 +926,216 @@ Testing this endpoint using a REST client (such as Postman or an HTTP request to
 * In this example, we assumed that the client always sends a valid object containing a `name` property.
 * However, a client might forget to include `name`, or send an invalid or too-short name.
 * To handle such cases, we need **input validation**, which will be covered in the next lecture.
+
+*** 11- Input Validation ***
+### Lecture Notes: Input Validation in Express Using Joi
+
+#### 1. Importance of Input Validation
+
+* **Never trust client input.** Always validate what the client sends to the server.
+* Input validation ensures **security**, **data consistency**, and **application stability**.
+* Even in simple examples like a course object with one property (`name`), validation must be applied.
+
+---
+
+#### 2. Manual Input Validation Example
+
+A simple way to validate input manually:
+
+-------------------code----------------------
+if (!req.body.name || req.body.name.length < 3) {
+  res.status(400).send('Name is required and should be a minimum of 3 characters.');
+  return;
+}
+-------------------code----------------------
+
+* `400` is the HTTP status code for **Bad Request**.
+* This approach works, but it quickly becomes unmanageable for complex objects with many fields.
+
+---
+
+#### 3. Introducing Joi
+
+* Joi is a popular **Node.js validation library** that simplifies and structures validation logic.
+* It allows you to define **schemas** that describe the shape and rules of your data.
+
+**Installation:**
+
+-------------------code----------------------
+npm install joi@13.1.0
+-------------------code----------------------
+
+(The version `13.1.0` is used in the example for consistency.)
+
+---
+
+#### 4. Setting Up Joi in the Application
+
+1. **Require the module** at the top of the file:
+
+   -------------------code----------------------
+   const Joi = require('joi');
+   -------------------code----------------------
+
+   * The capitalized name `Joi` follows the **PascalCase** convention for classes.
+   * It’s a best practice to keep all `require` statements at the top for clarity.
+
+2. **Dependencies so far:**
+
+   * `express` for the web framework.
+   * `joi` for validation.
+
+---
+
+#### 5. Defining a Schema
+
+A schema defines the structure and constraints of your input object.
+
+**Example schema for a course:**
+
+-------------------code----------------------
+const schema = {
+  name: Joi.string().min(3).required()
+};
+-------------------code----------------------
+
+Explanation:
+
+* `Joi.string()` — the property must be a string.
+* `.min(3)` — must have at least 3 characters.
+* `.required()` — this property is mandatory.
+
+---
+
+#### 6. Validating Request Data
+
+Use `Joi.validate()` to check if the request body matches the schema:
+
+-------------------code----------------------
+const result = Joi.validate(req.body, schema);
+-------------------code----------------------
+
+* The `result` object has two properties:
+
+  * `error` — contains details if validation fails.
+  * `value` — contains the validated data if successful.
+
+---
+
+#### 7. Handling Validation Errors
+
+Check for errors and return an appropriate response:
+
+-------------------code----------------------
+if (result.error) {
+  res.status(400).send(result.error.details[0].message);
+  return;
+}
+-------------------code----------------------
+
+* If validation fails, `result.error` will be set.
+* The `details` array contains one or more error messages.
+* In this example, only the first message is sent to the client.
+
+---
+
+#### 8. Example of Full Implementation
+
+-------------------code----------------------
+const Joi = require('joi');
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+const courses = [
+  { id: 1, name: 'course1' },
+  { id: 2, name: 'course2' },
+  { id: 3, name: 'course3' }
+];
+
+app.post('/api/courses', (req, res) => {
+  const schema = {
+    name: Joi.string().min(3).required()
+  };
+
+  const result = Joi.validate(req.body, schema);
+
+  if (result.error) {
+    res.status(400).send(result.error.details[0].message);
+    return;
+  }
+
+  const course = {
+    id: courses.length + 1,
+    name: req.body.name
+  };
+  courses.push(course);
+  res.send(course);
+});
+-------------------code----------------------
+
+---
+
+#### 9. Testing with Postman
+
+1. **Valid request:**
+
+   -------------------code----------------------
+   {
+     "name": "new course"
+   }
+   -------------------code----------------------
+
+   **Response:**
+
+   -------------------code----------------------
+   {
+     "id": 4,
+     "name": "new course"
+   }
+   -------------------code----------------------
+
+2. **Invalid request (missing name):**
+
+   -------------------code----------------------
+   {}
+   -------------------code----------------------
+
+   **Response:**
+
+   -------------------code----------------------
+   "Name is required"
+   -------------------code----------------------
+
+3. **Invalid request (too short name):**
+
+   -------------------code----------------------
+   {
+     "name": "a"
+   }
+   -------------------code----------------------
+
+   **Response:**
+
+   -------------------code----------------------
+   "Name length must be at least 3 characters long"
+   -------------------code----------------------
+
+---
+
+#### 10. Benefits of Using Joi
+
+* Cleaner and more maintainable code.
+* Standardized and expressive validation rules.
+* Flexible schema definitions for complex objects.
+* Detailed and customizable error messages.
+
+---
+
+**Summary:**
+In this lecture, you learned how to:
+
+* Perform basic manual validation for incoming data.
+* Use **Joi** to create schema-based, reusable validation logic.
+* Simplify input checking and return appropriate HTTP 400 responses with clear error messages.
