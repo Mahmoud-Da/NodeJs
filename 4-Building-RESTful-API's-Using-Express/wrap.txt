@@ -430,3 +430,122 @@ nodemon index.js
 * Install globally using `npm install -g nodemon`.
 * Run your application with `nodemon index.js` instead of `node index.js`.
 * Any saved file changes trigger an automatic restart, keeping the development process fast and efficient.
+
+
+*** 6- Environment Variables ***
+**Lecture Notes: Using Environment Variables for Dynamic Port Assignment**
+
+---
+
+### **1. The Problem with Hardcoded Port Numbers**
+
+* In the current code, the server listens on a **hardcoded port (3000)**.
+* While this works during development, it is **not suitable for production**.
+* In production, the **hosting environment dynamically assigns a port** for the application to use.
+* Therefore, hardcoding `3000` can cause the server to fail when deployed.
+
+---
+
+### **2. What Is an Environment Variable?**
+
+* An **environment variable** is a variable that exists **outside the application’s code** but is part of the environment in which the process runs.
+* It allows configuration settings (like port numbers, API keys, or database URLs) to be defined **externally**, without modifying the application code.
+* Common in Node.js environments, one such variable is **`PORT`**.
+
+---
+
+### **3. Accessing Environment Variables in Node.js**
+
+* Node provides a global object called **`process`**, which represents the current running process.
+* To access environment variables, use:
+
+  -------------------code----------------------
+  process.env
+  -------------------code----------------------
+* To specifically access the port:
+
+  -------------------code----------------------
+  process.env.PORT
+  -------------------code----------------------
+
+---
+
+### **4. Implementing Dynamic Port Assignment**
+
+Replace the hardcoded port number with a value that checks for the environment variable first.
+If it doesn’t exist, default to `3000`.
+
+-------------------code----------------------
+const port = process.env.PORT || 3000;
+
+app.listen(port, () => {
+  console.log(`Listening on port ${port}...`);
+});
+-------------------code----------------------
+
+**Explanation:**
+
+* `process.env.PORT`: Retrieves the value of the environment variable `PORT`.
+* `|| 3000`: Uses port 3000 as a **fallback** if the environment variable is not set.
+* Template strings (backticks) are used for dynamic output in the console message.
+
+---
+
+### **5. Setting Environment Variables**
+
+#### **On macOS/Linux:**
+
+-------------------code----------------------
+export PORT=5000
+-------------------code----------------------
+
+#### **On Windows (Command Prompt):**
+
+-------------------code----------------------
+set PORT=5000
+-------------------code----------------------
+
+* After setting the variable, run the application again:
+
+  -------------------code----------------------
+  nodemon index.js
+  -------------------code----------------------
+* The server will now listen on **port 5000**, as specified by the environment variable.
+
+---
+
+### **6. Behavior When the Variable Is Not Set**
+
+* If `PORT` is **not defined**, the fallback value `3000` is used automatically.
+* Example terminal output:
+
+  -------------------code----------------------
+  Listening on port 3000...
+  -------------------code----------------------
+* After defining `PORT=5000`:
+
+  -------------------code----------------------
+  Listening on port 5000...
+  -------------------code----------------------
+
+---
+
+### **7. Best Practice**
+
+* Always configure your Node.js applications to **read the port from an environment variable**.
+* This ensures flexibility between **development** and **production** environments.
+* Typical pattern:
+
+  -------------------code----------------------
+  const port = process.env.PORT || 3000;
+  -------------------code----------------------
+
+---
+
+### **Summary**
+
+* Hardcoding port numbers limits portability.
+* Use `process.env.PORT` to dynamically assign ports.
+* Set environment variables using `export` (Mac/Linux) or `set` (Windows).
+* Always include a default value (e.g., `3000`) for local development.
+* This approach ensures your application can run reliably both locally and in hosting environments.
