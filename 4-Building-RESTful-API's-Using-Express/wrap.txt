@@ -1467,3 +1467,143 @@ All route handlers now follow a consistent, concise, and readable style:
 ---
 
 **Next Lecture:** Error handling and middleware functions in Express.
+
+*** 14- Project- Build the Genres API ***
+### Lecture Notes: Exercise – Building the Vidly Backend (Genres Service)
+
+---
+
+#### 1. **Overview**
+
+Starting from this lecture, we begin developing the **backend services** for the **Vidly** application — a fictional movie rental service.
+The goal of this exercise is to apply everything learned so far about building RESTful APIs using **Express**.
+
+---
+
+#### 2. **Project Description**
+
+* **Application Name:** Vidly
+* **Purpose:** To manage movies and their related data.
+* **Current Task:** Build a backend service for **managing genres**.
+
+Each movie has a **genre** (for example: Action, Comedy, Horror, Drama).
+The genre service will allow us to create, read, update, and delete genres.
+
+---
+
+#### 3. **Requirements**
+
+You need to build an **HTTP service** that supports **CRUD operations** for genres.
+
+1. **GET /api/genres**
+
+   * Returns a list of all genres.
+   * Example response:
+
+     -------------------code----------------------
+     [
+       { "id": 1, "name": "Action" },
+       { "id": 2, "name": "Comedy" }
+     ]
+     -------------------code----------------------
+
+2. **GET /api/genres/:id**
+
+   * Returns a single genre by ID.
+   * If the genre is not found, return **404 (Not Found)**.
+
+3. **POST /api/genres**
+
+   * Creates a new genre.
+   * The request body must include a `name` field.
+   * Validate that:
+
+     * `name` is a string.
+     * `name` has at least 3 characters.
+   * If invalid, return **400 (Bad Request)**.
+
+4. **PUT /api/genres/:id**
+
+   * Updates an existing genre.
+   * Validate the new data using the same rules as above.
+   * If the genre with the given ID does not exist, return **404**.
+
+5. **DELETE /api/genres/:id**
+
+   * Deletes the genre with the given ID.
+   * If not found, return **404 (Not Found)**.
+   * Return the deleted genre in the response.
+
+---
+
+#### 4. **Development Steps**
+
+1. **Initialize a new project**
+
+   * Create a folder named `vidly`.
+   * Run:
+
+     -------------------code----------------------
+     npm init -y
+     npm install express joi
+     -------------------code----------------------
+   * Create a file `index.js`.
+
+2. **Set up Express**
+
+   * Import Express and create an app.
+   * Use `express.json()` for handling JSON requests.
+
+3. **Define the in-memory genres array**
+
+   -------------------code----------------------
+   const genres = [
+     { id: 1, name: 'Action' },
+     { id: 2, name: 'Comedy' },
+     { id: 3, name: 'Drama' }
+   ];
+   -------------------code----------------------
+
+4. **Implement all CRUD routes**
+   Use the same structure and validation approach as in the previous lectures (for courses).
+
+5. **Add a validation function**
+
+   -------------------code----------------------
+   function validateGenre(genre) {
+     const schema = Joi.object({
+       name: Joi.string().min(3).required()
+     });
+     return schema.validate(genre);
+   }
+   -------------------code----------------------
+
+6. **Start the server**
+
+   -------------------code----------------------
+   const port = process.env.PORT || 3000;
+   app.listen(port, () => console.log(`Listening on port ${port}...`));
+   -------------------code----------------------
+
+---
+
+#### 5. **Purpose of the Exercise**
+
+* Practice implementing **Express** route handlers.
+* Reinforce understanding of **CRUD** operations.
+* Apply **input validation** with **Joi**.
+* Practice using **status codes** (200, 400, 404).
+* Get comfortable writing clean, reusable code.
+
+---
+
+#### 6. **Instructor’s Note**
+
+Even if you are an experienced developer, **do not skip this exercise**.
+The goal is not difficulty, but **familiarity** with the syntax and workflow of building Express applications step by step.
+
+---
+
+#### 7. **Next Lecture**
+
+In the next lecture, the instructor provides the **solution implementation** for the Vidly Genres service to compare with your work.
