@@ -1315,3 +1315,155 @@ Using **Postman**:
 ---
 
 **Next Lecture:** Handling **HTTP DELETE** requests.
+
+*** 13 - Handling HTTP Delete Requests ***
+### Lecture Notes: Handling HTTP DELETE Requests and Code Refinement
+
+---
+
+#### 1. **Overview**
+
+Up to this point, we have implemented three CRUD operations:
+
+* **Create (POST)**
+* **Read (GET)**
+* **Update (PUT)**
+
+In this lecture, we learn how to handle the final operation:
+**Delete (DELETE)** — removing a course from our list.
+
+---
+
+#### 2. **Creating the DELETE Route**
+
+We add a new route handler using the `DELETE` method on the **Express** app.
+
+-------------------code----------------------
+app.delete('/api/courses/:id', (req, res) => {
+  // Logic will go here
+});
+-------------------code----------------------
+
+* **Path**: `/api/courses/:id`
+* **Purpose**: Delete the course with the given ID.
+
+---
+
+#### 3. **Steps to Implement the Logic**
+
+1. **Look up the course by ID**
+
+   * If the course doesn’t exist, return **404 (Not Found)**.
+
+2. **Delete the course**
+
+   * Find its index in the array.
+   * Use `splice()` to remove it.
+
+3. **Return the deleted course**
+
+   * Send the deleted course back to the client.
+
+---
+
+#### 4. **Implementation**
+
+-------------------code----------------------
+app.delete('/api/courses/:id', (req, res) => {
+  // Look up the course
+  const course = courses.find(c => c.id === parseInt(req.params.id));
+  if (!course) return res.status(404).send('The course with the given ID was not found.');
+
+  // Delete the course
+  const index = courses.indexOf(course);
+  courses.splice(index, 1);
+
+  // Return the deleted course
+  res.send(course);
+});
+-------------------code----------------------
+
+---
+
+#### 5. **Testing with Postman**
+
+1. **Invalid ID**
+
+   * Method: `DELETE`
+   * URL: `/api/courses/10`
+   * Response: `404 Not Found`
+   * Message: “The course with the given ID was not found.”
+
+2. **Valid ID**
+
+   * Method: `DELETE`
+   * URL: `/api/courses/1`
+   * Response: Returns the deleted course.
+   * Verifying with a GET request shows that course `1` is no longer in the list.
+
+---
+
+#### 6. **Fixing Bugs and Code Improvements**
+
+While reviewing the existing code, we found **three issues** in how responses were handled.
+
+##### Problem:
+
+After sending an error response (`404` or `400`), the function continued executing the remaining code.
+
+##### Fix:
+
+Use `return` immediately when sending a response to **exit** the handler.
+
+---
+
+#### 7. **Examples of Code Refinement**
+
+##### PUT Handler (Before)
+
+-------------------code----------------------
+if (!course)
+  res.status(404).send('The course with the given ID was not found.');
+// rest of the code still runs...
+-------------------code----------------------
+
+##### PUT Handler (After)
+
+-------------------code----------------------
+if (!course) return res.status(404).send('The course with the given ID was not found.');
+-------------------code----------------------
+
+This ensures that once the response is sent, the function exits.
+
+---
+
+#### 8. **Apply the Same Fix to Other Handlers**
+
+* **GET (single course)** → return immediately if course not found.
+* **DELETE** → return immediately if course not found.
+* **POST** → return immediately if validation fails.
+
+---
+
+#### 9. **Resulting Clean Code**
+
+All route handlers now follow a consistent, concise, and readable style:
+
+* Immediate returns for error conditions.
+* Minimal nesting and noise.
+* Clear flow of logic.
+
+---
+
+#### 10. **Final Summary**
+
+* Implemented the **DELETE** route to remove courses.
+* Ensured all handlers exit early after sending responses.
+* Improved code readability by simplifying conditions.
+* Completed all four CRUD operations:
+
+  * **Create**, **Read**, **Update**, **Delete**
+
+---
+
+**Next Lecture:** Error handling and middleware functions in Express.
