@@ -265,3 +265,106 @@ This function parses the incoming request body, converts it to a JSON object, at
 
 **Exercise:**
 Create a second middleware function for authentication in a separate module and integrate it into the pipeline, following the same pattern as the logger middleware.
+
+*** 4- Built-in Middleware ***
+**Lecture Notes: Built-in Middleware in Express**
+
+---
+
+### **1. Overview**
+
+In the previous lecture, we learned how to create **custom middleware functions**.
+Now, we will explore **built-in middleware** functions that come with Express. These are pre-defined functions designed to handle common tasks like parsing requests and serving static files.
+
+---
+
+### **2. Built-in Middleware Functions**
+
+#### **a. `express.json()`**
+
+* Parses incoming requests with **JSON payloads**.
+* If the body contains valid JSON, it populates `req.body` with a JavaScript object.
+* Commonly used when working with REST APIs that send and receive JSON data.
+
+-------------------code----------------------
+app.use(express.json());
+-------------------code----------------------
+
+---
+
+#### **b. `express.urlencoded()`**
+
+* Parses incoming requests with **URL-encoded payloads**.
+* This is typically used when submitting data from traditional **HTML forms**.
+* Example body:
+
+  -------------------code----------------------
+  key1=value1&key2=value2
+  -------------------code----------------------
+* After parsing, it also populates `req.body` with a JavaScript object.
+* Example usage:
+
+-------------------code----------------------
+app.use(express.urlencoded({ extended: true }));
+-------------------code----------------------
+
+**Explanation:**
+
+* `{ extended: true }` allows Express to parse **arrays and complex objects** using the URL-encoded format.
+* If this option is omitted, Express will display a **deprecation warning** in the console:
+
+  -------------------code----------------------
+  body-parser deprecated undefined extended: provide extended option
+  -------------------code----------------------
+
+**Example Test (Postman):**
+
+1. Set method to `POST`.
+2. URL: `http://localhost:3000/api/courses`
+3. Body type: `x-www-form-urlencoded`
+4. Key: `name`, Value: `My Course`
+5. Send request → A new course is successfully created and the body is parsed correctly.
+
+---
+
+#### **c. `express.static()`**
+
+* Used to **serve static files** such as HTML, CSS, images, and text documents.
+* You specify a folder (e.g., `public`) that contains these assets.
+
+-------------------code----------------------
+app.use(express.static('public'));
+-------------------code----------------------
+
+**Example:**
+
+1. Create a folder named `public`.
+2. Add a file inside it, for example `readme.txt` with the content:
+
+   -------------------code----------------------
+   This is a readme file.
+   -------------------code----------------------
+3. Visit the file in the browser at:
+
+   -------------------code----------------------
+   http://localhost:3000/readme.txt
+   -------------------code----------------------
+
+**Note:**
+The URL does not include the `public` folder name; static files are served from the **root path**.
+
+---
+
+### **3. Summary**
+
+| Middleware Function    | Purpose                                 | Example                                           | Notes                  |
+| ---------------------- | --------------------------------------- | ------------------------------------------------- | ---------------------- |
+| `express.json()`       | Parses JSON request bodies              | `app.use(express.json())`                         | Used for APIs          |
+| `express.urlencoded()` | Parses URL-encoded form data            | `app.use(express.urlencoded({ extended: true }))` | Used for HTML forms    |
+| `express.static()`     | Serves static files (CSS, images, etc.) | `app.use(express.static('public'))`               | Files served from root |
+
+---
+
+### **4. Next Topic**
+
+In the next lecture, we will study **third-party middleware** and how to integrate them into an Express application for additional features and functionality.
