@@ -16,3 +16,101 @@ In the previous section, we learned how to build RESTful services using Express.
 To gain a deeper understanding of Express and learn how to apply its advanced features for building robust and 
 maintainable web applications.
 
+*** 2- Middleware ***
+**Lecture Notes: Middleware in Express**
+
+**Core Concept:**
+One of the most important concepts in Express is **middleware** (or middleware functions). A middleware function is a function that takes a **request** object and either:
+
+1. Returns a response to the client, or
+2. Passes control to another middleware function.
+
+---
+
+### **Examples of Middleware Functions**
+
+1. **Route Handler Function:**
+
+   * Every route handler in Express is technically a middleware function.
+   * It receives a request object and, in most cases, sends a response back to the client.
+   * When it sends a response, it **terminates the request-response cycle**.
+
+2. **`express.json()` Middleware:**
+
+   * The `express.json()` method returns a middleware function.
+   * This middleware reads incoming requests and, if the body contains JSON data, it parses it and sets it on `request.body`.
+   * It does not terminate the cycle but instead passes control to the next middleware function.
+
+---
+
+### **Request Processing Pipeline**
+
+When a request reaches the server, it goes through a **pipeline** known as the **request processing pipeline**.
+
+* This pipeline contains one or more middleware functions.
+* Each middleware either:
+
+  * Terminates the cycle by sending a response, or
+  * Passes control to the next middleware.
+
+**Example Flow:**
+
+1. The first middleware (`express.json()`) parses the request body and attaches it to `request.body`.
+2. Since it doesn’t terminate the cycle, it passes control to the next middleware.
+3. The next middleware (the route handler) uses the populated `request.body` to process the request and sends a response, terminating the cycle.
+
+-------------------code----------------------
+ ┌──────────────────────────┐
+ │      Incoming Request     │
+ └─────────────┬─────────────┘
+               │
+               ▼
+ ┌──────────────────────────┐
+ │ express.json() Middleware│
+ │  - Parses JSON body      │
+ │  - Adds data to req.body │
+ └─────────────┬─────────────┘
+               │ next()
+               ▼
+ ┌──────────────────────────┐
+ │  Custom Middleware       │
+ │  (e.g., logger, auth)    │
+ │  - Logs or validates     │
+ │  - May end or continue   │
+ └─────────────┬─────────────┘
+               │ next()
+               ▼
+ ┌──────────────────────────┐
+ │     Route Handler        │
+ │  - Processes request     │
+ │  - Sends response        │
+ │  - Ends cycle            │
+ └─────────────┬─────────────┘
+               │
+               ▼
+ ┌──────────────────────────┐
+ │     Response Sent to     │
+ │         Client           │
+ └──────────────────────────┘
+
+-------------------code----------------------
+---
+
+### **Built-in and Custom Middleware**
+
+* Express provides several built-in middleware functions.
+* Developers can also create **custom middleware** functions to handle **cross-cutting concerns**, such as:
+
+  * Logging
+  * Authentication
+  * Authorization
+  * Input validation, etc.
+
+---
+
+### **Summary**
+
+An Express application is essentially a collection of middleware functions arranged in a specific order to process incoming requests. Each middleware can modify the request, send a response, or pass control to the next function.
+
+**Next Topic:**
+Creating custom middleware functions in Express.
