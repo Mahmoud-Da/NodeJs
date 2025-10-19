@@ -342,3 +342,91 @@ app.get('/api/courses', (req, res) => {
 * `res.send()` sends a response to the client.
 * `app.listen()` starts the server.
 * Express gives structure to Node.js web applications, making them easier to scale and manage.
+
+
+*** 5- Nodemon ***
+**Lecture Notes: Using Nodemon for Automatic Server Restart**
+
+---
+
+### **1. The Problem**
+
+* Up to now, every time a change is made in the code, the process must be **manually stopped and restarted** using the terminal.
+* This process becomes **tedious and inefficient**, especially during development when frequent changes are made.
+
+---
+
+### **2. Introducing Nodemon**
+
+* **Nodemon** stands for **Node Monitor**.
+* It automatically **watches your files** and **restarts the Node.js process** whenever a file changes.
+* This eliminates the need to manually restart the server each time you modify your code.
+
+---
+
+### **3. Installing Nodemon**
+
+In the terminal, run:
+
+-------------------code----------------------
+npm install -g nodemon
+-------------------code----------------------
+
+* The `-g` flag means installing **globally**, allowing you to use `nodemon` from any project directory.
+* On macOS or Linux, if you encounter a permissions error, prefix the command with `sudo`:
+
+-------------------code----------------------
+sudo npm install -g nodemon
+-------------------code----------------------
+
+---
+
+### **4. Running the Application with Nodemon**
+
+Instead of using:
+
+-------------------code----------------------
+node index.js
+-------------------code----------------------
+
+use:
+
+-------------------code----------------------
+nodemon index.js
+-------------------code----------------------
+
+* Nodemon now **monitors all files** in the current folder (regardless of file extension).
+* When a change is detected, it automatically **restarts the application**.
+
+---
+
+### **5. Demonstration**
+
+1. Run the application using `nodemon index.js`.
+2. Make a small change in your code (for example, change a message in a route).
+3. Save the file.
+4. Nodemon will detect the change and **restart the server automatically**.
+5. Check the terminal — you will see a message like:
+
+   -------------------code----------------------
+   [nodemon] restarting due to changes...
+   [nodemon] starting `node index.js`
+   -------------------code----------------------
+6. Refresh the browser (e.g., at `http://localhost:3000`) to see the updated output.
+
+---
+
+### **6. Benefits of Using Nodemon**
+
+* Saves development time by eliminating the need to manually restart the server.
+* Detects changes automatically in any file type within the project.
+* Ideal for local development environments.
+
+---
+
+### **Summary**
+
+* Nodemon improves the development workflow by automatically restarting the server when code changes.
+* Install globally using `npm install -g nodemon`.
+* Run your application with `nodemon index.js` instead of `node index.js`.
+* Any saved file changes trigger an automatic restart, keeping the development process fast and efficient.
