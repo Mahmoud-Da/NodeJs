@@ -143,3 +143,118 @@ When running `node app.js`, the console will show `undefined`, proving that the 
 * Each file has its own **module scope**, forming the foundation of Node.js’s modular system.
 
 ---
+
+*** 3- Modules ***
+**Lecture Notes: Node.js Modules and Scope**
+
+---
+
+### 1. Introduction
+
+* In client-side JavaScript (run inside browsers), any variable or function defined without special scoping is added to the **global scope**.
+* For example:
+
+  -------------------code----------------------
+  function sayHello() {
+    console.log("Hello");
+  }
+  -------------------code----------------------
+
+  The above function becomes available globally through the **window** object.
+
+---
+
+### 2. Problem with the Global Scope
+
+* In real-world applications, JavaScript code is often **split into multiple files**.
+* If two files define a function with the same name (e.g., `sayHello()`), the **second definition overwrites** the first one because both share the same global scope.
+* This causes:
+
+  * Naming conflicts.
+  * Unpredictable behavior.
+  * Difficulties in debugging and maintenance.
+
+---
+
+### 3. The Need for Modularity
+
+* To build **reliable and maintainable** applications, developers must **avoid defining variables and functions in the global scope**.
+* Instead, code should be organized into **modules** — small, independent building blocks.
+* Each module encapsulates its own variables and functions, preventing conflicts between files.
+
+---
+
+### 4. The Concept of Modules in Node.js
+
+* **Every file** in a Node.js application is treated as a **module**.
+* Variables and functions defined within a file are **scoped only to that file**.
+* In object-oriented terms, these are considered **private** to that module.
+* If you want to use a variable or function outside of its module, you must **explicitly export** it.
+
+---
+
+### 5. The Main Module
+
+* Every Node.js application has at least one module — the **main module**.
+* Typically, this is the entry file, such as `app.js`.
+
+---
+
+### 6. The `module` Object
+
+* Inside any Node.js file, there is a special object called **`module`**.
+* Example:
+
+  -------------------code----------------------
+  console.log(module);
+  -------------------code----------------------
+* When you run this (`node app.js`), it outputs a **module object** in the console.
+-------------------code----------------------
+Module {
+  id: '.',
+  path: '/Users/mahmouddabbbagh/moody/NodeJs/2-Node-Module-System',
+  exports: {},
+  filename: '/Users/mahmouddabbbagh/moody/NodeJs/2-Node-Module-System/app3.js',
+  loaded: false,
+  children: [],
+  paths: [
+    '/Users/mahmouddabbbagh/moody/NodeJs/2-Node-Module-System/node_modules',
+    '/Users/mahmouddabbbagh/moody/NodeJs/node_modules',
+    '/Users/mahmouddabbbagh/moody/node_modules',
+    '/Users/mahmouddabbbagh/node_modules',
+    '/Users/node_modules',
+    '/node_modules'
+  ]
+}
+-------------------code----------------------
+
+**Properties of the `module` object include:**
+
+| Property     | Description                                                  |
+| ------------ | ------------------------------------------------------------ |
+| **id**       | Unique identifier of the module                              |
+| **exports**  | Object that determines what is accessible outside the module |
+| **parent**   | References the module that imported this one                 |
+| **filename** | Full path of the current file                                |
+| **loaded**   | Boolean indicating if the module has finished loading        |
+| **children** | List of modules imported by this module                      |
+| **paths**    | Lookup paths for module resolution                           |
+
+---
+
+### 7. Important Clarification
+
+* The `module` object may **appear global**, but it is **not** part of the global scope.
+* Unlike `console` or `setTimeout`, it cannot be accessed via the `global` object.
+* Each file has its own instance of the `module` object, specific to that file’s context.
+
+---
+
+### 8. Summary
+
+* **In browsers:** variables and functions defined globally are attached to the `window` object.
+* **In Node.js:** each file is a **module**, and its variables/functions are **private** to that module.
+* To share functionality, you must **explicitly export** and **import** between modules.
+* Understanding this modular structure is key to writing scalable, conflict-free Node.js applications.
+
+---
