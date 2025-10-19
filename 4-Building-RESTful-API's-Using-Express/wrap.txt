@@ -68,9 +68,9 @@ Imagine a company called **Vidly** that rents movies.
 * The client app manages a list of customers.
 * The server exposes a RESTful service at an endpoint like:
 
-  ```
+  -------------------code----------------------
   https://vidly.com/api/customers
-  ```
+  -------------------code----------------------
 
 **Endpoint Structure Explained:**
 
@@ -126,3 +126,77 @@ Imagine a company called **Vidly** that rents movies.
 * REST is a structured way of building HTTP services that follow predictable patterns.
 * Each resource is accessed through a meaningful endpoint and standard HTTP methods.
 * Express simplifies the creation of RESTful APIs, allowing developers to easily define endpoints and handle requests.
+
+*** 3- Introducing Express ***
+**Lecture Notes: Introduction to Express Framework Setup**
+
+**1. Recap of HTTP Module**
+
+* In the earlier section about Node’s core modules, we used the **HTTP module** to create a basic web server.
+* The server used a **callback function** that received two parameters:
+
+  * **request (req):** Contains information about the incoming request, including the URL.
+  * **response (res):** Used to send a response back to the client.
+* Using the request object, we could check the URL and define routes, for example:
+
+  * If the request URL is `/api/courses`, respond with a list of courses.
+
+**2. Problem with This Approach**
+
+* Although this method works, it quickly becomes **unmaintainable** as the application grows.
+* Each new route requires another **if statement** in the callback function, making the code repetitive and hard to manage.
+
+**3. The Need for a Framework**
+
+* A **framework** provides structure and organization to the application.
+* It allows us to:
+
+  * Easily define multiple routes.
+  * Keep the code clean and maintainable.
+  * Focus on business logic instead of low-level HTTP handling.
+
+**4. Introduction to Express**
+
+* **Express** is the most popular framework for building web applications and servers in Node.js.
+* It is known for being:
+
+  * **Fast**
+  * **Lightweight**
+  * **Well-documented**
+* According to npm statistics:
+
+  * Over **700,000 downloads per day**.
+  * Over **15 million downloads per month**.
+
+**5. Setting Up an Express Project**
+
+* Visit **npmjs.org** (or **npmjs.com**) to view details and documentation about Express.
+* To start a new project:
+
+  1. **Create a new folder** for the project:
+
+     -------------------code----------------------
+     mkdir express-demo
+     -------------------code----------------------
+  2. **Navigate into the folder:**
+
+     -------------------code----------------------
+     cd express-demo
+     -------------------code----------------------
+  3. **Initialize the project with npm:**
+
+     -------------------code----------------------
+     npm init -y
+     -------------------code----------------------
+
+     This creates a `package.json` file.
+  4. **Install Express:**
+
+     -------------------code----------------------
+     npm install express
+     -------------------code----------------------
+* After installation, Express will be added as a dependency in the `package.json` file.
+
+**6. Next Step**
+
+* In the next lecture, you will learn how to **build your first web server using Express**.
