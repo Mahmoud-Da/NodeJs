@@ -637,3 +637,107 @@ app.get('/api/courses/:id', (req, res) => {
 * **Route parameters** (`req.params`) are used for **required** values that identify a specific resource (e.g., course ID).
 * **Query parameters** (`req.query`) are used for **optional** information (e.g., sorting, filtering).
 * Express makes it easy to define and retrieve both types of parameters for flexible API design.
+
+*** 8- Handling HTTP GET Requests ***
+### Lecture Notes: Implementing an Endpoint to Get a Single Course
+
+#### 1. Creating the Courses Array
+
+* Define a constant array called `courses` that contains three course objects.
+* Each object includes two properties:
+
+  * `id`
+  * `name`
+* Example:
+
+  -------------------code----------------------
+  const courses = [
+    { id: 1, name: 'course1' },
+    { id: 2, name: 'course2' },
+    { id: 3, name: 'course3' }
+  ];
+  -------------------code----------------------
+
+#### 2. Setting Up Endpoints
+
+There will be two main endpoints:
+
+1. **Get All Courses**
+
+   * URL: `/api/courses`
+   * Returns the entire `courses` array.
+
+   -------------------code----------------------
+   app.get('/api/courses', (req, res) => {
+     res.send(courses);
+   });
+   -------------------code----------------------
+
+2. **Get a Single Course by ID**
+
+   * URL: `/api/courses/:id`
+   * Retrieves a specific course based on its `id` parameter.
+
+#### 3. Implementing Logic to Find a Single Course
+
+* Use the `find()` method on the `courses` array:
+
+  -------------------code----------------------
+  app.get('/api/courses/:id', (req, res) => {
+    const course = courses.find(c => c.id === parseInt(req.params.id));
+  });
+  -------------------code----------------------
+* `find()` iterates over the array and returns the first course that matches the condition.
+* The `req.params.id` value is a string, so it must be converted to an integer using `parseInt()` for accurate comparison.
+
+#### 4. Choosing Between `var`, `let`, and `const`
+
+* `var` is function-scoped and older; modern JavaScript prefers `let` and `const`.
+* Use:
+
+  * `let` when the variable will be reassigned.
+  * `const` when the variable value should remain constant.
+* In this case, `const` is appropriate since `course` will not change after being found.
+
+#### 5. Handling Non-Existent Courses
+
+* If the course is not found, return an HTTP status code `404` with a message:
+
+  -------------------code----------------------
+  if (!course) {
+    res.status(404).send('The course with the given ID was not found');
+  }
+  -------------------code----------------------
+* `404` indicates “Not Found” — a standard convention in RESTful APIs.
+
+#### 6. Returning the Course if Found
+
+* If the course exists, send it back in the response:
+
+  -------------------code----------------------
+  res.send(course);
+  -------------------code----------------------
+
+#### 7. Testing the Endpoint
+
+* Access `/api/courses/1` → should return the course object `{ id: 1, name: 'course1' }`.
+* Access `/api/courses/10` → should return a 404 response with the message “The course with the given ID was not found.”
+
+#### 8. Verifying Status Code in Browser
+
+* Open **Chrome Developer Tools** → **Network** tab.
+* Refresh the page (`Ctrl + R` or `Cmd + R`).
+* Check the request’s **Status** column:
+
+  * `200` for successful responses.
+  * `404` when the course does not exist.
+
+---
+
+**Summary:**
+This lecture demonstrated how to:
+
+* Create a static array of course objects.
+* Implement two RESTful endpoints: one for fetching all courses and one for fetching a specific course by ID.
+* Use `Array.find()` and `parseInt()` for precise matching.
+* Return appropriate HTTP responses following REST conventions.
