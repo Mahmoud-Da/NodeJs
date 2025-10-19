@@ -26,3 +26,103 @@
 **4. Next Topic**
 
 * The next section will cover **RESTful services**, a key concept in building structured and scalable web APIs using Express.
+
+
+*** 2- RESTful Services ***
+**Lecture Notes: Introduction to RESTful Services (RESTful APIs)**
+
+**1. Overview**
+
+* REST stands for **Representational State Transfer**.
+* RESTful services (or RESTful APIs) are a **convention for building HTTP services** that enable communication between clients (frontends) and servers (backends).
+* These services allow applications to **create, read, update, and delete (CRUD)** data using standard **HTTP protocol** principles.
+
+---
+
+**2. Client-Server Architecture Recap**
+
+* Most modern applications follow the **client-server model**.
+
+  * **Client (frontend)**: The app users interact with.
+  * **Server (backend)**: Manages and provides data or functionality.
+* Communication between the client and server occurs through **HTTP requests**, the same protocol used for web browsing.
+* The server exposes services (APIs) that clients can call to perform actions such as retrieving or saving data.
+
+---
+
+**3. Purpose of REST**
+
+* REST provides a **standardized convention** for designing and accessing these HTTP services.
+* It allows developers to use existing HTTP methods to perform CRUD operations:
+
+  * **Create** → `POST`
+  * **Read** → `GET`
+  * **Update** → `PUT`
+  * **Delete** → `DELETE`
+
+---
+
+**4. Example: Vidly Movie Rental Company**
+Imagine a company called **Vidly** that rents movies.
+
+* The client app manages a list of customers.
+* The server exposes a RESTful service at an endpoint like:
+
+  ```
+  https://vidly.com/api/customers
+  ```
+
+**Endpoint Structure Explained:**
+
+1. **HTTP or HTTPS:**
+
+   * `HTTP` for normal communication.
+   * `HTTPS` for secure communication (encrypted data transfer).
+2. **Domain:**
+
+   * Example: `vidly.com`
+3. **/api:**
+
+   * Common convention to indicate that the path refers to API services (optional but widely used).
+   * Could also appear as a subdomain, e.g., `https://api.vidly.com/customers`
+4. **/customers:**
+
+   * Refers to a **resource** in the application.
+   * In REST, resources represent data entities such as customers, movies, or rentals.
+
+---
+
+**5. HTTP Methods and Their Uses**
+
+| Method     | Purpose       | Example Endpoint          | Description                                                                                  |
+| ---------- | ------------- | ------------------------- | -------------------------------------------------------------------------------------------- |
+| **GET**    | Retrieve data | `GET /api/customers`      | Returns a list of all customers.                                                             |
+|            |               | `GET /api/customers/1`    | Returns details of a single customer by ID.                                                  |
+| **POST**   | Create data   | `POST /api/customers`     | Creates a new customer; the client sends the customer object in the request body.            |
+| **PUT**    | Update data   | `PUT /api/customers/1`    | Updates an existing customer; includes the full updated customer object in the request body. |
+| **DELETE** | Remove data   | `DELETE /api/customers/1` | Deletes the customer with the specified ID.                                                  |
+
+---
+
+**6. Key Concepts in REST**
+
+* **Resources:** Entities such as `customers`, `movies`, or `rentals` that the API exposes.
+* **Endpoints:** URLs that represent these resources.
+* **HTTP Methods (Verbs):** Indicate the desired operation (GET, POST, PUT, DELETE).
+* **Request Body:** Data sent by the client when creating or updating a resource (POST and PUT).
+
+---
+
+**7. What We Will Build**
+
+* In this section, we will use the **Express framework** to build a RESTful service for managing a list of customers.
+* Instead of connecting to a database, we will use a **simple in-memory array** to store customer data for simplicity.
+* Later in the course, we will integrate a **database** for persistent storage.
+
+---
+
+**Summary**
+
+* REST is a structured way of building HTTP services that follow predictable patterns.
+* Each resource is accessed through a meaningful endpoint and standard HTTP methods.
+* Express simplifies the creation of RESTful APIs, allowing developers to easily define endpoints and handle requests.
