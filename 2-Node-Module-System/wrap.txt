@@ -1578,3 +1578,177 @@ Listener called { id: 1, url: 'http://' }
   4. In the main module, **instantiate the class** and **register listeners** on that instance.
 
 * This approach keeps the code modular, reusable, and consistent with real-world Node.js design patterns.
+
+*** 13- HTTP Module ***
+**Lecture Notes: Building Web Servers Using the HTTP Module in Node.js**
+
+---
+
+### 1. Overview of the HTTP Module
+
+* The **HTTP module** in Node.js is a core module used for creating **networking applications**, such as web servers.
+* It allows the creation of backend services that can communicate with client applications (web, mobile, etc.).
+* In the Node.js documentation, the HTTP module includes several classes such as:
+
+  * `http.Agent`
+  * `http.ClientRequest`
+  * `http.Server`
+  * Each class provides specific **properties, methods, and events**.
+
+---
+
+### 2. Creating a Basic Web Server
+
+1. **Import the module:**
+
+   -------------------code----------------------
+   const http = require('http');
+   -------------------code----------------------
+
+2. **Create a server:**
+
+   -------------------code----------------------
+   const server = http.createServer();
+   -------------------code----------------------
+
+3. **Listen on a specific port:**
+
+   -------------------code----------------------
+   server.listen(3000);
+   console.log('Listening on port 3000...');
+   -------------------code----------------------
+
+* The server now listens for incoming HTTP requests on port **3000**.
+
+---
+
+### 3. EventEmitter Relationship
+
+* The `server` object created by `http.createServer()` is an **EventEmitter**.
+* It inherits its behavior from the `net.Server` class, which itself extends `EventEmitter`.
+* This means it supports event-driven methods such as:
+
+  * `on()`
+  * `emit()`
+  * `addListener()`
+
+**Example:**
+
+-------------------code----------------------
+server.on('connection', (socket) => {
+  console.log('New connection...');
+});
+-------------------code----------------------
+
+* When a new client connects, the `connection` event is triggered, and the callback is executed.
+
+---
+
+### 4. Handling HTTP Requests
+
+Rather than working directly with low-level socket connections, we can handle **HTTP requests** and **responses** directly.
+
+1. **Using a callback function with `createServer`:**
+
+   -------------------code----------------------
+   const server = http.createServer((req, res) => {
+     if (req.url === '/') {
+       res.write('Hello World');
+       res.end();
+     }
+   });
+   -------------------code----------------------
+
+2. **Run the server:**
+
+   -------------------code----------------------
+   server.listen(3000);
+   console.log('Listening on port 3000...');
+   -------------------code----------------------
+
+3. **Test the result:**
+
+   * Open a browser and visit `http://localhost:3000`
+   * You will see **“Hello World”**.
+
+---
+
+### 5. Adding Multiple Routes
+
+To serve different responses for different routes:
+
+-------------------code----------------------
+const server = http.createServer((req, res) => {
+  if (req.url === '/') {
+    res.write('Hello World');
+    res.end();
+  }
+
+  if (req.url === '/api/courses') {
+    res.write(JSON.stringify([1, 2, 3]));
+    res.end();
+  }
+});
+
+server.listen(3000);
+console.log('Listening on port 3000...');
+-------------------code----------------------
+
+* When visiting:
+
+  * `/` → returns “Hello World”
+  * `/api/courses` → returns `[1, 2, 3]` (JSON formatted)
+
+---
+
+### 6. Using JSON Responses
+
+* Use `JSON.stringify()` to convert JavaScript objects or arrays into a JSON string before sending them in the response.
+
+**Example:**
+
+-------------------code----------------------
+res.write(JSON.stringify([{ id: 1 }, { id: 2 }]));
+-------------------code----------------------
+
+---
+
+### 7. Limitations of Using the HTTP Module Directly
+
+* As more routes and conditions are added, the code becomes **linear and complex**.
+* There is no built-in structure for:
+
+  * Routing
+  * Middleware
+  * Request handling
+* Managing larger backend applications becomes difficult using only the HTTP module.
+
+---
+
+### 8. Transition to Express Framework
+
+* In real-world applications, developers use **Express.js**, a higher-level framework built **on top of the HTTP module**.
+* Express provides:
+
+  * Simplified routing
+  * Middleware support
+  * Cleaner and modular structure
+* Express still uses the same underlying HTTP server, but abstracts away repetitive and low-level code.
+
+---
+
+**Summary**
+
+| Concept               | Description                                                      |
+| --------------------- | ---------------------------------------------------------------- |
+| **HTTP Module**       | Core Node.js module for handling HTTP requests.                  |
+| **Server Object**     | Created using `http.createServer()`, inherits from EventEmitter. |
+| **Events**            | `connection`, `request`, and others can be handled using `on()`. |
+| **Response Handling** | Use `res.write()` and `res.end()` to send responses.             |
+| **JSON Output**       | Use `JSON.stringify()` for structured data.                      |
+| **Express Framework** | Built on the HTTP module, simplifies server and routing setup.   |
+
+---
+
+**Conclusion:**
+The HTTP module provides the foundational tools to create servers in Node.js. However, for building scalable and maintainable web applications, frameworks like **Express.js** are preferred because they offer structure, simplicity, and extensibility on top of the native HTTP capabilities.
