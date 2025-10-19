@@ -1205,3 +1205,45 @@ npm install
 * Application dependencies go under `dependencies` and are required in production.
 * Development dependencies go under `devDependencies` and are used only during development.
 * Both types are stored in `node_modules` but are managed differently in `package.json`.
+
+*** 13- Uninstalling a Package ***
+### Lecture Notes: Uninstalling npm Packages
+
+**1. When to uninstall a package**
+
+* In real-world projects, you may no longer need a package that was previously installed.
+* Uninstalling removes it from your project to keep dependencies clean and reduce bloat.
+
+---
+
+**2. How to uninstall a package**
+
+* Command syntax:
+
+  -------------------code----------------------
+  npm uninstall <package-name>
+  -------------------code----------------------
+* Shortcut:
+
+  -------------------code----------------------
+  npm un <package-name>
+  -------------------code----------------------
+* Example: Uninstall Mongoose
+
+  -------------------code----------------------
+  npm uninstall mongoose
+  -------------------code----------------------
+
+---
+
+**3. Effects of uninstalling**
+
+* The package is removed from the **dependencies** section in `package.json`.
+* The package is also removed from the **node_modules** folder.
+
+---
+
+**4. Summary**
+
+* Use `npm uninstall` (or `npm un`) to remove unnecessary packages.
+* Always check `package.json` and `node_modules` to verify that the package has been successfully removed.
