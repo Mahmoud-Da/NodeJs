@@ -307,3 +307,126 @@ This structure allows Node.js and NPM to manage each package independently.
 
 **Next Lecture:**
 How to use installed Node packages (like Underscore) in your application code.
+
+*** 4- Using a Package ***
+**Lecture Notes: Using Third-Party Node Modules (Example: Underscore Library)**
+
+---
+
+### 1. Introduction
+
+* After installing a third-party Node module (like **Underscore**), the next step is to **use it in your application**.
+* In this example, we demonstrate how to load and use the **Underscore** library in a simple Node.js script.
+
+---
+
+### 2. Creating the Entry File
+
+* Inside the project root (for example, `npm-demo`), create a new file:
+
+  -------------------code----------------------
+  index.js
+  -------------------code----------------------
+
+---
+
+### 3. Loading the Module with `require()`
+
+* In `index.js`, use the **`require()`** function to load the Underscore module:
+
+  -------------------code----------------------
+  var _ = require('underscore');
+  -------------------code----------------------
+* By convention, the variable name **`_`** is used to represent the Underscore library.
+
+---
+
+### 4. How `require()` Works
+
+The **`require()`** function follows a sequence when resolving a module:
+
+1. **Core Module Check**
+
+   * It first checks if the specified module is a **core Node.js module** (like `fs`, `http`, or `path`).
+   * Since there is no core module named `underscore`, it proceeds to the next step.
+
+2. **Local File or Folder Check**
+
+   * If the module name starts with `./`, `../`, or `/`, Node assumes it refers to a **local file or folder**.
+
+   * Example:
+
+     -------------------code----------------------
+     require('./underscore')
+     -------------------code----------------------
+
+     would look for:
+
+     * A file named `underscore.js` in the current folder, or
+     * A folder named `underscore` containing a file `index.js`.
+
+   * Since we do **not** have a local file or folder called `underscore`, Node continues.
+
+3. **`node_modules` Folder Check**
+
+   * Node finally checks inside the **`node_modules`** directory for a module named `underscore`.
+   * If found, it loads that module.
+
+This is the **module resolution process** in Node.js.
+
+---
+
+### 5. Using the Underscore Library
+
+* Visit **[underscorejs.org](https://underscorejs.org)** for documentation and examples.
+* The library provides many utility functions for arrays, objects, and collections.
+
+**Example: Using the `contains` function**
+
+-------------------code----------------------
+var _ = require('underscore');
+
+var result = _.contains([1, 2, 3], 2);
+console.log(result);
+-------------------code----------------------
+
+* The `contains` method checks whether a given value exists in an array.
+* It takes:
+
+  * First argument: the array to search.
+  * Second argument: the value to find.
+* Returns a **boolean** (`true` or `false`).
+
+---
+
+### 6. Running the Script
+
+* In the terminal, execute:
+
+  -------------------code----------------------
+  node index.js
+  -------------------code----------------------
+* Output:
+
+  -------------------code----------------------
+  true
+  -------------------code----------------------
+* This confirms that the **Underscore module** was successfully loaded and used.
+
+---
+
+### 7. Summary
+
+* Use **`require()`** to load installed Node packages.
+* The `require()` function resolves modules in this order:
+
+  1. Core modules
+  2. Local files/folders
+  3. `node_modules` directory
+* The **Underscore** library provides helpful utility methods such as `contains`.
+* Running your script with `node filename.js` executes the Node application using these imported modules.
+
+---
+
+**Next Lecture:**
+How to manage global packages and understand versioning in NPM.
