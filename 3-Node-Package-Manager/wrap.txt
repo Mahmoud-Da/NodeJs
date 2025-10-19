@@ -807,3 +807,89 @@ This ensures that everyone using your code installs **the exact same version** o
 * The **tilde (`~`)** allows updates within the same minor version.
 * Removing both locks the version to an exact number.
 * Proper version control ensures stability and compatibility across different development environments.
+
+
+*** 8- Listing the Installed Packages ***
+### Lecture Notes: Checking Installed Package Versions in Node.js
+
+#### 1. Understanding the Caret Character
+
+* The **caret ( ^ )** in `package.json` means your project can use **any version of a dependency** as long as the **major version** remains the same.
+  Example:
+
+  * `^4.13.6` allows updates to versions like `4.14.0` or `4.15.2`
+  * It blocks updates to `5.0.0` or higher.
+
+---
+
+#### 2. Checking the Installed Version
+
+When you restore dependencies with `npm install`, the installed version in your `node_modules` folder might be **newer** (but still within the allowed version range).
+To check the exact version installed, there are two main methods:
+
+##### Method 1: Check `package.json` inside the module
+
+1. Navigate to `node_modules`.
+2. Open the folder of the dependency (e.g., `mongoose`).
+3. Open its `package.json` file.
+4. Scroll to the **version** property — this shows the exact installed version.
+
+However, this is **tedious** if you have multiple dependencies.
+
+---
+
+#### 3. Viewing Installed Dependencies via Command Line
+
+##### Method 2: Using `npm list`
+
+* Run:
+
+  -------------------code----------------------
+  npm list
+  -------------------code----------------------
+* Displays a **tree structure** showing:
+
+  * Your application’s dependencies.
+  * Their sub-dependencies.
+  * Each package’s version number.
+
+Example Output:
+
+-------------------code----------------------
+myapp
+├── mongoose@4.13.6
+│   ├── async@2.1.5
+│   └── lodash@4.17.4
+└── underscore@1.8.3
+-------------------code----------------------
+
+---
+
+#### 4. Simplifying the View
+
+If you only want to see the **top-level dependencies** (those directly listed in your project’s `package.json`):
+
+* Use the **depth flag**:
+
+  -------------------code----------------------
+  npm list --depth=0
+  -------------------code----------------------
+* This will display only:
+
+  -------------------code----------------------
+  myapp
+  ├── mongoose@4.13.6
+  └── underscore@1.8.3
+  -------------------code----------------------
+
+---
+
+#### Summary
+
+| Task                                       | Command                                    | Description                   |
+| ------------------------------------------ | ------------------------------------------ | ----------------------------- |
+| View all dependencies and sub-dependencies | `npm list`                                 | Shows full dependency tree    |
+| View only main dependencies                | `npm list --depth=0`                       | Shows top-level dependencies  |
+| Check version manually                     | Open `node_modules/<package>/package.json` | Shows exact installed version |
+
+This makes it easy to monitor which versions of libraries are installed and ensure consistency across development environments.
