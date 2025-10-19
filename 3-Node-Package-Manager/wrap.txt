@@ -589,3 +589,99 @@ npm list --depth=0          # View only top-level dependencies
 
 **Next Lecture:**
 Understanding semantic versioning and the meaning of symbols like the caret (`^`) and tilde (`~`) in `package.json`.
+
+*** 6- NPM Packages and Source Control ***
+### Lecture Notes: Excluding `node_modules` from Git Repositories
+
+---
+
+#### 1. The Nature of the `node_modules` Folder
+
+* The `node_modules` folder contains all installed third-party packages and their dependencies.
+* In small projects, this folder may be light, but in real-world applications, it can grow to **hundreds of megabytes**.
+* Every dependency used in the project is stored here after running `npm install`.
+
+---
+
+#### 2. Why We Should Not Include `node_modules` in Source Control
+
+* Including it in a **Git repository** makes the repository unnecessarily large.
+* When collaborators clone or pull the project, they would need to download hundreds of megabytes.
+* The same applies when transferring the project (e.g., via email or cloud storage).
+* The dependencies can always be restored from the `package.json` file, so storing them in Git is redundant.
+
+---
+
+#### 3. How Dependencies Are Restored
+
+* All dependencies and their versions are listed in the **`package.json`** file.
+* The **npm tool** can reinstall them automatically using:
+
+  -------------------code----------------------
+  npm install
+  -------------------code----------------------
+* This command reads the dependencies from `package.json` and downloads them from the **npm registry**.
+
+**Example Process:**
+
+1. Delete the existing `node_modules` folder.
+2. Run `npm install`.
+3. npm restores all dependencies as listed in `package.json`.
+
+---
+
+#### 4. Excluding `node_modules` from Git
+
+**Step 1:** Initialize a Git repository
+
+-------------------code----------------------
+git init
+-------------------code----------------------
+
+**Step 2:** Check the current status
+
+-------------------code----------------------
+git status
+-------------------code----------------------
+
+You’ll see all project files, including `index.js`, `package.json`, `package-lock.json`, and `node_modules`.
+
+**Step 3:** Create a `.gitignore` file
+
+* In the root directory, create a new file named `.gitignore` (no filename, only the extension).
+* Inside it, add:
+
+  -------------------code----------------------
+  node_modules/
+  -------------------code----------------------
+
+  The trailing slash indicates that it’s a folder.
+
+**Step 4:** Save the file and check the status again
+
+-------------------code----------------------
+git status
+-------------------code----------------------
+
+Now, `node_modules` will no longer appear in the tracked files list.
+
+---
+
+#### 5. Finalizing the Git Commit
+
+* After excluding unnecessary files, add and commit the remaining ones:
+
+  -------------------code----------------------
+  git add .
+  git commit -m "First commit"
+  -------------------code----------------------
+* The `.gitignore` file ensures that `node_modules` and any other ignored files remain excluded from future commits.
+
+---
+
+#### **Summary**
+
+* The `node_modules` folder should never be committed to Git.
+* Dependencies can be restored using `npm install`.
+* The `.gitignore` file prevents unnecessary or large files from being tracked.
+* This keeps your repository clean, lightweight, and professional.
