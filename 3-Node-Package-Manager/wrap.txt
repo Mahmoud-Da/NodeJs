@@ -204,3 +204,106 @@ You should now see:
 
 * Once your project has a `package.json` file, you can proceed to **install Node packages** using NPM commands.
 * The next part of the lecture covers **how to install a Node package**.
+
+*** 3- Installing a Node Package ***
+**Lecture Notes: Installing Third-Party Node Packages**
+
+---
+
+### 1. Introduction
+
+* In this lecture, we learn how to **add third-party libraries** (or Node packages) to a Node.js application.
+* Example package: **Underscore**, a popular JavaScript utility library.
+
+---
+
+### 2. Exploring Packages on NPM
+
+* Visit **[npmjs.com](https://www.npmjs.com)** and search for **“underscore”**.
+* You’ll find the **Underscore** package, with the latest version (in this example) being **1.8.3**.
+* On the package page, you can view:
+
+  * **Installation command**
+  * **Publisher information**
+  * **Latest version**
+  * **GitHub repository**
+  * **Official homepage:** [underscorejs.org](https://underscorejs.org)
+  * **Collaborators**
+  * **Download statistics** and other metadata
+
+**Tip:**
+Whenever you need a Node package, start by checking **npmjs.com** for documentation and usage details.
+
+---
+
+### 3. Installing a Package
+
+* In the terminal, you can install a package using:
+
+  -------------------code----------------------
+  npm install underscore
+  -------------------code----------------------
+
+  or the shorthand:
+
+  -------------------code----------------------
+  npm i underscore
+  -------------------code----------------------
+
+#### What Happens When You Run This:
+
+1. **NPM downloads** the specified package from the **NPM registry**.
+2. It **adds the package information** to your project’s **`package.json`** under the `dependencies` section:
+
+   -------------------code----------------------
+   "dependencies": {
+     "underscore": "^1.8.3"
+   }
+   -------------------code----------------------
+3. It **creates (or updates)** a folder named **`node_modules`**, which contains all installed packages.
+
+   * Inside `node_modules/underscore/`, you’ll find various files including its own **`package.json`** file.
+
+---
+
+### 4. Understanding the Dependency Structure
+
+* The `package.json` inside each module (like Underscore) contains metadata about that package:
+
+  * **Version** (e.g., 1.8.3)
+  * **Description**
+  * **Homepage**
+  * **Keywords**
+  * **License**, etc.
+
+This structure allows Node.js and NPM to manage each package independently.
+
+---
+
+### 5. The `--save` Flag (Old Behavior)
+
+* In older versions of NPM, you had to include the `--save` flag when installing packages:
+
+  -------------------code----------------------
+  npm install underscore --save
+  -------------------code----------------------
+
+  * Without `--save`, the dependency was not recorded in `package.json`.
+* **Modern versions of NPM** automatically update `package.json` when you install a package.
+  The `--save` flag is **no longer required**.
+
+---
+
+### 6. Summary
+
+* To add a third-party package:
+
+  1. Search for it on **npmjs.com** to understand its usage.
+  2. Run `npm install package-name` to add it to your project.
+  3. Check your **`package.json`** for updated dependencies.
+  4. Verify the **`node_modules`** folder contains the installed package.
+
+---
+
+**Next Lecture:**
+How to use installed Node packages (like Underscore) in your application code.
