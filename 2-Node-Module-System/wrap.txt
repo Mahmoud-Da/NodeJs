@@ -1035,3 +1035,135 @@ With Node.js, JavaScript runs **outside the browser** (on the server or local en
 * Node.js expands JavaScript’s capability beyond browsers, enabling system and server-side operations.
 
 ---
+
+*** 9- File System Module ***
+**Lecture Notes: Working with Files in Node.js**
+
+---
+
+### 1. Overview
+
+This lecture explains how to work with files and directories in Node.js using the **File System (fs)** module. It also introduces the difference between **synchronous (blocking)** and **asynchronous (non-blocking)** methods.
+
+---
+
+### 2. The File System Module (fs)
+
+* Node.js provides a built-in module called **`fs`** (File System) for working with files and directories.
+* This module includes many methods for reading, writing, deleting, and managing files.
+* You can find the documentation for the `fs` module in the official Node.js documentation.
+
+**Importing the Module:**
+
+-------------------code----------------------
+const fs = require('fs');
+-------------------code----------------------
+
+---
+
+### 3. Synchronous vs Asynchronous Methods
+
+Most operations in the `fs` module are available in two versions:
+
+* **Synchronous (blocking)** → Methods ending with `Sync`, such as `readFileSync()`, `accessSync()`, etc.
+* **Asynchronous (non-blocking)** → Methods without the `Sync` suffix, such as `readFile()`, `access()`, etc.
+
+**Key Point:**
+
+* In real-world applications, **always use asynchronous methods** to prevent blocking the single Node.js thread.
+* Blocking the thread means other clients cannot be served simultaneously, which harms performance in web applications.
+
+---
+
+### 4. Example: Reading a Directory
+
+#### 4.1 Synchronous Version
+
+The synchronous form is easier to understand but should be avoided in production.
+
+**Example:**
+
+-------------------code----------------------
+const fs = require('fs');
+
+const files = fs.readdirSync('./');
+console.log(files);
+-------------------code----------------------
+
+**Explanation:**
+
+* `fs.readdirSync('./')` reads the contents of the current directory (`./`).
+* It returns an array of strings containing the names of all files and folders.
+* This operation blocks the thread until it completes.
+
+**Output Example:**
+
+-------------------code----------------------
+[ 'app.js', 'package.json', 'node_modules' ]
+-------------------code----------------------
+
+---
+
+#### 4.2 Asynchronous Version
+
+The asynchronous version is non-blocking and should be preferred.
+
+**Example:**
+
+-------------------code----------------------
+const fs = require('fs');
+
+fs.readdir('./', (error, files) => {
+  if (error) {
+    console.log('Error:', error);
+  } else {
+    console.log('Result:', files);
+  }
+});
+-------------------code----------------------
+
+**Explanation:**
+
+* The first argument (`'./'`) is the path of the directory to read.
+* The second argument is a **callback function** that Node calls once the operation is complete.
+* The callback receives two parameters:
+
+  * `error`: contains an error object if something went wrong.
+  * `files`: contains the result (array of file and folder names) if successful.
+* Only one of these parameters will have a value at a time.
+
+---
+
+### 5. Handling Errors
+
+If an invalid path is provided, an error will occur.
+
+**Example:**
+
+-------------------code----------------------
+fs.readdir('$', (error, files) => {
+  if (error) console.log('Error:', error);
+  else console.log('Result:', files);
+});
+-------------------code----------------------
+
+**Output:**
+
+-------------------code----------------------
+Error: ENOENT: no such file or directory, scandir '$'
+-------------------code----------------------
+
+**Note:**
+This simple error logging is only for demonstration. A complete section on **error handling** will be covered later in the course.
+
+---
+
+### 6. Summary
+
+* To work with files or directories in Node.js, use the **`fs`** module.
+* Most methods come in **synchronous** and **asynchronous** pairs.
+* **Always prefer asynchronous methods** to prevent blocking the Node.js event loop.
+* The **`readdir()`** method reads the contents of a directory.
+* Asynchronous methods require a **callback** function to handle results and errors.
+
+---
