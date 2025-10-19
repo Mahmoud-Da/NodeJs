@@ -549,3 +549,91 @@ set PORT=5000
 * Set environment variables using `export` (Mac/Linux) or `set` (Windows).
 * Always include a default value (e.g., `3000`) for local development.
 * This approach ensures your application can run reliably both locally and in hosting environments.
+
+*** 7- Route Parameters ***
+### Lecture Notes: Creating Routes with Parameters in Express
+
+#### 1. **Overview**
+
+* So far, we have a route that returns the list of all courses.
+* In this lecture, we learn how to create a route that retrieves **a single course** based on its **ID**.
+
+#### 2. **Defining a Route with Parameters**
+
+* In RESTful services, to get a specific course, we include its **ID** in the URL.
+  Example endpoint:
+
+  -------------------code----------------------
+  /api/courses/1
+  -------------------code----------------------
+
+  where `1` is the course ID.
+
+#### 3. **Implementing the Route**
+
+-------------------code----------------------
+app.get('/api/courses/:id', (req, res) => {
+  res.send(req.params.id);
+});
+-------------------code----------------------
+
+* `:id` defines a **route parameter** named `id`.
+* The parameter name can be anything, but `id` is standard and concise.
+* To access the parameter, use:
+
+  -------------------code----------------------
+  req.params.id
+  -------------------code----------------------
+* Example: Requesting `/api/courses/1` will return `1`.
+
+#### 4. **Multiple Route Parameters**
+
+* We can define multiple parameters in a route.
+  Example:
+
+  -------------------code----------------------
+  /api/posts/:year/:month
+  -------------------code----------------------
+* This allows fetching all posts for a specific month and year.
+* Parameters are accessed as:
+
+  -------------------code----------------------
+  req.params.year
+  req.params.month
+  -------------------code----------------------
+* The `req.params` object contains all route parameters:
+
+  -------------------code----------------------
+  { year: '2018', month: '1' }
+  -------------------code----------------------
+
+#### 5. **Query String Parameters**
+
+* Query strings are used to send **optional or additional data** to the backend.
+* Example:
+
+  -------------------code----------------------
+  /api/posts/2018/1?sortBy=name
+  -------------------code----------------------
+
+  * `sortBy` is a **query string parameter**.
+  * Query parameters are added after a `?` and separated by `&` if there are multiple.
+
+#### 6. **Reading Query Parameters**
+
+* Access query string parameters using:
+
+  -------------------code----------------------
+  req.query
+  -------------------code----------------------
+* Example output:
+
+  -------------------code----------------------
+  { sortBy: 'name' }
+  -------------------code----------------------
+
+#### 7. **Summary**
+
+* **Route parameters** (`req.params`) are used for **required** values that identify a specific resource (e.g., course ID).
+* **Query parameters** (`req.query`) are used for **optional** information (e.g., sorting, filtering).
+* Express makes it easy to define and retrieve both types of parameters for flexible API design.
