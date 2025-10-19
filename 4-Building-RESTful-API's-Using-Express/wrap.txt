@@ -741,3 +741,105 @@ This lecture demonstrated how to:
 * Implement two RESTful endpoints: one for fetching all courses and one for fetching a specific course by ID.
 * Use `Array.find()` and `parseInt()` for precise matching.
 * Return appropriate HTTP responses following REST conventions.
+
+
+*** 9- Handling HTTP POST Requests ***
+### Lecture Notes: Handling HTTP POST Requests in Express
+
+#### 1. Overview
+
+* Up to this point, we have created two routes that handle **HTTP GET** requests:
+
+  * One to get all courses.
+  * One to get a single course.
+* In this lecture, we learn how to handle **HTTP POST** requests, which are used to **create new resources** — in this case, a new course.
+
+---
+
+#### 2. Creating a POST Endpoint
+
+* Use `app.post()` instead of `app.get()`.
+* The endpoint path is `/api/courses`, because we are adding a new course to the *collection* of courses.
+
+**Syntax:**
+
+-------------------code----------------------
+app.post('/api/courses', (req, res) => {
+  // Logic to create and return a new course
+});
+-------------------code----------------------
+
+---
+
+#### 3. Implementing the Route Handler
+
+Inside the route handler:
+
+1. **Create a new course object** using the data from the request body.
+2. **Manually assign an ID** since there is no database yet.
+3. **Add the new course** to the `courses` array.
+4. **Return the new course** to the client.
+
+**Example:**
+
+-------------------code----------------------
+app.post('/api/courses', (req, res) => {
+  const course = {
+    id: courses.length + 1,       // Manual ID assignment
+    name: req.body.name           // Reading from the request body
+  };
+
+  courses.push(course);
+  res.send(course);               // Return the created course
+});
+-------------------code----------------------
+
+---
+
+#### 4. Reading JSON Data from the Request Body
+
+* By default, **Express does not parse JSON** request bodies automatically.
+* To enable this feature, use built-in middleware provided by Express.
+* Add the following line **at the top of your app file**, after creating the app object:
+
+-------------------code----------------------
+app.use(express.json());
+-------------------code----------------------
+
+##### Explanation:
+
+* `express.json()` returns a **middleware function**.
+* `app.use()` registers this middleware in the **request processing pipeline**.
+* The middleware parses incoming JSON payloads and populates `req.body`.
+
+This means that when a client sends a JSON object (like `{"name": "New Course"}`), you can access it using `req.body.name`.
+
+---
+
+#### 5. Returning the Created Course
+
+* After adding the course to the array, return it in the response body using `res.send(course)`.
+* This is a **RESTful convention**:
+  When a resource is created on the server, the server should return the full representation of that new resource — including its server-assigned ID.
+
+---
+
+#### 6. Summary of Steps
+
+1. Define a POST route using `app.post('/api/courses')`.
+2. Use `app.use(express.json())` to enable JSON body parsing.
+3. Create a new course object with an ID and name.
+4. Push it into the `courses` array.
+5. Send the created course object back to the client.
+
+---
+
+#### 7. Purpose of Returning the Course
+
+* The **client needs to know the ID** assigned by the server.
+* Returning the full course object allows the client to store or reference it later.
+
+---
+
+**In the next lecture:**
+Testing this endpoint using a REST client (such as Postman or an HTTP request tool) to verify that POST requests successfully create and return new course objects.
