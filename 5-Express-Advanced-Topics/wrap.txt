@@ -1009,3 +1009,164 @@ No need to create multiple debugger instances unless necessary.
 * Control log visibility through the `DEBUG` environment variable.
 
 ---
+
+*** 9- Templating Engines ***
+## **Lecture Notes: Using Templating Engines in Express**
+
+### **1. Overview**
+
+* So far, we have been returning **JSON objects** in responses.
+* However, sometimes we need to return **HTML markup** to the client.
+* In such cases, we use a **templating engine** to generate dynamic HTML.
+
+---
+
+### **2. What Is a Templating Engine?**
+
+A templating engine allows you to:
+
+* Embed dynamic data into HTML pages.
+* Render and return complete HTML markup to the client.
+* Keep your code cleaner and separate logic from presentation.
+
+**Popular templating engines for Express:**
+
+* **Pug** (formerly called Jade)
+* **Mustache**
+* **EJS**
+
+Each engine has its own syntax and style for generating HTML.
+
+---
+
+### **3. Installing Pug**
+
+-------------------code----------------------
+npm install pug
+-------------------code----------------------
+
+---
+
+### **4. Setting Up Pug in Express**
+
+In your `index.js` (or main app file):
+
+-------------------code----------------------
+const express = require('express');
+const app = express();
+
+// Set the view engine to pug
+app.set('view engine', 'pug');
+
+// Optional: specify the folder for views (default is './views')
+app.set('views', './views');
+-------------------code----------------------
+
+**Explanation:**
+
+* `app.set('view engine', 'pug')`: tells Express to use Pug for rendering views.
+* `app.set('views', './views')`: defines where templates are stored (optional, default is `views` folder in the root).
+
+---
+
+### **5. Creating a View Template**
+
+**File path:** `views/index.pug`
+
+**Example template:**
+
+-------------------code----------------------
+html
+  head
+    title= title
+  body
+    h1= message
+-------------------code----------------------
+
+**Explanation:**
+
+* Pug uses indentation instead of opening and closing HTML tags.
+* Variables like `title` and `message` will be replaced dynamically when rendering.
+
+---
+
+### **6. Rendering the Template in a Route**
+
+Replace your existing route:
+
+-------------------code----------------------
+app.get('/', (req, res) => {
+  res.send('Hello World');
+});
+-------------------code----------------------
+
+With a new render-based response:
+
+-------------------code----------------------
+app.get('/', (req, res) => {
+  res.render('index', { title: 'My Express App', message: 'Hello' });
+});
+-------------------code----------------------
+
+**Explanation:**
+
+* `res.render(viewName, data)`:
+
+  * `viewName`: the name of the template file (without extension).
+  * `data`: an object containing key-value pairs used in the template.
+
+---
+
+### **7. Running the Application**
+
+Start your application:
+
+-------------------code----------------------
+node index.js
+-------------------code----------------------
+
+Then visit:
+
+-------------------code----------------------
+http://localhost:3000
+-------------------code----------------------
+
+**Result:**
+
+* The browser displays a web page rendered from `index.pug`.
+* You can view the HTML source to confirm it was converted to standard HTML:
+
+  -------------------code----------------------
+  <html>
+    <head>
+      <title>My Express App</title>
+    </head>
+    <body>
+      <h1>Hello</h1>
+    </body>
+  </html>
+  -------------------code----------------------
+
+---
+
+### **8. When to Use a Templating Engine**
+
+* Use a templating engine when building **server-rendered web applications**.
+* You can dynamically generate and serve full HTML pages.
+
+**However:**
+
+* For **RESTful APIs** or **backend services** that serve frontend clients (React, Angular, etc.), templating engines are not needed.
+* Those applications typically return **JSON** instead of HTML.
+
+---
+
+### **9. Summary**
+
+* Use a templating engine to render HTML dynamically.
+* Express supports multiple engines such as Pug, Mustache, and EJS.
+* Pug offers a clean, indentation-based syntax.
+* `res.render()` replaces `res.send()` when sending HTML responses.
+* For backend RESTful APIs, templating engines are optional and usually unnecessary.
+
+---
