@@ -621,3 +621,224 @@ if (app.get('env') === 'development') {
 * Setting environment variables differs between operating systems.
 
 ---
+
+*** 7- Configuration ***
+---
+
+## **Lecture Notes: Configuration Management in Express**
+
+### **1. Overview**
+
+In this lecture, we learn how to store and manage configuration settings for an Express application and how to override them depending on the environment (development, production, etc.).
+This builds on the previous lecture about detecting the environment in which an application is running.
+
+---
+
+### **2. Importance of Environment-Based Configuration**
+
+* Different environments (development, production, testing) often require different settings.
+* Example:
+
+  * **Development:** may use a local database or mail server.
+  * **Production:** uses live servers and secure credentials.
+* Therefore, configuration settings should be flexible and environment-dependent.
+
+---
+
+### **3. Configuration Management Packages**
+
+There are several Node.js packages for managing configuration:
+
+#### **a. `rc` Package**
+
+* Very popular (over 11 million downloads/month).
+* However, it has several issues and less elegant design.
+
+#### **b. `config` Package**
+
+* Preferred package by the instructor.
+* Cleaner, simpler, and has an active community.
+* Download count: ~600,000 per month.
+* URL: `npmjs.com/package/config`.
+
+---
+
+### **4. Installing and Setting Up `config`**
+
+-------------------code----------------------
+npm install config
+-------------------code----------------------
+
+**Folder Structure:**
+
+-------------------code----------------------
+project/
+│
+├── config/
+│   ├── default.json
+│   ├── development.json
+│   ├── production.json
+│   └── custom-environment-variables.json
+│
+└── index.js
+-------------------code----------------------
+
+---
+
+### **5. Creating Configuration Files**
+
+#### **a. `default.json`**
+
+Defines base configuration settings used across all environments.
+
+-------------------code----------------------
+{
+  "name": "my express app"
+}
+-------------------code----------------------
+
+#### **b. `development.json`**
+
+Overrides or extends default settings for development.
+
+-------------------code----------------------
+{
+  "name": "my express app development",
+  "mail": {
+    "host": "dev-mail-server"
+  }
+}
+-------------------code----------------------
+
+#### **c. `production.json`**
+
+Overrides or extends default settings for production.
+
+-------------------code----------------------
+{
+  "name": "my express app production",
+  "mail": {
+    "host": "prod-mail-server"
+  }
+}
+-------------------code----------------------
+
+---
+
+### **6. Using Configuration in Code**
+
+**index.js:**
+
+-------------------code----------------------
+const config = require('config');
+
+console.log(`Application Name: ${config.get('name')}`);
+console.log(`Mail Server: ${config.get('mail.host')}`);
+-------------------code----------------------
+
+---
+
+### **7. Running the Application by Environment**
+
+#### **Development Environment**
+
+-------------------code----------------------
+export NODE_ENV=development
+node index.js
+-------------------code----------------------
+
+Output:
+
+-------------------code----------------------
+Application Name: my express app development
+Mail Server: dev mail server
+-------------------code----------------------
+
+#### **Production Environment**
+
+-------------------code----------------------
+export NODE_ENV=production
+node index.js
+-------------------code----------------------
+
+Output:
+
+-------------------code----------------------
+Application Name: my express app production
+Mail Server: prod mail server
+-------------------code----------------------
+
+---
+
+### **8. Handling Secrets (Passwords, Keys, etc.)**
+
+#### **Why Not Store in Config Files**
+
+* Sensitive data like database passwords should not be stored in config files.
+* Risk: credentials can be exposed in version control repositories.
+
+#### **Using Environment Variables**
+
+Define secrets via terminal or hosting platform:
+
+-------------------code----------------------
+export APP_PASSWORD=1234
+-------------------code----------------------
+
+---
+
+### **9. Mapping Environment Variables**
+
+Create `custom-environment-variables.json` in the config folder:
+
+-------------------code----------------------
+{
+  "mail": {
+    "password": "APP_PASSWORD"
+  }
+}
+-------------------code----------------------
+
+Now, `config` automatically maps the environment variable to the configuration key.
+
+**index.js:**
+
+-------------------code----------------------
+console.log(`Mail Password: ${config.get('mail.password')}`);
+-------------------code----------------------
+
+**Run the app:**
+
+-------------------code----------------------
+node index.js
+-------------------code----------------------
+
+Output:
+
+-------------------code----------------------
+Mail Password: 1234
+-------------------code----------------------
+
+---
+
+### **10. Config Package Summary**
+
+* Reads settings from multiple sources:
+
+  * JSON configuration files
+  * Environment variables
+  * Command-line arguments
+* Provides a clean and consistent structure for managing settings.
+* Encourages secure and environment-specific configurations.
+
+---
+
+### **11. Key Takeaways**
+
+* Use `config` package for flexible configuration management.
+* Separate configuration files by environment.
+* Store secrets in environment variables, not configuration files.
+* Access settings easily using `config.get('property')`.
+
+---
+
