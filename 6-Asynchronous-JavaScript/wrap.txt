@@ -1,0 +1,126 @@
+*** 1- Synchronous vs Asynchronous Code ***
+Here’s a clean, well-organized version of your lecture notes:
+
+---
+
+### **Lecture Notes: Introduction to Asynchronous Programming in Node.js**
+
+#### **1. Review of RESTful APIs**
+
+* In the previous section, we built RESTful APIs using Express.
+* We used a simple in-memory array to manage data.
+* Real-world applications use **databases** instead of arrays.
+
+---
+
+#### **2. Purpose of This Section**
+
+Before learning how to connect Node.js to a database, it’s essential to understand **asynchronous programming**—a core concept in Node.
+
+---
+
+#### **3. Project Setup**
+
+1. Create a new folder: `async-demo`
+2. Initialize a Node project:
+
+   -------------------code----------------------
+   npm init -y
+   -------------------code----------------------
+3. Open the folder in a code editor.
+4. Create a new file: `index.js`
+
+---
+
+#### **4. Synchronous (Blocking) Code**
+
+Example:
+
+-------------------code----------------------
+console.log('Before');
+console.log('After');
+-------------------code----------------------
+
+* Execution is **sequential**.
+* Each line waits for the previous one to complete.
+* This type of execution is called **synchronous** or **blocking**.
+
+---
+
+#### **5. Asynchronous (Non-Blocking) Code**
+
+Example:
+
+-------------------code----------------------
+console.log('Before');
+
+setTimeout(() => {
+  console.log('Reading a user from a database...');
+}, 2000);
+
+console.log('After');
+-------------------code----------------------
+
+**Explanation:**
+
+* `setTimeout()` schedules a task to execute after 2 seconds.
+* It does **not** block the code.
+* Output order:
+
+  -------------------code----------------------
+  Before
+  After
+  (2-second delay)
+  Reading a user from a database...
+  -------------------code----------------------
+* The function inside `setTimeout()` executes **later**, allowing the program to continue running other tasks.
+
+---
+
+#### **6. Key Concept**
+
+* `setTimeout()` is an **asynchronous** or **non-blocking** function.
+* It **schedules** a future task instead of **waiting** for it.
+* Control immediately returns to the next line.
+
+---
+
+#### **7. Thread Model**
+
+* Node.js runs in a **single thread**.
+* Asynchronous does **not** mean **multi-threaded** or **concurrent**.
+* The single thread:
+
+  1. Executes synchronous code.
+  2. Schedules asynchronous tasks.
+  3. Executes them when ready.
+
+---
+
+#### **8. Restaurant Analogy**
+
+* **Synchronous Restaurant:**
+  The waiter takes your order and waits in the kitchen until it’s ready before serving another customer.
+* **Asynchronous Restaurant:**
+  The waiter takes your order, gives it to the kitchen, and moves to serve the next table while waiting for the food to be ready.
+* In both cases, there’s only **one waiter** (thread).
+
+---
+
+#### **9. Why This Matters**
+
+* In Node.js, operations involving **disk** or **network access** are asynchronous.
+* Understanding asynchronous behavior is essential for:
+
+  * Writing efficient Node.js applications.
+  * Maintaining clean and readable code.
+  * Avoiding blocking the main thread.
+
+---
+
+#### **10. What’s Next**
+
+In the following lessons, you will learn:
+
+* Different patterns for writing asynchronous code.
+* How to handle asynchronous operations cleanly and maintainably.
