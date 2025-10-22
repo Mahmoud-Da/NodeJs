@@ -1062,3 +1062,186 @@ In this case, no call stack is included, making it harder to trace the source of
 
 The `Promise` class provides convenient static methods — `resolve()` and `reject()` — that help create pre-set promises for testing and error handling scenarios.
 Using `Error` objects ensures meaningful debugging information is available when a promise fails.
+
+*** 10- Running Promises in Parallel ***
+**Lecture Notes: Running Multiple Asynchronous Operations in Parallel with Promises**
+
+---
+
+### **Overview**
+
+This lecture explains how to run multiple asynchronous operations in parallel using the `Promise.all()` and `Promise.race()` methods. These techniques allow for efficient management of concurrent asynchronous tasks such as multiple API calls.
+
+---
+
+### **1. Simulating Parallel Asynchronous Operations**
+
+#### **Creating Two Promises**
+
+-------------------code----------------------
+const p1 = new Promise((resolve) => {
+  setTimeout(() => {
+    console.log('Asynchronous operation 1');
+    resolve(1);
+  }, 2000);
+});
+
+const p2 = new Promise((resolve) => {
+  setTimeout(() => {
+    console.log('Asynchronous operation 2');
+    resolve(2);
+  }, 2000);
+});
+-------------------code----------------------
+
+**Explanation:**
+
+* Each promise simulates an asynchronous operation using `setTimeout`.
+* `p1` and `p2` might represent API calls to Facebook and Twitter.
+* Both promises resolve after 2 seconds with different values.
+
+---
+
+### **2. Using `Promise.all()`**
+
+#### **Purpose**
+
+`Promise.all()` runs multiple asynchronous operations in parallel and returns a single promise that resolves **when all input promises are resolved**.
+
+#### **Implementation**
+
+-------------------code----------------------
+Promise.all([p1, p2])
+  .then(result => console.log(result))
+  .catch(error => console.log('Error:', error.message));
+-------------------code----------------------
+
+**Explanation:**
+
+* Accepts an array of promises (`[p1, p2]`).
+* Returns a new promise that resolves when *all* input promises are resolved.
+* The result is an **array** containing the values of each resolved promise.
+
+**Output Example:**
+
+-------------------code----------------------
+Asynchronous operation 1
+Asynchronous operation 2
+[1, 2]
+-------------------code----------------------
+
+---
+
+### **3. Important Clarifications**
+
+#### **Single Thread Execution**
+
+JavaScript is **single-threaded**, meaning it does not execute operations truly in parallel.
+However, it can **initiate multiple asynchronous operations** almost simultaneously.
+
+* The first operation starts.
+* The thread is released and begins the next operation immediately.
+* Both operations run independently without waiting for each other.
+
+#### **Sequential vs Parallel**
+
+* **Sequential:** Each operation starts after the previous one finishes.
+* **Parallel:** All operations are initiated around the same time and resolve independently.
+
+---
+
+### **4. Handling Promise Rejection**
+
+If any promise in `Promise.all()` is rejected, the final promise returned by `Promise.all()` will also be **rejected**.
+
+#### **Example**
+
+-------------------code----------------------
+const p1 = new Promise((resolve, reject) => {
+  setTimeout(() => reject(new Error('Something failed')), 2000);
+});
+
+const p2 = new Promise(resolve => {
+  setTimeout(() => resolve(2), 2000);
+});
+
+Promise.all([p1, p2])
+  .then(result => console.log(result))
+  .catch(error => console.log('Error:', error.message));
+-------------------code----------------------
+
+**Output:**
+
+-------------------code----------------------
+Error: Something failed
+-------------------code----------------------
+
+**Explanation:**
+Even though `p2` resolves successfully, the rejection of `p1` causes the overall `Promise.all()` to reject.
+
+---
+
+### **5. Using `Promise.race()`**
+
+#### **Purpose**
+
+`Promise.race()` runs multiple asynchronous operations in parallel but resolves **as soon as one of them is fulfilled** (or rejects as soon as one fails).
+
+#### **Example**
+
+-------------------code----------------------
+const p1 = new Promise(resolve => {
+  setTimeout(() => {
+    console.log('Asynchronous operation 1');
+    resolve(1);
+  }, 2000);
+});
+
+const p2 = new Promise(resolve => {
+  setTimeout(() => {
+    console.log('Asynchronous operation 2');
+    resolve(2);
+  }, 3000);
+});
+
+Promise.race([p1, p2])
+  .then(result => console.log('Result:', result))
+  .catch(error => console.log('Error:', error.message));
+-------------------code----------------------
+
+**Output Example:**
+
+-------------------code----------------------
+Asynchronous operation 1
+Result: 1
+Asynchronous operation 2
+-------------------code----------------------
+
+**Explanation:**
+
+* Both promises start almost at the same time.
+* The first promise to resolve determines the result of `Promise.race()`.
+* The final result is **not an array**—it’s the value of the first fulfilled promise.
+
+---
+
+### **6. Summary**
+
+| **Method**       | **Behavior**                   | **Resolves When**                          | **Result**                     | **Rejects When**          |
+| ---------------- | ------------------------------ | ------------------------------------------ | ------------------------------ | ------------------------- |
+| `Promise.all()`  | Runs all promises concurrently | All promises are fulfilled                 | Array of all results           | Any promise rejects       |
+| `Promise.race()` | Runs all promises concurrently | The first promise is fulfilled or rejected | Value of first settled promise | The first promise rejects |
+
+---
+
+### **7. Best Practices**
+
+* Use **`Promise.all()`** when you need *all* results before proceeding (e.g., multiple API calls that all must succeed).
+* Use **`Promise.race()`** when you only need *the first* result (e.g., loading from the fastest server).
+* Always include `.catch()` to handle potential rejections safely.
+
+---
+
+### **Key Takeaway**
+
+JavaScript’s `Promise.all()` and `Promise.race()` enable running asynchronous tasks efficiently and handling their outcomes collectively or selectively—allowing for more flexible and performant asynchronous workflows.
