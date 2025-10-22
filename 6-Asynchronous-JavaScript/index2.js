@@ -1,7 +1,7 @@
 console.log("Before");
 const user = getUser(1);
 console.log(user);
-
+console.log("After");
 // 3 ways to handle Asynchronous Code
 // Callbacks
 // Promises
@@ -17,5 +17,3 @@ function getUser(id) {
   // but that not what we want
   return 1;
 }
-
-console.log("After");

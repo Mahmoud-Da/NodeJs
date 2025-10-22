@@ -337,3 +337,352 @@ Repos [ 'repo1', 'repo2', 'repo3' ]
 * Returning values directly from asynchronous functions does not work; you must use a callback or other async mechanisms.
 * Nesting callbacks (e.g., calling `getRepositories` inside `getUser`) can make code less readable, a situation often called **callback hell**.
 * Future lessons will introduce **Promises** and **async/await** to make handling asynchronous code more elegant.
+
+
+*** 4- Callback Hell ***
+**Lecture Notes: Asynchronous Programming – Callback Hell**
+
+**1. Review of Current Code**
+
+* The current implementation uses callbacks to handle asynchronous operations:
+
+  * `getUser()` retrieves a user.
+  * Inside its callback, `getRepositories()` is called.
+  * Then, inside that callback, another function (e.g., `getCommits()`) could be called.
+
+**Example:**
+
+-------------------code----------------------
+getUser(1, user => {
+  getRepositories(user.githubUsername, repos => {
+    getCommits(repos[0], commits => {
+      console.log(commits);
+    });
+  });
+});
+-------------------code----------------------
+
+**2. The Problem: Nested Callback Structure**
+
+* Each asynchronous step is nested inside the previous one.
+* As more asynchronous operations are added, the indentation grows deeper, making the code harder to read and maintain.
+* This pattern is known as **callback hell** or the **Christmas tree problem** because the code visually resembles the shape of a tree due to indentation.
+
+---
+
+**3. Comparison with Synchronous Code**
+If all the same operations were **synchronous**, the flow of the program would look simple and linear:
+
+**Synchronous Example:**
+
+-------------------code----------------------
+console.log('Before');
+
+const user = getUser(1);
+const repos = getRepositories(user.githubUsername);
+const commits = getCommits(repos[0]);
+console.log(commits);
+
+console.log('After');
+-------------------code----------------------
+
+**Characteristics:**
+
+* The code runs top to bottom in a predictable order.
+* The logic is easy to follow because each line executes only after the previous one finishes.
+* There is no nesting or callback structure.
+
+---
+
+**4. Why Asynchronous Code Becomes Complicated**
+
+* In asynchronous programming, each operation (like a database query or API call) takes time to complete.
+* Instead of blocking the execution of the program, JavaScript uses callbacks to handle results when they are ready.
+* As more asynchronous steps are added, callbacks begin to nest within one another, creating complex and difficult-to-read structures.
+
+---
+
+**5. Terminology**
+
+* **Callback Hell:** The problem of deeply nested callbacks that make asynchronous code hard to read, debug, and maintain.
+* **Christmas Tree Problem:** Another term for callback hell, describing the visual shape of heavily indented callback structures.
+
+---
+
+**6. Key Takeaways**
+
+* Callback-based asynchronous programming often leads to complex nesting as the number of dependent operations increases.
+* Synchronous code is easier to read because it runs sequentially.
+* The nested callback issue becomes more pronounced in real-world applications that involve multiple asynchronous operations.
+* In the next lecture, the instructor will introduce a **solution to callback hell**, which involves using **Promises** to simplify asynchronous code.
+
+
+*** 5- Named Functions to Rescue ***
+**Lecture Notes: Asynchronous Programming – Avoiding Callback Hell with Named Functions**
+
+**1. The Problem Recap**
+
+* In the previous lecture, we saw how deeply nested callbacks make code hard to read and maintain.
+* This pattern, known as *callback hell*, often appears when asynchronous operations depend on one another (e.g., fetching users, repositories, and commits).
+
+---
+
+**2. The Simple Solution: Replacing Anonymous Functions with Named Functions**
+
+* The technique to reduce nesting is to replace **anonymous callback functions** with **named functions**.
+* Anonymous functions are functions passed directly as arguments without names:
+
+  -------------------code----------------------
+  getRepositories(user.githubUsername, function(repos) {
+    getCommits(repos[0], function(commits) {
+      console.log(commits);
+    });
+  });
+  -------------------code----------------------
+* By giving each function a name, we can move it out of the nested structure and pass it as a reference instead.
+
+---
+
+**3. Step-by-Step Refactoring**
+
+**Step 1: Replace the innermost anonymous function**
+
+* The last callback handles commits. Replace it with a named function called `displayCommits`:
+
+  -------------------code----------------------
+  function displayCommits(commits) {
+    console.log(commits);
+  }
+  -------------------code----------------------
+* Then replace the inline callback with this named function:
+
+  -------------------code----------------------
+  getCommits(repo, displayCommits);
+  -------------------code----------------------
+* Note: We pass the function **reference**, not a call (no parentheses).
+
+---
+
+**Step 2: Replace the middle-level callback**
+
+* The callback in `getRepositories` retrieves commits for a user’s repositories.
+
+  -------------------code----------------------
+  function getCommitsForUser(repos) {
+    getCommits(repos[0], displayCommits);
+  }
+  -------------------code----------------------
+* Now replace the inline callback with this named function:
+
+  -------------------code----------------------
+  getRepositories(user.githubUsername, getCommitsForUser);
+  -------------------code----------------------
+
+---
+
+**Step 3: Replace the outermost callback**
+
+* The outer callback in `getUser` retrieves repositories for a user.
+
+  -------------------code----------------------
+  function getRepositoriesForUser(user) {
+    getRepositories(user.githubUsername, getCommitsForUser);
+  }
+  -------------------code----------------------
+* Replace the anonymous callback in the main code:
+
+  -------------------code----------------------
+  getUser(1, getRepositoriesForUser);
+  -------------------code----------------------
+
+---
+
+**4. Final Code Structure**
+
+-------------------code----------------------
+getUser(1, getRepositoriesForUser);
+
+function getRepositoriesForUser(user) {
+  getRepositories(user.githubUsername, getCommitsForUser);
+}
+
+function getCommitsForUser(repos) {
+  getCommits(repos[0], displayCommits);
+}
+
+function displayCommits(commits) {
+  console.log(commits);
+}
+-------------------code----------------------
+
+**Result:**
+
+* The logic is the same, but the structure is now flat and readable.
+* Each function clearly represents one step in the sequence of asynchronous operations.
+
+---
+
+**5. Advantages of This Approach**
+
+* Reduces visual nesting (no “Christmas tree” indentation).
+* Makes the code easier to read, follow, and debug.
+* Each step of the process is modular and reusable.
+
+---
+
+**6. Limitations**
+
+* While this approach improves readability, it still requires managing multiple callbacks manually.
+* Complex applications with many dependent asynchronous calls can still become difficult to handle.
+
+---
+
+**7. Next Step**
+
+* A more powerful and elegant solution for handling asynchronous operations is using **Promises**.
+* Promises provide a structured way to chain asynchronous actions without deeply nested callbacks.
+
+*** 6- Promises ***
+**Lecture Notes: Asynchronous Programming – Understanding JavaScript Promises**
+
+**1. Introduction to Promises**
+
+* A **promise** is an object that represents the eventual result of an asynchronous operation.
+* When an asynchronous operation completes, it can either:
+
+  * Produce a **value** (success)
+  * Produce an **error** (failure)
+
+**2. States of a Promise**
+A promise can be in one of three states:
+
+1. **Pending** – The initial state when the asynchronous operation has started but not yet completed.
+2. **Fulfilled (Resolved)** – The asynchronous operation completed successfully and returned a value.
+3. **Rejected** – The asynchronous operation failed and returned an error.
+
+---
+
+**3. Creating a Promise**
+
+* A promise is created using the `Promise` constructor:
+
+-------------------code----------------------
+const p = new Promise((resolve, reject) => {
+  // Asynchronous operation
+});
+-------------------code----------------------
+
+* The constructor takes a function with two parameters:
+
+  * **resolve** – a function used to return a successful result.
+  * **reject** – a function used to return an error.
+
+**Example (Basic Promise):**
+
+-------------------code----------------------
+const p = new Promise((resolve, reject) => {
+  resolve(1); // Successful result
+  // reject(new Error('Something went wrong')); // Failure example
+});
+-------------------code----------------------
+
+---
+
+**4. Consuming a Promise**
+
+* To use the result of a promise, call:
+
+  * `.then()` to handle success
+  * `.catch()` to handle errors
+
+**Example:**
+
+-------------------code----------------------
+p
+  .then(result => console.log(result)) // Called when resolved
+  .catch(error => console.log(error.message)); // Called when rejected
+-------------------code----------------------
+
+**Output:**
+
+-------------------code----------------------
+1
+-------------------code----------------------
+
+---
+
+**5. Adding Asynchronous Behavior**
+
+* To simulate asynchronous work, use `setTimeout` inside the promise:
+
+-------------------code----------------------
+const p = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve(1); // Return result after 2 seconds
+  }, 2000);
+});
+-------------------code----------------------
+
+**Result:**
+
+* The code waits 2 seconds before printing the result:
+
+-------------------code----------------------
+1
+-------------------code----------------------
+
+---
+
+**6. Handling Errors**
+
+* If something goes wrong, use `reject` instead of `resolve`:
+
+-------------------code----------------------
+const p = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    reject(new Error('Something failed'));
+  }, 2000);
+});
+-------------------code----------------------
+
+**Consuming the Promise with Error Handling:**
+
+-------------------code----------------------
+p
+  .then(result => console.log(result))
+  .catch(error => console.log(error.message));
+-------------------code----------------------
+
+**Output:**
+
+-------------------code----------------------
+Something failed
+-------------------code----------------------
+
+---
+
+**7. Summary of Promise Behavior**
+
+* **Creation:**
+  A promise starts in the *pending* state when created.
+* **Resolution:**
+  If the async task succeeds → state becomes *fulfilled* → `resolve()` is called.
+* **Rejection:**
+  If the async task fails → state becomes *rejected* → `reject()` is called.
+* **Consumption:**
+  Use `.then()` to handle success and `.catch()` to handle errors.
+
+---
+
+**8. Key Takeaways**
+
+* Promises make asynchronous code easier to manage and read compared to nested callbacks.
+* A promise “promises” to eventually return a result (success or failure).
+* The `.then()` and `.catch()` methods allow you to handle results and errors cleanly.
+* **Best Practice:** Instead of passing callbacks, modify asynchronous functions to return a promise.
+
+---
+
+**Next Lecture Preview**
+
+* The next topic will demonstrate how to modify existing asynchronous callback functions so they return promises, allowing cleaner and more maintainable code.
