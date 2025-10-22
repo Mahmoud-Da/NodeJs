@@ -807,3 +807,128 @@ After modification:
 ### **Next Lecture Preview**
 
 The next lecture will demonstrate how to **consume these Promises** using the `.then()` method for chaining and better control flow.
+
+*** 8- Consuming Promises ***
+**Lecture Notes: Rewriting Asynchronous Code Using Promises**
+
+---
+
+### **Overview**
+
+In this lecture, the callback-based asynchronous code is rewritten using *Promises* to achieve a cleaner and more maintainable structure. This approach eliminates nested callbacks (callback hell) and introduces promise chaining for sequential asynchronous operations.
+
+---
+
+### **Using Promises Instead of Callbacks**
+
+#### **1. Basic Promise Usage**
+
+When calling an asynchronous function like `getUser`, which returns a promise, we can handle the result using the `.then()` method and handle errors using `.catch()`.
+
+-------------------code----------------------
+getUser(1)
+  .then(user => console.log(user))
+  .catch(err => console.log(err.message));
+-------------------code----------------------
+
+**Explanation:**
+
+* `then()` is used to access the result of a resolved promise.
+* `catch()` is used to handle any error that occurs during the asynchronous operations.
+
+---
+
+### **Simplifying the Code**
+
+Previously:
+
+-------------------code----------------------
+const promise = getUser(1);
+promise.then(user => console.log(user));
+-------------------code----------------------
+
+Simplified:
+
+-------------------code----------------------
+getUser(1)
+  .then(user => console.log(user));
+-------------------code----------------------
+
+Here, the `.then()` method is chained directly to the function call, making the code shorter and cleaner.
+
+---
+
+### **Chaining Promises for Sequential Operations**
+
+#### **Example Workflow**
+
+1. Get a user from the database.
+2. Get the repositories for that user.
+3. Get the commits for the first repository.
+
+#### **Code Implementation**
+
+-------------------code----------------------
+getUser(1)
+  .then(user => getRepositories(user.gitHubUsername))
+  .then(repos => getCommits(repos[0]))
+  .then(commits => console.log(commits))
+  .catch(err => console.log('Error:', err.message));
+-------------------code----------------------
+
+**Explanation of Each Step:**
+
+* **`getUser(1)`**
+  Returns a promise that resolves to a *user object*.
+
+* **`.then(user => getRepositories(user.gitHubUsername))`**
+  The `then` callback receives the user object and calls `getRepositories`, which returns another promise.
+  Because `.then()` returns a new promise, we can chain another `.then()`.
+
+* **`.then(repos => getCommits(repos[0]))`**
+  Once repositories are available, we call `getCommits` for the first repository.
+  This also returns a promise that resolves to a list of commits.
+
+* **`.then(commits => console.log(commits))`**
+  Finally, when commits are retrieved, they are displayed in the console.
+
+* **`.catch(err => console.log('Error:', err.message))`**
+  If any of these operations fail, this single `catch` handles the error from any point in the chain.
+
+---
+
+### **Output Sequence**
+
+When running `node index.js`, the output sequence shows:
+
+1. Reading a user from the database (after 2 seconds)
+2. Calling the GitHub API to get repositories (after another 2 seconds)
+3. Getting commits for the first repository (after another 2 seconds)
+4. Displaying the list of commits in the console
+
+---
+
+### **Comparison: Callbacks vs Promises**
+
+| **Callback-based Implementation** | **Promise-based Implementation** |
+| --------------------------------- | -------------------------------- |
+| Nested structure (callback hell)  | Flat, readable chain             |
+| Hard to maintain and debug        | Easier to follow and handle      |
+| Multiple error handlers           | Single `.catch()` handles all    |
+
+---
+
+### **Best Practice**
+
+Always include a `.catch()` block at the end of a promise chain to handle unexpected errors during asynchronous operations.
+
+---
+
+### **Summary**
+
+* Promises simplify asynchronous code by replacing nested callbacks with chained operations.
+* The `.then()` method handles successful results.
+* The `.catch()` method handles all errors in one place.
+* Promise chaining enables readable and maintainable asynchronous workflows.
+
+In the next lecture, the code will be made even simpler using *async and await*.
