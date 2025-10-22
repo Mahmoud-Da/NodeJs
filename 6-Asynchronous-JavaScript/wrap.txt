@@ -686,3 +686,124 @@ Something failed
 **Next Lecture Preview**
 
 * The next topic will demonstrate how to modify existing asynchronous callback functions so they return promises, allowing cleaner and more maintainable code.
+
+
+*** 7- Replacing Callbacks with Promises ***
+**Lecture Notes: Converting Asynchronous Functions to Promises**
+
+---
+
+### **Overview**
+
+In this lecture, the focus is on resolving the *callback hell* problem by converting asynchronous functions that use callbacks into functions that return *Promises*. This approach simplifies asynchronous code and improves readability.
+
+---
+
+### **Callback Hell Problem**
+
+Previously, asynchronous operations were handled using callbacks, leading to nested and hard-to-maintain code (callback hell).
+To fix this, we modify asynchronous functions to return *Promises* instead of accepting callbacks.
+
+---
+
+### **Promise Basics**
+
+* A *Promise* is an object representing the eventual completion or failure of an asynchronous operation.
+* A Promise is created using the constructor:
+
+  -------------------code----------------------
+  new Promise((resolve, reject) => {
+      // asynchronous operation
+  });
+  -------------------code----------------------
+* **resolve:** called when the asynchronous operation completes successfully.
+* **reject:** called when the asynchronous operation fails.
+
+---
+
+### **Step-by-Step Conversion Example**
+
+#### **1. Original Function**
+
+-------------------code----------------------
+function getUser(id, callback) {
+    setTimeout(() => {
+        console.log('Reading a user from a database...');
+        callback({ id: id, gitHubUsername: 'mosh' });
+    }, 2000);
+}
+-------------------code----------------------
+
+This function uses a callback to return the result after an asynchronous operation.
+
+---
+
+#### **2. Modified Function (Returning a Promise)**
+
+-------------------code----------------------
+function getUser(id) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            console.log('Reading a user from a database...');
+            resolve({ id: id, gitHubUsername: 'mosh' });
+        }, 2000);
+    });
+}
+-------------------code----------------------
+
+**Changes made:**
+
+* Removed the callback parameter.
+* Returned a new Promise.
+* Moved asynchronous work (`setTimeout`) inside the Promise constructor.
+* Used `resolve()` to send the result to the consumer.
+
+---
+
+### **Exercise**
+
+Modify the following two functions using the same approach:
+
+1. **getRepositories**
+
+   -------------------code----------------------
+   function getRepositories(username, callback) {
+       setTimeout(() => {
+           console.log('Calling GitHub API...');
+           callback(['repo1', 'repo2', 'repo3']);
+       }, 2000);
+   }
+   -------------------code----------------------
+
+2. **getCommits**
+
+   -------------------code----------------------
+   function getCommits(repo, callback) {
+       setTimeout(() => {
+           console.log('Calling GitHub API...');
+           callback(['commit']);
+       }, 2000);
+   }
+   -------------------code----------------------
+
+**Steps:**
+
+* Remove the callback parameter.
+* Return a new Promise.
+* Use `resolve()` to return the final result.
+
+---
+
+### **Final Summary**
+
+After modification:
+
+* None of the asynchronous functions use callbacks.
+* Each function now returns a Promise.
+* This makes it possible to consume them using `.then()` and `.catch()` for cleaner asynchronous code.
+
+---
+
+### **Next Lecture Preview**
+
+The next lecture will demonstrate how to **consume these Promises** using the `.then()` method for chaining and better control flow.
