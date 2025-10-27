@@ -1,0 +1,54 @@
+*** 1- Introducing MongoDB  ***
+
+---
+
+### **Lecture Notes: Introduction to MongoDB in Node/Express Applications**
+
+#### **1. The Problem with In-Memory Storage**
+
+* Currently, the *vid.ly* (or *bit.ly*) application stores the list of genres in an in-memory array.
+* This is not suitable for real-world applications because:
+
+  * When the server restarts, all data in memory is lost.
+* To ensure data persistence, we must store our data in a **database**.
+
+#### **2. Choosing a Database**
+
+* When developing applications with **Node.js** and **Express**, there are many database options.
+* In this course, we will use **MongoDB**:
+
+  * It is a popular and widely used **database management system**.
+  * It is commonly paired with **Node.js** and **Express**.
+  * It is beginner-friendly and integrates smoothly with JavaScript.
+
+#### **3. What is MongoDB?**
+
+* **MongoDB** is a **NoSQL** or **document-based database**.
+* It differs from traditional **relational databases** (like SQL Server or MySQL) in several ways:
+
+  * No concept of **tables**, **schemas**, **views**, **records**, or **columns**.
+  * It does **not require pre-defined structure** (schema-less).
+  * You can directly store **JSON objects** (JavaScript Object Notation) in MongoDB.
+  * You can query and retrieve JSON objects directly without transformation.
+
+#### **4. Data Handling Example**
+
+* Suppose we have an array of *genres* in memory.
+
+  * In MongoDB, we can store this array of objects directly in a **collection**.
+  * When retrieving data, MongoDB returns JSON objects that can be sent directly to the client.
+
+#### **5. Learning Scope**
+
+* This course will provide enough knowledge to use MongoDB effectively in a Node/Express application.
+* However, MongoDB itself is large enough to require a full separate course.
+* The goal here is **not to become a MongoDB expert**, but to **learn enough to get the job done**.
+
+#### **6. Next Steps**
+
+* The next part of the lecture will demonstrate:
+
+  * How to **install MongoDB** on your local machine.
+  * How to start using it within your Node.js environment.
+
+---
