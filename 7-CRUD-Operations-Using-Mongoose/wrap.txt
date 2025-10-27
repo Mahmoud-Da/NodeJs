@@ -347,6 +347,9 @@ If you want MongoDB to always use that path, you can:
 * Open the downloaded **DMG** file and **drag MongoDB Compass** into your **Applications** folder.
 
 ---
+-------------------code----------------------
+https://www.mongodb.com/try/download/compass
+-------------------code----------------------
 
 #### **8. Connecting to MongoDB with Compass**
 
@@ -376,3 +379,161 @@ If you want MongoDB to always use that path, you can:
 
 ---
 
+*** 3- Installing MongoDB on Windows  ***
+
+---
+
+### **Lecture Notes: Installing MongoDB on Windows**
+
+#### **1. Introduction**
+
+* This lecture explains how to install **MongoDB** on a **Windows machine**.
+* MongoDB includes:
+
+  * **MongoDB Server** – runs in the background and stores data.
+  * **MongoDB Compass** – a GUI client to connect to and manage databases.
+
+---
+
+#### **2. Downloading MongoDB Server**
+
+1. Open your web browser and go to **[https://mongodb.com](https://mongodb.com)**.
+2. Click the **Download** button at the top right of the page.
+3. Select the **Community Server** tab.
+
+   * This is the free version for local development.
+4. Ensure **Windows** is selected as the platform.
+5. Download the **MSI installer** (MongoDB setup file).
+
+---
+
+#### **3. Installing MongoDB Server**
+
+1. Run the downloaded **MSI installer**.
+2. Proceed with the installation steps:
+
+   * Click **Next**.
+   * Accept the **license agreement**.
+   * Choose **Complete Installation**.
+3. On the installation options page, you will see a checkbox for **“Install MongoDB Compass.”**
+
+   * This is the GUI client to connect to your MongoDB server.
+   * However, sometimes Compass fails to install properly during this step.
+   * To avoid this issue, **uncheck** this option and install Compass separately later.
+4. Click **Next**, then **Install**.
+5. Once completed, click **Finish**.
+
+---
+
+#### **4. Installing MongoDB Compass**
+
+1. Go back to the **MongoDB website** and open the **Download** page again.
+2. This time, select the **Compass** tab.
+3. Ensure the platform is set to **Windows**.
+4. Download the Compass installer and run it.
+5. Complete the installation wizard (Next → Install → Finish).
+
+---
+
+#### **5. Setting Up the Environment Variables**
+
+To run MongoDB commands (like `mongod`) from any Command Prompt window, you must add MongoDB’s `bin` directory to your **PATH**.
+
+1. Open **File Explorer** and navigate to:
+
+   -------------------code----------------------
+   C:\Program Files\MongoDB\Server\<version>\bin
+   -------------------code----------------------
+
+   *(Replace `<version>` with your installed version, e.g., 3.6 or later.)*
+2. Copy this path.
+3. In the Windows search bar, type **“View Advanced System Settings”** and open it.
+4. In the dialog box, click **Environment Variables**.
+5. Under **System Variables**, find and select **Path**, then click **Edit**.
+6. Click **New**, and **paste** the copied MongoDB `bin` path.
+7. Click **OK** on all dialog boxes to save changes.
+
+---
+
+#### **6. Verifying the Installation**
+
+1. Open a new **Command Prompt** window.
+   *(You must restart Command Prompt if it was open before editing the PATH.)*
+2. Type:
+
+   -------------------code----------------------
+   mongod
+   -------------------code----------------------
+
+   If you see an output starting with MongoDB logs and configurations, MongoDB is installed successfully.
+
+   However, by default, you will likely see an **error**:
+
+   -------------------code----------------------
+   Non-existent path: Data directory C:\data\db not found
+   -------------------code----------------------
+
+---
+
+#### **7. Creating the Data Directory**
+
+MongoDB requires a default directory to store its data:
+
+-------------------code----------------------
+C:\data\db
+-------------------code----------------------
+
+If it doesn’t exist, create it using:
+
+-------------------code----------------------
+md C:\data\db
+-------------------code----------------------
+
+Then, rerun:
+
+-------------------code----------------------
+mongod
+-------------------code----------------------
+
+Now you should see:
+
+-------------------code----------------------
+Waiting for connections on port 27017
+-------------------code----------------------
+
+This means the MongoDB server is running correctly.
+
+---
+
+#### **8. Connecting to MongoDB via Compass**
+
+1. Open **MongoDB Compass** from the Start Menu.
+2. Proceed through the welcome screens (Next → Next → Get Started).
+3. On the connection page:
+
+   * **Hostname:** `localhost`
+   * **Port:** `27017`
+4. Click **Connect**.
+5. Once connected, you’ll see two default databases:
+
+   * **admin**
+   * **local**
+
+   These are internal MongoDB databases used for system operations and configuration.
+   You don’t need to modify or use them.
+
+---
+
+#### **9. Summary**
+
+| Step | Description                                        |
+| ---- | -------------------------------------------------- |
+| 1    | Download MongoDB Community Server (MSI)            |
+| 2    | Install the server (uncheck Compass option)        |
+| 3    | Download and install MongoDB Compass separately    |
+| 4    | Add MongoDB `bin` directory to the system PATH     |
+| 5    | Create data directory `C:\data\db`                 |
+| 6    | Run `mongod` to start the server                   |
+| 7    | Connect using MongoDB Compass on `localhost:27017` |
+
+---
