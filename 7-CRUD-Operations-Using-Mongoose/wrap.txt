@@ -937,3 +937,114 @@ After running the script again:
 - MongoDB collections grow dynamically as new documents are added.
 - Next, you will learn how to **query documents** from the database.
 
+
+*** 8- Querying Documents ***
+**Lecture Notes: Retrieving Documents from MongoDB Using Mongoose**
+
+**Overview:**
+In this lecture, we learn how to retrieve documents from a MongoDB database using Mongoose. This includes basic queries, filtering, sorting, limiting, and selecting specific properties.
+
+---
+
+### 1. **Creating the Query Function**
+
+We define an asynchronous function to retrieve documents:
+
+-------------------code----------------------
+async function getCourses() {
+  const courses = await Course.find();
+  console.log(courses);
+}
+-------------------code----------------------
+
+Then, replace the call to `createCourse()` with `getCourses()` in the main file.  
+This retrieves all course documents from the database.
+
+---
+
+### 2. **Basic Query Methods**
+
+Mongoose provides several methods for querying documents:
+
+- **find()** – Retrieves multiple documents.
+- **findOne()** – Retrieves a single document that matches the filter.
+- **findById()** – Retrieves a document by its unique `_id`.
+
+All these methods return a **document query object**, which behaves like a promise and can be awaited.
+
+---
+
+### 3. **Filtering Documents**
+
+You can pass a filter object to the `find()` method to retrieve specific documents:
+
+-------------------code----------------------
+const courses = await Course.find({ author: 'Mahmoud', isPublished: true });
+-------------------code----------------------
+
+This query retrieves only the documents where:
+- `author` equals `'Mahmoud'`
+- `isPublished` equals `true`
+
+---
+
+### 4. **Chaining Query Modifiers**
+
+The query object returned by `find()` can be customized with additional methods to refine results.
+
+#### **Example: Building a Complex Query**
+
+-------------------code----------------------
+async function getCourses() {
+  const courses = await Course
+    .find({ author: 'Mahmoud', isPublished: true })  // Filter
+    .limit(10)                                   // Limit number of results
+    .sort({ name: 1 })                           // Sort ascending by name
+    .select({ name: 1, tags: 1 });               // Return only specific fields
+
+  console.log(courses);
+}
+-------------------code----------------------
+
+---
+
+### 5. **Explanation of Query Options**
+
+- **`.limit(number)`** – Limits the number of results (e.g., 10).
+- **`.sort({ field: 1 or -1 })`** – Sorts results by field name.
+  - `1` for ascending order.
+  - `-1` for descending order.
+- **`.select({ field: 1 })`** – Selects which properties to include in the output.
+
+Example:  
+`{ name: 1, tags: 1 }` means only the `name` and `tags` fields are returned, along with the default `_id`.
+
+---
+
+### 6. **Execution and Results**
+
+Run the application:
+
+-------------------code----------------------
+node index.js
+-------------------code----------------------
+
+**Output:**
+- Documents are displayed with only the selected properties (`name`, `tags`, `_id`).
+- Results are sorted alphabetically by `name`.
+- If multiple documents exist, only the first 10 appear due to the limit.
+
+---
+
+### 7. **Summary**
+
+- Use `find()` to retrieve documents, optionally filtered by specific criteria.
+- Use chaining methods to refine queries:
+  - `limit()` for restricting result count.
+  - `sort()` for ordering results.
+  - `select()` for returning specific fields.
+- The query result can be awaited like a promise.
+- Mongoose provides a clean and expressive way to interact with MongoDB queries.
+
+Next, the lecture will cover more advanced filtering techniques.
+
