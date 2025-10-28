@@ -1343,3 +1343,74 @@ Course.find({ author: /.*Mosh.*/i })
 ### Next Topic
 
 In the next lecture: **Counting, Pagination, and Sorting Queries** in MongoDB.
+
+
+*** 12- Counting ***
+---
+
+### Lecture: Counting Documents in MongoDB
+
+#### Overview
+
+This lecture explains how to use the **count** method in MongoDB (via Mongoose) to determine how many documents match a query instead of retrieving the documents themselves.
+
+---
+
+### When to Use Counting
+
+In some cases, you may only need to know **how many** documents meet a certain condition rather than retrieving all their details. For example:
+
+* Counting how many courses are published
+* Counting users with a specific role
+* Counting products within a price range
+
+In such situations, using **count** is more efficient than fetching full documents.
+
+---
+
+### Example: Filtering Courses
+
+Suppose you have a query that retrieves courses with specific properties:
+
+-------------------code----------------------
+Course.find({ isPublished: true })
+  .select({ name: 1, tags: 1 })
+-------------------code----------------------
+
+This returns an array of documents containing only the `name` and `tags` fields.
+
+---
+
+### Using the count Method
+
+If you only want to know how many documents match the filter, replace `find()` and `select()` with **count()**:
+
+-------------------code----------------------
+Course.find({ isPublished: true }).count()
+-------------------code----------------------
+
+This query returns a **number** instead of document data.
+
+---
+
+### Example Output
+
+If you run this query and there are two matching courses, the output will be:
+
+-------------------code----------------------
+2
+-------------------code----------------------
+
+---
+
+### Key Takeaways
+
+* Use `.count()` when you need only the **number** of matching documents.
+* It is more **efficient** than retrieving and iterating through all documents.
+* Useful for **statistics**, **pagination**, or **summary reports**.
+
+---
+
+### Next Topic
+
+In the next lecture: **Pagination and Limiting Results** in MongoDB.
