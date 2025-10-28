@@ -2076,3 +2076,163 @@ In the terminal, you should see the updated document:
   3. Saving changes using `.save()`.
 * It’s a simple and clear approach, especially useful when you need to perform validation or apply logic before saving.
 * In the next lecture, the **Update First** approach will be introduced to modify documents directly in the database.
+
+
+*** 18- Updating a Document- Update First ***
+
+---
+
+### Lecture: Updating Documents in MongoDB (Update-First Approach)
+
+#### Overview
+
+Previously, you learned about the **query-first** approach for updating documents.
+In this lecture, you will learn the **update-first** approach — a faster method that updates documents directly in the database without retrieving them first.
+
+---
+
+### 1. Query-First vs Update-First
+
+#### Query-First
+
+* Retrieve the document → Validate → Modify → Save.
+* Used when:
+
+  * You receive input from a client.
+  * You need to enforce business rules before updating.
+* Example:
+
+  -------------------code----------------------
+  if (course.isPublished) return;
+  -------------------code----------------------
+
+#### Update-First
+
+* Update documents **directly** in the database.
+* Used when:
+
+  * You already know the exact changes.
+  * No validation or logic is required before updating.
+* Can also update **multiple documents** at once.
+
+---
+
+### 2. Using the `update()` Method
+
+-------------------code----------------------
+async function updateCourse(id) {
+  // in the new mongoose update => updateOne
+  const result = await Course.updateOne(
+    { _id: id },
+    {
+      $set: {
+        author: 'Mosh',
+        isPublished: false
+      }
+    }
+  );
+
+  console.log(result);
+}
+-------------------code----------------------
+
+**Explanation:**
+
+* First argument → Filter or query object (`{ _id: id }`).
+* Second argument → Update object (uses MongoDB update operators).
+* Returns a **result object**, not the updated document.
+
+---
+
+### 3. Common MongoDB Update Operators
+
+| Operator       | Description                                                                         |
+| -------------- | ----------------------------------------------------------------------------------- |
+| `$currentDate` | Sets a field to the current date.                                                   |
+| `$inc`         | Increments a numeric field by a given value (can use negative values to decrement). |
+| `$min`         | Updates a field if the specified value is less than the existing value.             |
+| `$max`         | Updates a field if the specified value is greater than the existing value.          |
+| `$mul`         | Multiplies the value of a field.                                                    |
+| `$rename`      | Renames a field.                                                                    |
+| `$set`         | Sets the value of a field.                                                          |
+| `$unset`       | Removes a field from the document.                                                  |
+
+Example using `$set`:
+
+-------------------code----------------------
+$set: { author: 'Mosh', isPublished: false }
+-------------------code----------------------
+
+---
+
+### 4. Using `findByIdAndUpdate()`
+
+If you want to **retrieve the updated document**, use `findByIdAndUpdate()` instead of `update()`.
+
+-------------------code----------------------
+async function updateCourse(id) {
+  const course = await Course.findByIdAndUpdate(
+    id,
+    {
+      $set: {
+        author: 'Jack',
+        isPublished: true
+      }
+    }
+  );
+
+  console.log(course);
+}
+-------------------code----------------------
+
+**Result:** Returns the **original document** (before the update).
+
+---
+
+### 5. Getting the Updated Document
+
+To get the **new** (updated) version of the document, add the `{ new: true }` option.
+
+-------------------code----------------------
+async function updateCourse(id) {
+  const course = await Course.findByIdAndUpdate(
+    id,
+    {
+      $set: {
+        author: 'Jason',
+        isPublished: false
+      }
+    },
+    { new: true }
+  );
+
+  console.log(course);
+}
+-------------------code----------------------
+
+**Result:**
+Returns the updated document:
+
+-------------------code----------------------
+{
+  _id: "...",
+  author: "Jason",
+  isPublished: false,
+  ...
+}
+-------------------code----------------------
+
+---
+
+### 6. Summary
+
+| Approach     | Method                             | Use Case                                                   |
+| ------------ | ---------------------------------- | ---------------------------------------------------------- |
+| Query-First  | `findById()` → modify → `save()`   | When validation or logic is required before updating.      |
+| Update-First | `update()` / `findByIdAndUpdate()` | When you want to update directly without retrieving first. |
+
+---
+
+### Next Topic
+
+The next lecture will explain **how to remove documents** from a MongoDB collection.
