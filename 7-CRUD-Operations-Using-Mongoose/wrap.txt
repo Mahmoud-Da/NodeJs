@@ -1795,3 +1795,133 @@ The output should be identical to the previous approach, confirming that both `$
 ### Next Topic
 
 The next lecture will cover **Regular Expressions and Pattern Matching in Mongoose Queries.**
+
+*** 16- Exercise 3 ***
+
+---
+
+### Lecture: Exercise – Using Logical Operators and Regular Expressions in Mongoose
+
+#### Objective
+
+Retrieve all **published courses** that meet **either** of these conditions:
+
+1. The price is **$15 or more**, **or**
+2. The course title contains the word **"buy"** (case-insensitive).
+
+---
+
+### Step 1: Setup
+
+Create a new file named **solution3.js**.
+To save time, copy the entire code from **solution2.js** and paste it here.
+
+---
+
+### Step 2: Problem Breakdown
+
+You need to retrieve:
+
+* Only **published courses**, and
+* Courses that **either**:
+
+  * Cost **$15 or more**, **or**
+  * Have the word **“buy”** in their title.
+
+This means you’ll use the **`.or()`** method to combine these conditions.
+
+---
+
+### Step 3: Base Query
+
+Keep the existing filter for published courses:
+
+-------------------code----------------------
+.find({ isPublished: true })
+-------------------code----------------------
+
+Then, chain the `.or()` method to add the two filter conditions.
+
+---
+
+### Step 4: Using the `$gte` Operator
+
+For the price condition:
+
+-------------------code----------------------
+{ price: { $gte: 15 } }
+-------------------code----------------------
+
+**Explanation:**
+
+* `$gte` means “greater than or equal to.”
+* `{ price: { $gte: 15 } }` selects all courses priced at **15 or more**.
+
+---
+
+### Step 5: Using Regular Expressions for Title Matching
+
+To match titles containing the word “buy” (in any case):
+
+-------------------code----------------------
+{ name: /.*buy.*/i }
+-------------------code----------------------
+
+**Explanation:**
+
+* `/pattern/` defines a regular expression.
+* `.*` means **zero or more characters** before or after the word “buy.”
+* `i` makes the search **case-insensitive**.
+
+This matches titles like:
+
+* “Buy Now”
+* “How to Buy Stocks”
+* “Best Buys in 2025”
+
+---
+
+### Step 6: Complete Query Example
+
+-------------------code----------------------
+async function getCourses() {
+  return await Course
+    .find({ isPublished: true })
+    .or([
+      { price: { $gte: 15 } },
+      { name: /.*buy.*/i }
+    ])
+    .select('name author price');
+}
+-------------------code----------------------
+
+---
+
+### Step 7: Running the Query
+
+Run the file in the terminal:
+
+-------------------code----------------------
+node solution3.js
+-------------------code----------------------
+
+**Expected Output:**
+Four courses:
+
+1. Three courses priced **15 or more** (e.g., $20, $15, $15)
+2. One course priced **below 15** but with **“buy”** in the title.
+
+---
+
+### Step 8: Key Takeaways
+
+* `.or()` allows combining multiple filter conditions.
+* `$gte` filters values greater than or equal to a given number.
+* Regular expressions (`/.*pattern.*/i`) enable flexible, case-insensitive text searches.
+* You can use both numeric comparisons and pattern matching in the same query.
+
+---
+
+### Next Topic
+
+The next lecture will cover **how to update documents in MongoDB using Mongoose methods.**
