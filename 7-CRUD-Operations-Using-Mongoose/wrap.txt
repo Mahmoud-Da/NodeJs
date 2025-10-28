@@ -1234,3 +1234,112 @@ Course.find()
 ### Next Topic
 
 In the next lecture: **Using Regular Expressions** in MongoDB.
+
+*** 11- Regular Expressions ***
+---
+
+### Lecture: Using Regular Expressions in MongoDB
+
+#### Overview
+
+This lecture explains how to use **regular expressions (regex)** in MongoDB queries to perform advanced string filtering. Regular expressions allow you to search for patterns within text, giving more control than simple string matching.
+
+---
+
+### Why Use Regular Expressions
+
+A simple equality query like:
+
+-------------------code----------------------
+Course.find({ author: 'Mosh' })
+-------------------code----------------------
+
+only matches documents where the `author` field is **exactly** `"Mosh"`.
+If a course has `author: 'MoshBack'` or `author: 'MoshHamadani'`, it will **not** be returned.
+To handle such cases, we use **regular expressions**.
+
+---
+
+### Regular Expression Syntax
+
+Regular expressions in JavaScript are written between **slashes**:
+
+-------------------code----------------------
+/pattern/
+-------------------code----------------------
+
+You can include **modifiers** after the final slash, such as `i` for case-insensitive matching.
+
+---
+
+### Example 1: Author Starts With a String
+
+Find all courses where the `author` field **starts with "Mosh"**:
+
+-------------------code----------------------
+Course.find({ author: /^Mosh/ })
+-------------------code----------------------
+
+* `^` represents the **start** of a string.
+* This matches `"Mosh"`, `"MoshHamadani"`, `"MoshBack"`, etc.
+
+---
+
+### Example 2: Author Ends With a String
+
+Find all courses where the `author` field **ends with "amadani"**:
+
+-------------------code----------------------
+Course.find({ author: /amadani$/ })
+-------------------code----------------------
+
+* `$` represents the **end** of a string.
+* This matches `"MoshHamadani"` but not `"HamadaniMosh"`.
+
+Make the query **case insensitive**:
+
+-------------------code----------------------
+Course.find({ author: /amadani$/i })
+-------------------code----------------------
+
+---
+
+### Example 3: Author Contains a String
+
+Find all courses where the `author` field **contains "Mosh"** anywhere:
+
+-------------------code----------------------
+Course.find({ author: /.*Mosh.*/i })
+-------------------code----------------------
+
+* `.` means **any character**.
+* `*` means **zero or more** occurrences of the preceding character.
+* `.*` means **any sequence of characters**, including none.
+* Adding `i` makes the search **case insensitive**.
+
+---
+
+### Summary of Key Regex Patterns
+
+| Pattern      | Description            | Example Match                       |
+| ------------ | ---------------------- | ----------------------------------- |
+| `^text`      | Starts with “text”     | “textbook”, “textData”              |
+| `text$`      | Ends with “text”       | “mytext”                            |
+| `.*text.*`   | Contains “text”        | “newtextfile”, “myTextData”         |
+| `/pattern/i` | Case-insensitive match | “Text” matches “text”, “TEXT”, etc. |
+
+---
+
+### Key Takeaways
+
+* Regular expressions allow **flexible and powerful text searching**.
+* Use `^` and `$` to anchor searches to the start or end of strings.
+* Use `.*` to represent any number of characters before or after a target string.
+* Add `i` for **case-insensitive** matching.
+* Regular expressions are part of **JavaScript syntax**, not specific to MongoDB.
+
+---
+
+### Next Topic
+
+In the next lecture: **Counting, Pagination, and Sorting Queries** in MongoDB.
