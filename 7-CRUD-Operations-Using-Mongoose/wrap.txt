@@ -1659,3 +1659,139 @@ This exercise demonstrated how to:
 ### Next Topic
 
 In the next lecture: **Updating Documents in MongoDB using Mongoose.**
+
+*** 15- Exercise 2 ***
+---
+
+### Lecture: Exercise – Querying with Logical Operators in Mongoose
+
+#### Objective
+
+Retrieve all **published front-end and back-end courses**, sort them by **price (descending)**, and display only their **name** and **author** on the console.
+
+---
+
+### Step 1: Setup
+
+Create a new file named **solution2.js**.
+To save time, copy the entire content from **solution1.js** and paste it into this new file.
+You will then modify only the query section.
+
+---
+
+### Step 2: Updating the Query
+
+#### Current Query (from solution1)
+
+-------------------code----------------------
+.find({ isPublished: true, tags: 'backend' })
+-------------------code----------------------
+
+This query only retrieves published **backend** courses.
+If you replace `'backend'` with an array like `['backend', 'frontend']`, it will not work as intended because MongoDB interprets this as requiring both tags simultaneously (logical AND).
+
+---
+
+### Step 3: Using the `$in` Operator
+
+To retrieve courses that have **either** the `frontend` or `backend` tag, use the `$in` operator.
+
+-------------------code----------------------
+async function getCourses() {
+  return await Course
+    .find({ isPublished: true, tags: { $in: ['frontend', 'backend'] } })
+    .sort({ price: -1 }) // Descending order
+    .select('name author');
+}
+-------------------code----------------------
+
+**Explanation:**
+
+* `$in` allows specifying multiple possible values for a field.
+* `{ price: -1 }` sorts results from most to least expensive.
+* `'name author'` selects only these two fields.
+
+---
+
+### Step 4: Verifying the Output
+
+Run the script:
+
+-------------------code----------------------
+node solution2.js
+-------------------code----------------------
+
+**Expected Result:**
+Five courses should appear, including:
+
+* Node
+* ASP.NET
+* Angular
+* Node (by Jack)
+* Express.js
+
+These include both **frontend** and **backend** courses.
+
+To confirm sorting, modify the `select()` statement to also include the price:
+
+-------------------code----------------------
+.select('name author price');
+-------------------code----------------------
+
+Re-run the file:
+
+-------------------code----------------------
+node solution2.js
+-------------------code----------------------
+
+You should now see prices confirming that the highest-priced course appears first.
+
+---
+
+### Step 5: Alternative Approach – Using the `$or` Operator
+
+Instead of `$in`, the query can also be written with the **logical OR** operator.
+
+-------------------code----------------------
+async function getCourses() {
+  return await Course
+    .find({ isPublished: true })
+    .or([{ tags: 'frontend' }, { tags: 'backend' }])
+    .sort('-price') // alternative string syntax
+    .select('name author price');
+}
+-------------------code----------------------
+
+**Explanation:**
+
+* The `.or()` method accepts an array of multiple conditions.
+* Each object inside represents a separate filter.
+* This achieves the same result as `$in`.
+
+---
+
+### Step 6: Testing the Alternative
+
+Run the program again:
+
+-------------------code----------------------
+node solution2.js
+-------------------code----------------------
+
+The output should be identical to the previous approach, confirming that both `$in` and `$or` produce the same filtered and sorted result.
+
+---
+
+### Summary
+
+* `$in`: Matches any value from a specified array.
+* `$or`: Combines multiple query conditions.
+* `sort({ price: -1 })` or `sort('-price')`: Sorts descending.
+* `select('name author price')`: Displays specific fields.
+* Both methods correctly retrieve all **published frontend and backend courses** sorted by **price (descending)**.
+
+---
+
+### Next Topic
+
+The next lecture will cover **Regular Expressions and Pattern Matching in Mongoose Queries.**
