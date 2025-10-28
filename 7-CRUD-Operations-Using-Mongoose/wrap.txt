@@ -1414,3 +1414,87 @@ If you run this query and there are two matching courses, the output will be:
 ### Next Topic
 
 In the next lecture: **Pagination and Limiting Results** in MongoDB.
+
+
+*** 13- Pagination ***
+
+---
+
+### Lecture: Pagination in MongoDB
+
+#### Overview
+
+This lecture explains how to use the **skip()** and **limit()** methods together to implement **pagination** in MongoDB. Pagination allows you to load data in chunks (pages) instead of retrieving all documents at once.
+
+---
+
+### Key Methods
+
+* **`limit(n)`**: Restricts the number of documents returned.
+* **`skip(n)`**: Skips a specified number of documents before starting to return results.
+
+These two methods are commonly used together to display data page by page.
+
+---
+
+### Example: Defining Page Variables
+
+-------------------code----------------------
+const pageNumber = 2;  // current page
+const pageSize = 10;   // number of documents per page
+-------------------code----------------------
+
+In real-world applications:
+
+* These values are typically received as **query string parameters** in an API request.
+  Example:
+
+  -------------------code----------------------
+  /api/courses?pageNumber=2&pageSize=10
+  -------------------code----------------------
+
+---
+
+### Pagination Formula
+
+To skip the documents from previous pages:
+
+-------------------code----------------------
+skip = (pageNumber - 1) * pageSize
+-------------------code----------------------
+
+* `pageNumber` starts from **1**.
+* For example, if `pageNumber = 2` and `pageSize = 10`,
+  then `skip = (2 - 1) * 10 = 10`.
+
+This means the query will skip the first 10 documents and return the next 10.
+
+---
+
+### Example Query
+
+-------------------code----------------------
+Course.find()
+  .skip((pageNumber - 1) * pageSize)
+  .limit(pageSize)
+-------------------code----------------------
+
+**Explanation:**
+
+* `.skip()` moves past documents belonging to previous pages.
+* `.limit()` restricts how many documents to fetch for the current page.
+
+---
+
+### Key Takeaways
+
+* **Pagination** improves performance by fetching only the needed subset of data.
+* **`skip()`** and **`limit()`** work together for paginated queries.
+* Page numbers in user interfaces usually start from **1**, not **0**.
+* Useful for APIs, dashboards, and search result pages.
+
+---
+
+### Next Topic
+
+In the next lecture: **Sorting Query Results** in MongoDB.
