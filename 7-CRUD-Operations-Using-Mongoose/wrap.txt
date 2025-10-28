@@ -2236,3 +2236,90 @@ Returns the updated document:
 ### Next Topic
 
 The next lecture will explain **how to remove documents** from a MongoDB collection.
+
+*** 19- Removing Documents ***
+**Lecture Title:** Removing Documents in MongoDB  
+
+**Overview:**  
+This lecture explains how to remove documents from a MongoDB collection using Mongoose. It covers different deletion methods and their use cases, including how to delete single or multiple documents and how to retrieve the deleted document.
+
+---
+
+### 1. Function Setup
+- Start by duplicating the `updateCourse` function.
+- Rename it to `removeCourse`.
+- Replace all references of `updateCourse` with `removeCourse`.
+
+---
+
+### 2. Deleting a Document Using `deleteOne()`
+- To delete a document, use the `deleteOne()` method.
+- Syntax:
+  -------------------code----------------------
+  await Course.deleteOne({ _id: id });
+  -------------------code----------------------
+- `deleteOne()` accepts a **filter (query)** object.
+  - Example: `{ _id: id }` deletes a specific document.
+  - Example: `{ isPublished: false }` deletes the **first** document that matches the condition.
+- The method returns a **result object** that indicates how many documents were deleted.
+
+**Example:**
+-------------------code----------------------
+async function removeCourse(id) {
+  const result = await Course.deleteOne({ _id: id });
+  console.log(result);
+}
+-------------------code----------------------
+
+**Result:**
+-------------------code----------------------
+{ deletedCount: 1 }
+-------------------code----------------------
+- This confirms that one document has been deleted.
+
+---
+
+### 3. Deleting Multiple Documents Using `deleteMany()`
+- To delete several documents at once, use:
+  -------------------code----------------------
+  await Course.deleteMany({ isPublished: false });
+  -------------------code----------------------
+- This method also returns a result object showing how many documents were deleted.
+
+---
+
+### 4. Deleting and Returning the Document Using `findByIdAndRemove()`
+- To get the **deleted document** itself, use:
+  -------------------code----------------------
+  const course = await Course.findByIdAndRemove(id);
+  -------------------code----------------------
+- This returns the deleted document if it exists, or `null` if no matching document is found.
+
+**Example:**
+-------------------code----------------------
+async function removeCourse(id) {
+  const course = await Course.findByIdAndRemove(id);
+  console.log(course);
+}
+-------------------code----------------------
+
+**Behavior:**
+- If the document is found, it will be deleted and logged.
+- If not found, `null` will be returned.
+
+---
+
+### 5. Summary of Deletion Methods
+
+| Method | Description | Returns |
+|--------|--------------|----------|
+| `deleteOne(filter)` | Deletes the first document matching the filter | Result object |
+| `deleteMany(filter)` | Deletes all documents matching the filter | Result object |
+| `findByIdAndRemove(id)` | Deletes a document by ID and returns it | Deleted document or null |
+
+---
+
+**Conclusion:**  
+Use `deleteOne` or `deleteMany` for quick deletions when you only need to confirm success.  
+Use `findByIdAndRemove` when you need to access the deleted document before or after removal.
+-------------------code----------------------`
