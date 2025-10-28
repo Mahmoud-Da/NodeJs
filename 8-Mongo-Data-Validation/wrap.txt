@@ -1,0 +1,96 @@
+*** 1- Validation ***
+**Lecture Title:** Validation in Mongoose  
+
+**Overview:**  
+This lecture explains how to implement validation in Mongoose, focusing on the `required` validator. It also discusses how validation works, error handling, and the difference between Mongoose and MongoDB validations.  
+
+---
+
+### 1. Default Behavior
+- By default, all schema properties are **optional**.
+- Example: If you create a course without a `name` or `price`, MongoDB allows it.  
+- Validation is not enforced at the MongoDB level by default.
+
+---
+
+### 2. Implementing Required Validator
+- Modify the schema to make a property required.
+-------------------code----------------------
+const courseSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  author: String,
+  tags: [String],
+  date: { type: Date, default: Date.now },
+  isPublished: Boolean,
+  price: Number
+});
+-------------------code----------------------
+- If a course is saved without a `name`, Mongoose will throw a validation error.
+
+---
+
+### 3. Handling Validation Errors
+- Saving a document returns a **promise**.
+- Use `try-catch` to handle promise rejections:
+-------------------code----------------------
+async function createCourse() {
+  try {
+    const course = new Course();
+    await course.save();
+  } catch (ex) {
+    console.log(ex.message);
+  }
+}
+-------------------code----------------------
+- Error Example:
+-------------------code----------------------
+Course validation failed: Path `name` is required.
+-------------------code----------------------
+
+---
+
+### 4. Manual Validation
+- You can manually trigger validation without saving:
+-------------------code----------------------
+await course.validate();
+-------------------code----------------------
+- Returns a promise of `void`.  
+- If invalid, it throws an exception.
+
+---
+
+### 5. Callback-Based Validation
+- Mongoose `validate` can also use a **callback** to detect errors:
+-------------------code----------------------
+course.validate((err) => {
+  if (err) console.log(err.message);
+});
+-------------------code----------------------
+- Returns a Boolean-like result through the callback.
+
+---
+
+### 6. Key Points About Mongoose Validation
+- Validation occurs **only in Mongoose**, not at MongoDB level.
+- MongoDB itself does not enforce required fields.
+- Mongoose validations ensure documents are valid before saving.
+
+---
+
+### 7. Using Validation with REST APIs
+- In REST APIs, you can use libraries like **Joi** to validate client input.
+- Mongoose validation acts as a **second layer**:
+  - Prevents invalid documents due to programming errors.
+  - Ensures data integrity in the database even if the client sends correct data.
+
+---
+
+### 8. Summary
+- Default schema properties are optional.  
+- Use Mongoose validators like `required` to enforce constraints.  
+- Always handle rejected promises when saving documents.  
+- Manual validation is possible with `validate()`.  
+- Validation in Mongoose complements client-side validation libraries like Joi.  
+
+**Next Lecture:** Built-in validators in Mongoose.  
+
