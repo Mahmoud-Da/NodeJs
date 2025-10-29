@@ -94,3 +94,110 @@ course.validate((err) => {
 
 **Next Lecture:** Built-in validators in Mongoose.  
 
+*** 2- Built-in Validators ***
+---
+
+### **Mongoose Built-in Validators**
+
+#### **1. Required Validator**
+
+* The `required` property ensures that a field must have a value.
+* It can be set to:
+
+  * A **boolean**: makes the field always required.
+  * A **function** returning a boolean: makes the field **conditionally required**.
+
+**Example:**
+
+-------------------code----------------------
+price: {
+  type: Number,
+  required: function() { return this.isPublished; }
+}
+-------------------code----------------------
+
+* Here, `price` is required **only if** `isPublished` is `true`.
+* **Important:**
+  Do **not** use an arrow function (`=>`) because arrow functions don’t have their own `this`.
+  They capture `this` from the outer scope, which would not refer to the Mongoose document instance.
+
+**Example test result:**
+
+* If `isPublished = true` and `price` is missing → validation error: *"Path `price` is required."*
+* If `name` is also missing → another validation error for name.
+
+---
+
+#### **2. String Validators**
+
+For string-type fields, Mongoose provides several built-in validators:
+
+| Validator   | Description                          | Example                              |
+| ----------- | ------------------------------------ | ------------------------------------ |
+| `minlength` | Minimum allowed length               | `minlength: 5`                       |
+| `maxlength` | Maximum allowed length               | `maxlength: 255`                     |
+| `match`     | Regular expression pattern matching  | `match: /pattern/`                   |
+| `enum`      | Restricts value to a predefined list | `enum: ['web', 'mobile', 'network']` |
+
+**Example:**
+
+-------------------code----------------------
+category: {
+  type: String,
+  required: true,
+  enum: ['web', 'mobile', 'network']
+}
+-------------------code----------------------
+
+**Test Example:**
+
+-------------------code----------------------
+category: '-'
+-------------------code----------------------
+
+Output:
+
+-------------------code----------------------
+category: '-' is not a valid enum value for path 'category'.
+-------------------code----------------------
+
+---
+
+#### **3. Number Validators**
+
+For numeric fields:
+
+| Validator | Description   | Example    |
+| --------- | ------------- | ---------- |
+| `min`     | Minimum value | `min: 10`  |
+| `max`     | Maximum value | `max: 200` |
+
+**Example:**
+
+-------------------code----------------------
+price: {
+  type: Number,
+  min: 10,
+  max: 200
+}
+-------------------code----------------------
+
+---
+
+#### **4. Date Validators**
+
+* Date fields can also use `min` and `max` validators to ensure the value falls within a specific range.
+
+---
+
+### **Summary**
+
+* `required`: ensures a value is provided (can be conditional via a function).
+* String validators: `minlength`, `maxlength`, `match`, `enum`.
+* Number validators: `min`, `max`.
+* Date validators: `min`, `max`.
+* Avoid using arrow functions when referencing `this` in validators.
+
+---
+
+Next lecture: **Custom Validators in Mongoose**.
