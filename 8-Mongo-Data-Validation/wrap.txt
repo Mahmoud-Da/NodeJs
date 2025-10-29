@@ -319,3 +319,132 @@ A course should have at least one tag.
 ---
 
 Next lecture: **Asynchronous Custom Validators**.
+
+*** 4- Async Validators ***
+---
+
+### **Asynchronous Validators in Mongoose**
+
+#### **1. When to Use Async Validators**
+
+* Sometimes validation depends on external data sources such as:
+
+  * A **database query**
+  * A **remote HTTP service**
+  * The **file system**
+* In such cases, the validator cannot return a result immediately — it must wait for an asynchronous operation to complete.
+
+---
+
+#### **2. Converting a Synchronous Validator to an Asynchronous One**
+
+To make a validator asynchronous:
+
+1. **Set the `isAsync` property to `true`.**
+2. **Modify the validator function** to accept a **second parameter** — a **callback function**.
+3. Perform the asynchronous task, then **invoke the callback** with the result.
+
+---
+
+#### **3. Example Implementation**
+
+**Original (Synchronous) Validator:**
+
+-------------------code----------------------
+validate: {
+  validator: function(v) {
+    return v && v.length > 0;
+  },
+  message: 'A course should have at least one tag.'
+}
+-------------------code----------------------
+
+**Converted to Asynchronous Validator:**
+
+-------------------code----------------------
+validate: {
+  isAsync: true,
+  validator: function(v, callback) {
+    setTimeout(() => {
+      const result = v && v.length > 0;
+      callback(result);
+    }, 4000); // Simulating async operation (4 seconds)
+  },
+  message: 'A course should have at least one tag.'
+}
+-------------------code----------------------
+
+- we have error 
+-------------------code----------------------
+index4.js:23
+          callback(result);
+          ^
+
+TypeError: callback is not a function
+
+-------------------code----------------------
+
+That happens because the isAsync option was deprecated starting from Mongoose v5.0, and removed in newer versions (v6 and above).
+In modern Mongoose, async validators should return a Promise instead of using the old callback style.
+
+Fixed Version (Modern Syntax)
+-------------------code----------------------
+validate: {
+  validator: async function (v) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const result = v && v.length > 0;
+        resolve(result);
+      }, 4000); // Simulating async operation (4 seconds)
+    });
+  },
+  message: "A course should have at least one tag.",
+},
+
+-------------------code----------------------
+
+---
+
+#### **4. How It Works**
+
+* The `setTimeout()` function simulates an asynchronous process such as:
+
+  * Fetching data from a database.
+  * Making a network request.
+  * Reading from a file.
+* After the async work completes, the **callback** is called with:
+
+  * `true` → validation passes.
+  * `false` → validation fails and the error message is shown.
+
+---
+
+#### **5. Example Test Run**
+
+**Scenario:**
+
+-------------------code----------------------
+tags: []
+-------------------code----------------------
+
+**Terminal Output (after 4 seconds delay):**
+
+-------------------code----------------------
+A course should have at least one tag.
+-------------------code----------------------
+
+---
+
+### **6. Summary**
+
+* **Use async validators** when your validation logic depends on asynchronous operations.
+* **Steps to implement:**
+
+  1. Add `isAsync: true`.
+  2. Use a callback function in your validator.
+  3. Perform the async operation and call the callback with the result.
+* This pattern ensures that Mongoose waits for the async validation result before saving the document.
+
+---
+
+Next lecture: **Getting Access to Individual Validation Errors**.
