@@ -201,3 +201,121 @@ price: {
 ---
 
 Next lecture: **Custom Validators in Mongoose**.
+
+
+*** 3- Custom Validators ***
+---
+
+### **Custom Validators in Mongoose**
+
+#### **1. When to Use Custom Validators**
+
+* Built-in validators (e.g., `required`, `min`, `max`, `enum`) are often sufficient, but sometimes custom rules are needed.
+* Example case: enforcing that an array (like `tags`) must have **at least one element**.
+* The `required` validator alone cannot handle this because an empty array `[]` still passes validation.
+
+---
+
+#### **2. Defining a Custom Validator**
+
+To define a custom validator, use the `validate` property in your schema field definition.
+
+**Example:**
+
+-------------------code----------------------
+tags: {
+  type: Array,
+  validate: {
+    validator: function(v) {
+      return v && v.length > 0;
+    },
+    message: 'A course should have at least one tag.'
+  }
+}
+-------------------code----------------------
+
+**Explanation:**
+
+* `validate` is set to an **object** that includes:
+
+  * `validator`: a function defining the validation logic.
+
+    * `v` represents the field’s value.
+    * It returns `true` if valid, `false` otherwise.
+  * `message`: a custom error message displayed if validation fails.
+* The condition `v && v.length > 0` ensures that:
+
+  * The field is not `null` or `undefined`.
+  * The array is not empty.
+
+---
+
+#### **3. Testing the Validator**
+
+**Scenario 1 – Empty array:**
+
+-------------------code----------------------
+tags: []
+-------------------code----------------------
+
+**Output:**
+
+-------------------code----------------------
+A course should have at least one tag.
+-------------------code----------------------
+
+**Scenario 2 – Property excluded (not set):**
+
+-------------------code----------------------
+// tags not defined
+-------------------code----------------------
+
+**Output:**
+
+-------------------code----------------------
+A course should have at least one tag.
+-------------------code----------------------
+
+* Mongoose initializes an undefined array field as an empty array, so it triggers the same validation error.
+
+**Scenario 3 – Null value:**
+
+-------------------code----------------------
+tags: null
+-------------------code----------------------
+
+**Without handling null:**
+
+-------------------code----------------------
+Cannot read property 'length' of null
+-------------------code----------------------
+
+**With corrected logic (v && v.length > 0):**
+
+-------------------code----------------------
+A course should have at least one tag.
+-------------------code----------------------
+
+---
+
+### **4. Summary**
+
+* Use **custom validators** for complex validation logic not covered by built-in options.
+* Syntax:
+
+  -------------------code----------------------
+  validate: {
+    validator: function(v) { /* logic */ },
+    message: 'Custom error message'
+  }
+  -------------------code----------------------
+* Always handle possible `null` or `undefined` values to avoid runtime errors.
+* Common use cases:
+
+  * Arrays requiring at least one element.
+  * Strings requiring specific formatting beyond regex.
+  * Relationships or dependent validations between fields.
+
+---
+
+Next lecture: **Asynchronous Custom Validators**.
