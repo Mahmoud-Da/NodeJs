@@ -148,3 +148,170 @@
   1. Normalized relationships
   2. Denormalized relationships
   3. Hybrid structures
+
+*** 2- Referencing Documents ***
+### Lecture Notes: Referencing Documents in MongoDB
+
+#### 1. Overview
+
+* In this lecture, the goal is to **reference one document from another** in MongoDB using **Mongoose**.
+* We’ll use a file named **`population.js`** that contains two models:
+
+  1. **Author** model – with properties: `name`, `bio`, and `website`.
+  2. **Course** model – with property: `name`.
+* We will add an additional property `author` to the **Course** model to reference an **Author** document.
+
+---
+
+#### 2. Preparation Steps
+
+1. Open **MongoDB Compass**.
+2. **Delete the “playground” database** to start fresh.
+
+   * Type `playground` in the search field and delete the database.
+3. Open the terminal in the project directory.
+
+---
+
+#### 3. Creating the Author
+
+* At the bottom of `population.js`, there is a call to `createAuthor()`.
+
+  -------------------code----------------------
+  createAuthor('Mosh', 'Author bio', 'Website URL');
+  -------------------code----------------------
+* Run the following command in the terminal:
+
+  -------------------code----------------------
+  node population.js
+  -------------------code----------------------
+* This will create one **Author** document and return its **Object ID** in the terminal.
+
+**Example output:**
+
+-------------------code----------------------
+Author created:
+{
+  _id: 665abc12345,
+  name: "Mosh",
+  bio: "...",
+  website: "..."
+}
+-------------------code----------------------
+
+* Copy the **author ID** from the terminal for the next step.
+
+---
+
+#### 4. Creating the Course and Referencing the Author
+
+* Comment out the `createAuthor()` line in the code.
+* Uncomment or enable the `createCourse()` call, passing the **author ID** as a string.
+
+Example:
+
+-------------------code----------------------
+createCourse('Node Course', '665abc12345');
+-------------------code----------------------
+
+* The `createCourse()` function creates a course object with two properties:
+
+  -------------------code----------------------
+  name: "Node Course"
+  author: "665abc12345"
+  -------------------code----------------------
+
+* Run the script again:
+
+  -------------------code----------------------
+  node population.js
+  -------------------code----------------------
+
+* You will see the created course ID and name in the terminal, but not the author.
+
+---
+
+#### 5. Updating the Course Model to Include the Author Reference
+
+* The reason the author was not saved is that the **Course schema** only included the `name` property.
+* You must explicitly define the `author` field in the schema.
+
+Update the Course schema as follows:
+
+-------------------code----------------------
+const courseSchema = new mongoose.Schema({
+  name: String,
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Author'
+  }
+});
+-------------------code----------------------
+
+**Explanation:**
+
+* `type: mongoose.Schema.Types.ObjectId` → defines the data type as an **Object ID**.
+* `ref: 'Author'` → indicates that this field references the **Author** collection.
+
+---
+
+#### 6. Running the Updated Code
+
+* Save the file and re-run the script:
+
+  -------------------code----------------------
+  node population.js
+  -------------------code----------------------
+* Output example:
+
+  -------------------code----------------------
+  Course created:
+  {
+    _id: 665def67890,
+    name: "Node Course",
+    author: "665abc12345"
+  }
+  -------------------code----------------------
+
+---
+
+#### 7. Verifying in MongoDB Compass
+
+* Open **MongoDB Compass** and check the **“playground”** database.
+* Navigate to the **courses** collection.
+* You will now see two course documents:
+
+  1. The first (older) one has no author.
+  2. The second (new) one includes an `author` field with an **Object ID** reference.
+
+Example:
+
+-------------------code----------------------on
+{
+  "_id": ObjectId("665def67890"),
+  "name": "Node Course",
+  "author": ObjectId("665abc12345")
+}
+-------------------code----------------------
+
+---
+
+#### 8. Key Takeaways
+
+* Defining a reference in Mongoose requires specifying both **type** and **ref** in the schema.
+* MongoDB does **not enforce foreign key relationships**.
+
+  * You can store an invalid or non-existent author ID, and MongoDB will not raise an error.
+* Referencing is useful when you want **consistency** and to avoid duplicating data across collections.
+
+---
+
+#### 9. Summary of Steps
+
+1. Create and save an **Author** document.
+2. Copy the author’s ID.
+3. Add an **author** field to the **Course** schema using `ObjectId` and `ref`.
+4. Create a **Course** document with the author’s ID.
+5. Verify the stored relationship in **MongoDB Compass**.
+
+This sets the foundation for learning how to populate referenced documents, which will be covered in upcoming lectures.
