@@ -680,3 +680,221 @@ name: {
 ---
 
 **Next Topic:** Working with an **array of subdocuments** in Mongoose.
+
+
+*** 5- Using an Array of Sub-documents ***
+**Lecture Notes: Working with Arrays of Subdocuments in MongoDB (Mongoose)**
+
+---
+
+### 1. Introduction
+
+In the previous lecture, we learned how to embed a single author subdocument inside a course document.
+In this lecture, we extend that idea to **an array of subdocuments**, allowing each course to have **multiple authors**.
+
+---
+
+### 2. Updating the Schema
+
+**Before:**
+
+-------------------code----------------------
+author: authorSchema
+-------------------code----------------------
+
+**Now:**
+We rename the property to `authors` and make it an array of subdocuments:
+
+-------------------code----------------------
+authors: [authorSchema]
+-------------------code----------------------
+
+This allows multiple author objects to be stored within a single course document.
+
+---
+
+### 3. Creating a Course with Multiple Authors
+
+When creating a course, we now pass an array of authors:
+
+-------------------code----------------------
+async function createCourse(name, authors) {
+  const course = new Course({
+    name,
+    authors
+  });
+  await course.save();
+}
+-------------------code----------------------
+
+Example usage:
+
+-------------------code----------------------
+createCourse("Node Course", [
+  { name: "Mosh" },
+  { name: "John" }
+]);
+-------------------code----------------------
+
+---
+
+### 4. Resetting the Database
+
+Before running the code, open **MongoDB Compass**, delete the current `courses` collection, and then run:
+
+-------------------code----------------------
+node embedding.js
+-------------------code----------------------
+
+**Result:**
+Each course document will now contain an array of author objects:
+
+-------------------code----------------------on
+{
+  "_id": "...",
+  "name": "Node Course",
+  "authors": [
+    { "_id": "...", "name": "Mosh" },
+    { "_id": "...", "name": "John" }
+  ]
+}
+-------------------code----------------------
+
+---
+
+### 5. Adding an Author to the Array
+
+To add a new author after a course already exists:
+
+-------------------code----------------------
+async function addAuthor(courseId, author) {
+  const course = await Course.findById(courseId);
+  course.authors.push(author);
+  await course.save();
+}
+-------------------code----------------------
+
+Example call:
+
+-------------------code----------------------
+addAuthor("66a3c...", { name: "Amy" });
+-------------------code----------------------
+
+**Steps:**
+
+1. Find the course using its ID.
+2. Push the new author object into the `authors` array.
+3. Save the updated course document.
+
+After running:
+
+-------------------code----------------------
+node embedding.js
+-------------------code----------------------
+
+Check in MongoDB Compass — the course document now includes the new author `Amy`.
+
+---
+
+### 6. Removing an Author from the Array
+
+To remove an existing author:
+
+-------------------code----------------------
+async function removeAuthor(courseId, authorId) {
+  const course = await Course.findById(courseId);
+  const author = course.authors.id(authorId);
+  author.remove();
+  await course.save();
+}
+-------------------code----------------------
+
+Example call:
+
+-------------------code----------------------
+removeAuthor("66a3c...", "66a4f...");
+-------------------code----------------------
+
+NOTE: for new version of mongoose the remove method is deprecated
+so we have two ways:
+-------------------code----------------------
+1- using filter JS method
+
+ async function removeAuthor(courseId, authorId) {
+  const course = await Course.findById(courseId);
+  if (!course) return console.log("Course not found");
+
+  // Filter out the author by ID
+  course.authors = course.authors.filter(a => a._id.toString() !== authorId);
+  
+  await course.save();
+  console.log("Author removed successfully");
+}
+-------------------code----------------------
+
+2- using mongoose "pull()" method
+-------------------code----------------------
+async function removeAuthor(courseId, authorId) {
+  const course = await Course.findById(courseId);
+  if (!course) return console.log("Course not found");
+
+  course.authors.pull({ _id: authorId }); // removes matching subdocument
+  await course.save();
+  console.log("Author removed successfully");
+}
+-------------------code----------------------
+
+
+- pull() vs filter():
+
+| Aspect                   | `.pull()`                                                    | `.filter()`                                         |
+| ------------------------ | ------------------------------------------------------------ | --------------------------------------------------- |
+| **Performance**          | ⚡ Slightly faster (internally optimized for Mongoose arrays) | A bit slower (creates a new array and reassigns it) |
+| **Readability**          | Cleaner, more expressive for removing subdocs                | Slightly more verbose                               |
+| **Mongoose integration** | Fully aware of subdocument tracking and change detection     | Works fine, but you rely on manual reassignment     |
+| **Mutation**             | Mutates the array in place                                   | Creates a new array (non-mutating)                  |
+
+
+**Explanation:**
+
+* `course.authors.id(authorId)` retrieves the embedded author by its `_id`.
+* `author.remove()` removes that specific subdocument from the array.
+* Finally, `course.save()` persists the changes.
+
+After running:
+
+-------------------code----------------------
+node embedding.js
+-------------------code----------------------
+
+In MongoDB Compass, refresh the collection — the specified author will be removed.
+
+---
+
+### 7. Key Notes on Arrays of Subdocuments
+
+| Operation           | Method                    |
+| ------------------- | ------------------------- |
+| Add new subdocument | `array.push(subdocument)` |
+| Remove by ID        | `array.id(id).remove()`   |
+| Save changes        | `document.save()`         |
+
+**Characteristics:**
+
+* Subdocuments in arrays are fully functional Mongoose documents.
+* They support validation and schema rules.
+* They cannot be saved independently; they must be saved through their parent.
+
+---
+
+### 8. Summary
+
+* Changed a single embedded document into an **array of subdocuments**.
+* Learned how to **add** and **remove** authors within that array.
+* Used Mongoose methods like `.push()`, `.id()`, and `.remove()` to manipulate nested data.
+
+---
+
+### 9. Next Lecture
+
+In the next lecture, we will discuss **design trade-offs between embedding and referencing** — when to use each approach depending on the application’s requirements.
