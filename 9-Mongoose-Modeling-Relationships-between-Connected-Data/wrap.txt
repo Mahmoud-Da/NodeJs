@@ -898,3 +898,125 @@ In MongoDB Compass, refresh the collection — the specified author will be remo
 ### 9. Next Lecture
 
 In the next lecture, we will discuss **design trade-offs between embedding and referencing** — when to use each approach depending on the application’s requirements.
+
+
+*** 6- Project- Build the Movies API ***
+---
+
+## Lecture Notes: Building the Movie API (VidLib Project)
+
+### 1. Overview
+
+In this exercise, the goal is to build an API to manage a list of movies in MongoDB.
+This task is more challenging than managing the list of genres. Each movie document will embed a genre document inside it to improve query performance.
+
+### 2. Movie Schema Design
+
+#### Movie Object Structure
+
+Each **movie** will have the following properties:
+
+* **title** (string)
+* **genre** (embedded document)
+* **numberInStock** (number)
+* **dailyRentalRate** (number)
+
+#### Design Decision: Embedded Genre
+
+Although there is a separate `genres` collection, a genre document is **embedded** inside each movie document.
+**Reasoning:**
+
+* Improves query performance.
+* Genre names (e.g., Sci-Fi, Thriller) rarely change, so data inconsistency is unlikely.
+* The `genres` collection is still useful for UI components, such as dropdowns for selecting a movie’s genre.
+
+### 3. Detailed Schema Definition
+
+#### Title Property
+
+* **Type:** String
+* **Required:** Yes
+* **Trim:** Enabled (removes extra spaces)
+* **Min Length:** 5 characters
+* **Max Length:** 255 characters
+* **Purpose:** Prevents invalid or maliciously long strings.
+
+#### Genre Property
+
+* **Type:** `genreSchema` (embedded)
+* The `genreSchema` is imported from the `genre` module.
+* The schema was extracted into a separate constant in the `genre` module and exported for reuse.
+
+#### Number in Stock
+
+* **Type:** Number
+* **Required:** Yes
+* **Min:** 0
+* **Max:** 255
+* **Purpose:** Prevents invalid negative or excessively large values.
+
+#### Daily Rental Rate
+
+* **Type:** Number
+* **Required:** Yes
+* **Min:** 0
+* **Max:** 255
+
+### 4. Validation Schema (Joi)
+
+#### Purpose
+
+The Joi validation schema is different from the Mongoose schema. It defines **what the client sends** to the API.
+
+#### Joi Schema Example
+
+* **genreId:** String, required
+
+  * The client sends only the genre’s ID, not the full genre object.
+* **title**, **numberInStock**, and **dailyRentalRate:** Validated similarly to Mongoose schema.
+
+**Note:**
+
+* The **Mongoose schema** represents how data is stored in MongoDB.
+* The **Joi schema** represents how data is received from the client.
+
+### 5. Creating a Movie (Route Handler)
+
+#### Steps
+
+1. **Validate the request body** using Joi.
+
+   * If invalid, return **400 Bad Request**.
+2. **Find the genre by ID.**
+
+   * If not found, return **400 Invalid Genre**.
+3. **Create the movie object.**
+
+   * `title`: From request body.
+   * `genre`: An embedded object with only `_id` and `name`.
+
+     * Only selected fields are embedded to avoid unnecessary data such as version keys (`__v`) or extra properties.
+   * `numberInStock` and `dailyRentalRate`: From request.
+
+#### Example Snippet
+
+-------------------code----------------------
+const movie = new Movie({
+  title: req.body.title,
+  genre: {
+    _id: genre._id,
+    name: genre.name
+  },
+  numberInStock: req.body.numberInStock,
+  dailyRentalRate: req.body.dailyRentalRate
+});
+-------------------code----------------------
+
+### 6. Key Takeaways
+
+* **Hybrid approach:** Combines embedding (for performance) with referencing (for reusability).
+* **Separated schemas:** Joi for validation, Mongoose for persistence.
+* **Selective embedding:** Only store necessary fields from related documents.
+* **Validation and safety:** Input checks prevent malformed or malicious data.
+
+---
