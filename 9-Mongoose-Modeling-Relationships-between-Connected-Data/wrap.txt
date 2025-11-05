@@ -1631,3 +1631,148 @@ console.log(isValid); // false
 * You can generate, inspect, and validate ObjectIDs directly using Mongoose.
 
 ---
+
+
+*** 10- Validating ObjectIDs  ***
+
+## Lecture Notes: Validating Object IDs in Mongoose
+
+### 1. The Problem
+
+In the **Vidly** application, when we send a POST request to the `/api/rentals` endpoint through **Postman**, the request includes a **customer ID** and a **movie ID**.
+
+If one of these IDs is invalid (for example, `"1234"` instead of a valid MongoDB ObjectID), the server request **hangs** and no response is returned.
+
+In the terminal, the following error appears:
+
+-------------------code----------------------
+Unhandled promise rejection
+Cast to ObjectId failed for value "1234" at path "_id" for model "Customer"
+-------------------code----------------------
+
+---
+
+### 2. Understanding the Error
+
+* **“Cast to ObjectId failed”** means Mongoose tried to convert the provided value (`"1234"`) into an ObjectId but failed.
+* The word **path** in the error refers to the property location — in this case, the path `_id` inside the **Customer** model.
+* The request hangs because the invalid ObjectId throws an exception that wasn’t caught or handled properly.
+
+When a client sends invalid data like this, the server should respond with a **400 Bad Request**, not hang indefinitely.
+
+---
+
+### 3. Identifying Where the Error Happens
+
+In the `rentals.js` route handler:
+
+* At the top, the request body is validated for required fields (`customerId`, `movieId`).
+* However, this validation **does not check** whether these fields are **valid ObjectIDs**.
+* The exception occurs when the code tries to query the database:
+
+  -------------------code----------------------
+  const customer = await Customer.findById(req.body.customerId);
+  -------------------code----------------------
+
+  At this line, if the ID is invalid, Mongoose throws the casting error.
+
+---
+
+### 4. First (Incorrect) Solution
+
+We could manually check the validity of each ID before querying:
+
+-------------------code----------------------
+if (!mongoose.Types.ObjectId.isValid(req.body.customerId))
+  return res.status(400).send('Invalid customer.');
+
+if (!mongoose.Types.ObjectId.isValid(req.body.movieId))
+  return res.status(400).send('Invalid movie.');
+-------------------code----------------------
+
+While this approach works, it is **not ideal** because:
+
+* It adds repetitive code to the route handler.
+* Validation logic should be centralized in the **validation function**, not inside the controller.
+
+---
+
+### 5. The Correct Approach: Extend the Joi Validation
+
+#### Step 1. Install the `joi-objectid` Package
+
+This package extends Joi to validate MongoDB ObjectIDs easily.
+
+-------------------code----------------------bash
+npm install joi-objectid
+-------------------code----------------------
+
+(Example version used: **2.0.0**)
+
+---
+
+#### Step 2. Integrate it into the Validation File
+
+In `rental.js` (where the validation function is defined):
+
+-------------------code----------------------
+const Joi = require('joi');
+Joi.objectId = require('joi-objectid')(Joi);
+-------------------code----------------------
+
+Here’s what happens:
+
+* The `require('joi-objectid')` module returns a function.
+* We call this function and pass in the `Joi` object.
+* This adds a new method `Joi.objectId()` that we can use in our schemas.
+
+---
+
+#### Step 3. Update the Validation Schema
+
+Modify the `validateRental` function to use the new method:
+
+-------------------code----------------------
+function validateRental(rental) {
+  const schema = Joi.object({
+    customerId: Joi.objectId().required(),
+    movieId: Joi.objectId().required()
+  });
+
+  return schema.validate(rental);
+}
+-------------------code----------------------
+
+This ensures both IDs are present and are valid MongoDB ObjectIDs.
+
+---
+
+### 6. Testing the Fix
+
+* Restart the application:
+
+  -------------------code----------------------bash
+  npm start
+  -------------------code----------------------
+* Send a POST request again using Postman, with an invalid `customerId` such as `"1234"`.
+
+**Result:**
+
+-------------------code----------------------json
+{
+  "error": "\"customerId\" with value \"1234\" fails to match the required pattern"
+}
+-------------------code----------------------
+
+The server now correctly returns **400 Bad Request**, and the request no longer hangs.
+
+---
+
+### 7. Key Takeaways
+
+* Always validate **ObjectIDs** before querying MongoDB to prevent runtime exceptions.
+* Use **`joi-objectid`** to integrate ObjectID validation cleanly within your Joi schema.
+* Centralize all validation logic in one place (validation functions), not in route handlers.
+* Proper error handling ensures the server responds correctly and avoids unhandled promise rejections.
+
+---
