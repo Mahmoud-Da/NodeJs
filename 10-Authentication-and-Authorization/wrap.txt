@@ -972,3 +972,123 @@ So in short:
 > Increasing the number in `bcrypt.genSalt()` makes the hashing **computationally harder**,
 > which is **why it takes more time** — and also **why it’s more secure**.
 
+*** 6- Authenticating Users ***
+### Lecture Notes — Authentication Route (`os.js`) Setup
+
+#### 1. Creating the Authentication Route File
+
+* Inside the **routes** folder, create a new file named **`os.js`** (or `logins.js`, but `os.js` is more common).
+* Copy the structure from **`users.js`** and paste it into `os.js` to save time.
+
+#### 2. Importing and Registering the Route
+
+* Open **`index.js`** and import the new module:
+
+  -------------------code----------------------
+  const os = require('./routes/os');
+  -------------------code----------------------
+* Register the route:
+
+  -------------------code----------------------
+  app.use('/api/os', os);
+  -------------------code----------------------
+* This means any request sent to `/api/os` or its subroutes will be handled by the **os router**.
+
+#### 3. Adjusting the Validation Function
+
+* The validation function imported from the user module checks for:
+
+  * `name`
+  * `email`
+  * `password`
+* However, for login, only **email** and **password** are needed.
+* Therefore:
+
+  * Remove the imported validation function.
+  * Define a new **validate function** directly inside `os.js`:
+
+    -------------------code----------------------
+    function validate(req) {
+      const schema = {
+        email: Joi.string().min(5).max(255).required().email(),
+        password: Joi.string().min(5).max(255).required()
+      };
+      return Joi.validate(req, schema);
+    }
+    -------------------code----------------------
+
+#### 4. Validating User Existence
+
+* After validating input, check if a user exists with the given email:
+
+  -------------------code----------------------
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) return res.status(400).send('Invalid email or password.');
+  -------------------code----------------------
+* **Why 400 and not 404?**
+
+  * Returning 404 (Not Found) reveals that the email is invalid.
+  * To prevent information leakage, use a **generic error message** for both wrong email and wrong password.
+
+#### 5. Validating the Password
+
+* Use **bcrypt** to compare the plain text password with the stored hash:
+
+  -------------------code----------------------
+  const validPassword = await bcrypt.compare(req.body.password, user.password);
+  if (!validPassword) return res.status(400).send('Invalid email or password.');
+  -------------------code----------------------
+* `bcrypt.compare()`:
+
+  * Takes the plain password and the hashed password.
+  * Extracts the salt from the stored hash.
+  * Re-hashes the plain password using that salt.
+  * Returns `true` if they match.
+
+#### 6. Successful Login
+
+* If both checks pass:
+
+  -------------------code----------------------
+  res.send(true);
+  -------------------code----------------------
+* (Later, this will be replaced with generating and returning a JSON Web Token (JWT)).
+
+---
+
+### Summary of `os.js`
+
+-------------------code----------------------
+const express = require('express');
+const router = express.Router();
+const Joi = require('joi');
+const bcrypt = require('bcrypt');
+const { User } = require('../models/user');
+
+router.post('/', async (req, res) => {
+  const { error } = validate(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) return res.status(400).send('Invalid email or password.');
+
+  const validPassword = await bcrypt.compare(req.body.password, user.password);
+  if (!validPassword) return res.status(400).send('Invalid email or password.');
+
+  res.send(true);
+});
+
+function validate(req) {
+  const schema = {
+    email: Joi.string().min(5).max(255).required().email(),
+    password: Joi.string().min(5).max(255).required()
+  };
+  return Joi.validate(req, schema);
+}
+
+module.exports = router;
+-------------------code----------------------
+
+---
+
+Would you like me to include the **next step** from the lecture — generating a JWT after successful login?
