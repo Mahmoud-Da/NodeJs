@@ -97,3 +97,124 @@ Implement an endpoint to **register new users**.
 ---
 
 Next step: Implement the **register new users API** in code.
+
+
+*** 2- Creating the User Model ***
+**Lecture Notes: Creating the User Model in Vid.ly Application**
+
+---
+
+### 1. Objective
+
+In this lecture, we define a new **User model** in Mongoose to handle user data for registration and authentication.
+
+---
+
+### 2. File Setup
+
+* Navigate to the **models** folder.
+* Create a new file named **`user.js`**.
+* To save time, copy the existing structure from **`genre.js`** and modify it.
+
+---
+
+### 3. Defining the User Schema
+
+Instead of defining the schema as a separate constant, the schema object is defined inline when calling the `mongoose.model()` method.
+This makes the file cleaner and more compact.
+
+**Example structure:**
+
+-------------------code----------------------
+const mongoose = require('mongoose');
+const Joi = require('joi');
+
+const User = mongoose.model('User', new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    minlength: 5,
+    maxlength: 50
+  },
+  email: {
+    type: String,
+    required: true,
+    minlength: 5,
+    maxlength: 255,
+    unique: true
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 5,
+    maxlength: 1024
+  }
+}));
+-------------------code----------------------
+
+**Notes:**
+
+* **`name`**: required, between 5–50 characters.
+* **`email`**: required, between 5–255 characters, and must be **unique**.
+* **`password`**: required, between 5–1024 characters.
+
+  * The higher max length is chosen because hashed passwords are long strings.
+  * The plain text password sent by the user will later be hashed before being stored.
+
+---
+
+### 4. Validation Function
+
+Create a validation function using Joi to validate incoming user data before saving to the database.
+
+**Function:**
+
+-------------------code----------------------
+function validateUser(user) {
+  const schema = Joi.object({
+    name: Joi.string().min(5).max(50).required(),
+    email: Joi.string().min(5).max(255).required().email(),
+    password: Joi.string().min(5).max(255).required()
+  });
+
+  return schema.validate(user);
+}
+-------------------code----------------------
+
+**Explanation:**
+
+* Validates that:
+
+  * `name` is between 5 and 50 characters.
+  * `email` is valid and between 5 and 255 characters.
+  * `password` is between 5 and 255 characters.
+* The `password` here is **plain text**; it will be **hashed** later before being stored in MongoDB.
+
+---
+
+### 5. Exporting the Model and Validation Function
+
+Export both the `User` model and `validateUser` function for use in the routes.
+
+**Export:**
+
+-------------------code----------------------
+exports.User = User;
+exports.validate = validateUser;
+-------------------code----------------------
+
+---
+
+### 6. Summary
+
+* Created **user.js** in the models folder.
+* Defined a **User model** with properties: `name`, `email`, and `password`.
+* Ensured the **email** is unique in the database.
+* Added a **Joi validation** function for user input.
+* Exported the model and validation function.
+
+---
+
+### 7. Next Step
+
+In the next lecture, a **route** will be added to **register new users** using this `User` model.
