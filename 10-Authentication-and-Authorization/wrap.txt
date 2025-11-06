@@ -484,3 +484,254 @@ nodemon index.js
 -------------------code----------------------
 
 That will fix the error and let your app connect to MongoDB properly.
+
+
+## The error
+
+-------------------code----------------------
+Error: The provided mongoose instance is invalid
+-------------------code----------------------
+
+means **Fawn** (a library for handling MongoDB transactions) couldn’t recognize the Mongoose instance you passed to it with:
+
+-------------------code----------------------
+Fawn.init(mongoose);
+-------------------code----------------------
+
+This usually happens for **one of the following reasons:**
+
+---
+
+### 1. Mongoose isn’t imported correctly
+
+Make sure you’re using **CommonJS require**, not ES modules.
+Correct:
+
+-------------------code----------------------
+const mongoose = require('mongoose');
+-------------------code----------------------
+
+Wrong:
+
+-------------------code----------------------
+import mongoose from 'mongoose';
+-------------------code----------------------
+
+Fawn doesn’t work well with ES modules.
+
+---
+
+### 2. Fawn is initialized before the MongoDB connection
+
+You must **connect to MongoDB first** before calling `Fawn.init(mongoose)`.
+
+Correct order:
+
+-------------------code----------------------
+const mongoose = require('mongoose');
+const Fawn = require('fawn');
+
+mongoose.connect('mongodb://127.0.0.1/vidly')
+  .then(() => console.log('Connected to MongoDB...'))
+  .catch(err => console.error('Could not connect to MongoDB...', err));
+
+Fawn.init(mongoose);
+-------------------code----------------------
+
+---
+
+### 3. Incompatibility between Fawn and new Mongoose versions
+
+Fawn is **outdated** and not fully compatible with **Mongoose 7 or 8+**.
+Since you’re using a recent Node.js version (v24) and likely Mongoose 8, Fawn won’t work properly.
+
+---
+
+Recommended fix (modern way)
+
+Instead of using Fawn, you can use **Mongoose’s built-in transactions**, which are safer and officially supported:
+
+-------------------code----------------------
+const session = await mongoose.startSession();
+session.startTransaction();
+
+try {
+  await rental.save({ session });
+  movie.numberInStock--;
+  await movie.save({ session });
+
+  await session.commitTransaction();
+  session.endSession();
+} catch (ex) {
+  await session.abortTransaction();
+  session.endSession();
+  throw ex;
+}
+-------------------code----------------------
+
+---
+
+### Temporary workaround (if you want Fawn to work)
+
+You can downgrade Mongoose to an older version that still supports Fawn:
+
+-------------------code----------------------
+npm install mongoose@5.13.15
+-------------------code----------------------
+
+Then restart your server:
+
+-------------------code----------------------
+npx nodemon index.js
+-------------------code----------------------
+
+---
+*** 4- Using Lodash ***
+### Lecture Notes: Using Lodash and Improving User Response Handling
+
+#### 1. Goal
+
+In this lecture, we modify the **POST method** in our users module to:
+
+* Control what data is sent back to the client.
+* Exclude sensitive fields like passwords.
+* Introduce **Lodash**, a utility library for working with objects, arrays, and other data types.
+
+---
+
+#### 2. Excluding Sensitive Properties
+
+We have two ways to return filtered user data to the client:
+
+1. **Manually construct a custom object**
+
+   -------------------code----------------------
+   res.send({
+     name: user.name,
+     email: user.email
+   });
+   -------------------code----------------------
+
+   This works, but it becomes repetitive when we have many properties.
+
+2. **Using Lodash for cleaner code**
+   Lodash provides a utility method called `pick()` that allows us to create a new object containing only the desired properties.
+
+---
+
+#### 3. Installing Lodash
+
+In the terminal, run:
+
+-------------------code----------------------
+npm install lodash
+-------------------code----------------------
+
+*(Version used: 4.17.4)*
+
+---
+
+#### 4. Importing Lodash
+
+At the top of the **users** module:
+
+-------------------code----------------------
+const _ = require('lodash');
+-------------------code----------------------
+
+By convention, Lodash is stored in a variable named `_` because it’s short and clear.
+
+---
+
+#### 5. Using `_.pick()`
+
+The `pick` method allows us to extract only specific properties from an object.
+
+Example:
+
+-------------------code----------------------
+_.pick(user, ['name', 'email']);
+-------------------code----------------------
+
+This returns a new object containing only the `name` and `email` properties from `user`.
+
+We can use this instead of manually creating an object.
+
+So, in the response:
+
+-------------------code----------------------
+res.send(_.pick(user, ['_id', 'name', 'email']));
+-------------------code----------------------
+
+This ensures the password and other internal fields are excluded.
+
+---
+
+#### 6. Using `_.pick()` for Request Body
+
+We can also use it to sanitize incoming data before saving to the database:
+
+-------------------code----------------------
+let user = new User(_.pick(req.body, ['name', 'email', 'password']));
+-------------------code----------------------
+
+This helps prevent malicious users from adding unexpected properties to the request body.
+
+---
+
+#### 7. Testing
+
+* Run the application:
+
+  -------------------code----------------------
+  nodemon index.js
+  -------------------code----------------------
+* Send a **POST request** using Postman.
+* The response should include only:
+
+  -------------------code----------------------
+  {
+    "_id": "...",
+    "name": "...",
+    "email": "..."
+  }
+  -------------------code----------------------
+
+  No password or version fields appear in the response.
+
+---
+
+#### 8. Enforcing Password Complexity (Optional)
+
+If you want to enforce password strength, you can use an additional NPM package:
+
+-------------------code----------------------
+npm install joi-password-complexity
+-------------------code----------------------
+
+It allows you to configure:
+
+* Minimum and maximum length
+* Required uppercase/lowercase letters
+* Number of digits, etc.
+
+Example usage (optional for now):
+
+-------------------code----------------------
+const passwordComplexity = require('joi-password-complexity');
+-------------------code----------------------
+
+---
+
+#### 9. Next Step
+
+Currently, passwords are stored as plain text, which is a major security issue.
+In the next lecture, password **hashing** will be implemented to securely store them in the database.
+
+---
+
+### Summary
+
+* Installed and used **Lodash** for cleaner object handling.
+* Used `_.pick()` to select safe fields for database input and client output.
+* Prepared the ground for **password hashing** in the next lecture.
