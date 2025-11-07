@@ -1700,3 +1700,101 @@ const key = config.get('jwtPrivateKey');
 **In your case (Vidly project)** — since it’s a backend application with structured settings (DB, JWT key, etc.) —
 **Using the `config` package** is the better and more scalable choice.
 But for simplicity or deployment convenience, you can still load sensitive values from `.env` into config, achieving the best of both.
+
+*** 11- Setting Response Headers  ***
+### Lecture Notes: Returning JWT in HTTP Headers upon Registration
+
+---
+
+#### **1. Current Implementation**
+
+* When a user logs in, the server **generates a JSON Web Token (JWT)** and **returns it in the response body**.
+* Goal: Improve this behavior to automatically log in users immediately after registration.
+
+---
+
+#### **2. New Requirement**
+
+* Upon registration, users should be **automatically logged in** (receive a JWT).
+* This simulates a **local application environment** (like Vidly in a local video store) where:
+
+  * Users are internal employees.
+  * Email verification is not necessary.
+
+---
+
+#### **3. Implementation Steps**
+
+1. **Locate the Registration Endpoint**
+
+   * In the **users module**, find the POST method handling user registration.
+   * Currently, it returns a JSON object with user details.
+
+2. **Generate the JWT**
+
+   * Instead of only returning user info, **generate a JWT** before sending the response.
+   * Copy the JWT creation logic from the **auth module**:
+
+     -------------------code----------------------
+     const token = jwt.sign({ _id: user._id }, config.get('jwtPrivateKey'));
+     -------------------code----------------------
+
+3. **Set JWT in Response Header**
+
+   * Rather than including the token in the response body, add it as a **custom HTTP header**:
+
+     -------------------code----------------------
+     res.header('x-auth-token', token).send({
+       _id: user._id,
+       name: user.name,
+       email: user.email
+     });
+     -------------------code----------------------
+   * Custom headers should begin with the prefix `X-` (e.g., `X-Auth-Token`).
+
+---
+
+#### **4. Required Imports**
+
+At the top of the **users.js** file:
+
+-------------------code----------------------
+const jwt = require('jsonwebtoken');
+const config = require('config');
+-------------------code----------------------
+
+---
+
+#### **5. Testing the Implementation**
+
+1. Start the server with **nodemon** to automatically reload on code changes:
+
+   -------------------code----------------------
+   nodemon index.js
+   -------------------code----------------------
+2. In **Postman**:
+
+   * Send a `POST` request to the user registration endpoint.
+   * Use a **new email** each time to avoid duplicate user errors.
+3. Check the response:
+
+   * **Body:** User data (same as before).
+   * **Headers:** A new header named `x-auth-token` containing the JWT.
+
+---
+
+#### **6. Client-Side Behavior**
+
+* The client can now:
+
+  1. Read the `x-auth-token` header from the response.
+  2. Store it locally (e.g., in `localStorage` or cookies).
+  3. Include it in subsequent API requests for authentication.
+
+---
+
+#### **7. Summary**
+
+* Returning JWTs in **headers** keeps the response cleaner.
+* Automatic login after registration enhances user experience for trusted environments.
+* Using `X-Auth-Token` standardizes custom authentication headers.
