@@ -462,7 +462,7 @@ This sets the foundation for learning how to populate referenced documents, whic
 
   The result shows:
 
-  -------------------code----------------------on
+  -------------------code----------------------
   "author": null
   -------------------code----------------------
 
@@ -496,3 +496,187 @@ async function listCourses() {
 
 **Result:**
 Courses are listed with each author’s name, while ignoring unnecessary fields and invalid references.
+
+
+*** 4- Embedding Documents ***
+**Lecture Notes: Embedding Documents in MongoDB (Mongoose)**
+
+---
+
+### 1. Overview
+
+In this lecture, we learn an alternative to referencing documents: **embedding documents**.
+Embedding allows us to store a document directly inside another document as a **subdocument**.
+
+---
+
+### 2. Setup
+
+* File used: **embedding.js**
+* Existing structure:
+
+  * **Author Schema**: `name`, `bio`, `website`
+  * **Course Schema**: currently has only `name`
+
+We will modify the **Course Schema** to embed an author document.
+
+---
+
+### 3. Embedding the Author Schema
+
+Previously, in the reference model, we defined:
+
+-------------------code----------------------
+author: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Author'
+}
+-------------------code----------------------
+
+Now, we replace that with:
+
+-------------------code----------------------
+author: authorSchema
+-------------------code----------------------
+
+This embeds the entire author object inside the course document rather than just its reference ID.
+
+---
+
+### 4. Creating a Course with Embedded Author
+
+* The `createCourse` function initializes a new course with an embedded author and saves it.
+* Before running, clear the database in MongoDB Compass for a clean start.
+
+Run in terminal:
+
+-------------------code----------------------
+node embedding.js
+-------------------code----------------------
+
+**Result:**
+The course document will include:
+
+-------------------code----------------------on
+{
+  "_id": "...",
+  "name": "Node Course",
+  "author": {
+    "_id": "...",
+    "name": "Mosh"
+  }
+}
+-------------------code----------------------
+
+Here, `author` is a **subdocument**.
+
+---
+
+### 5. Subdocument Behavior
+
+* Subdocuments behave like normal documents:
+
+  * Support **validation**.
+  * Can have **required** fields.
+* However, **they cannot be saved independently** — only within their parent document.
+
+---
+
+### 6. Updating a Subdocument (Method 1)
+
+To update an embedded author’s name:
+
+-------------------code----------------------
+async function updateAuthor(courseId) {
+  const course = await Course.findById(courseId);
+  course.author.name = "Mosh Hamidani";
+  await course.save();
+}
+-------------------code----------------------
+
+Run:
+
+-------------------code----------------------
+node embedding.js
+-------------------code----------------------
+
+Check in MongoDB Compass:
+The embedded author’s name should now be **"Mosh Hamidani"**.
+
+---
+
+### 7. Updating a Subdocument (Method 2 — Direct Update)
+
+You can update without fetching the document first:
+
+-------------------code----------------------
+await Course.updateOne(
+  { _id: courseId },
+  { $set: { "author.name": "John Smith" } }
+);
+-------------------code----------------------
+
+This modifies the subdocument directly in the database.
+
+---
+
+### 8. Removing a Subdocument
+
+To remove an embedded document or a specific field, use `$unset`:
+
+-------------------code----------------------
+await Course.updateOne(
+  { _id: courseId },
+  { $unset: { author: "" } } // removes the entire author object
+);
+-------------------code----------------------
+
+After running:
+
+-------------------code----------------------
+node embedding.js
+-------------------code----------------------
+
+Check Compass — the `author` field will no longer exist.
+
+---
+
+### 9. Validation for Embedded Documents
+
+You can enforce validation on subdocuments just like top-level documents.
+
+**Example:**
+
+To make `author` required in the course schema:
+
+-------------------code----------------------
+author: {
+  type: authorSchema,
+  required: true
+}
+-------------------code----------------------
+
+To make a specific property (like `author.name`) required:
+
+-------------------code----------------------
+name: {
+  type: String,
+  required: true
+}
+-------------------code----------------------
+
+---
+
+### 10. Summary
+
+| Feature      | Referencing                 | Embedding                      |
+| ------------ | --------------------------- | ------------------------------ |
+| Relationship | Uses ObjectId reference     | Directly includes the document |
+| Querying     | Requires population         | No need for population         |
+| Performance  | Good for large, shared data | Faster read for related data   |
+| Redundancy   | Minimal                     | May have duplicate data        |
+| Independence | Documents separate          | Embedded depends on parent     |
+
+---
+
+**Next Topic:** Working with an **array of subdocuments** in Mongoose.
