@@ -1,0 +1,99 @@
+*** 1- Introduction ***
+**Lecture Notes: Authentication and Authorization in Vid.ly Application**
+
+---
+
+### 1. Overview
+
+Up to this point, the **Vid.ly** application includes API endpoints to manage:
+
+* Genres
+* Movies
+* Customers
+* Rentals
+
+The next step is to implement **authentication** and **authorization**, which are essential for most real-world applications.
+
+---
+
+### 2. Authentication vs. Authorization
+
+| Concept            | Definition                                                                                          | Example                                   |
+| ------------------ | --------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| **Authentication** | The process of verifying the user’s identity — confirming that the user is who they claim to be.    | Logging in using a username and password. |
+| **Authorization**  | The process of determining if an authenticated user has permission to perform a specific operation. | Allowing only admin users to delete data. |
+
+---
+
+### 3. Application Requirements
+
+1. **Authenticated users** (logged-in users) can perform operations that modify data.
+
+   * Example: Creating or updating a movie or genre.
+2. **Anonymous users** (not logged in) can only **read** data.
+3. **Admin users** have additional permissions:
+
+   * They can **delete** data (second level of authorization).
+
+---
+
+### 4. Endpoints to Implement
+
+To support authentication and authorization, two new endpoints are needed:
+
+| Purpose                 | HTTP Method | Endpoint      | Description                    |
+| ----------------------- | ----------- | ------------- | ------------------------------ |
+| **Register a new user** | `POST`      | `/api/users`  | Creates a new user (signup)    |
+| **Log in a user**       | `POST`      | `/api/logins` | Authenticates an existing user |
+
+---
+
+### 5. Why Use POST for Login?
+
+* Even though logging in doesn’t create or update an existing record in the traditional sense, in **RESTful design**, login can be modeled as creating a new **login request** or **login command**.
+* Thus, `POST /api/logins` is appropriate.
+* You may optionally store login records in MongoDB (e.g., for audit purposes).
+
+---
+
+### 6. Exercise: Implement User Registration API
+
+Implement an endpoint to **register new users**.
+
+**Endpoint:**
+`POST /api/users`
+
+**User Schema Fields:**
+
+* `name`: String
+* `email`: String
+* `password`: String
+
+**Special Requirement:**
+
+* In the schema definition, set the **email** field to be **unique**.
+
+  -------------------code----------------------
+  email: {
+    type: String,
+    unique: true
+  }
+  -------------------code----------------------
+
+  This ensures that no two users can register with the same email address.
+
+---
+
+### 7. Summary
+
+* Authentication = verifying identity.
+* Authorization = verifying permission.
+* Only authenticated users can modify data.
+* Only admin users can delete data.
+* Two main endpoints: `/api/users` (register) and `/api/logins` (login).
+* Use `POST` for both operations.
+* Ensure unique email addresses in MongoDB using the `unique` property.
+
+---
+
+Next step: Implement the **register new users API** in code.
