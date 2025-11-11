@@ -1,0 +1,150 @@
+*** 1- Modelling Relationships ***
+### Lecture Notes: Working with Related Objects in MongoDB
+
+#### 1. Introduction
+
+* In previous examples, we worked with single, self-contained documents.
+* In real-world applications, entities are often related.
+
+  * Example: A **course** has an **author**.
+  * An author is more than a name; it may include fields such as `name`, `website`, `image`, etc.
+* MongoDB allows two main approaches for modeling such relationships:
+
+  1. **Using References (Normalization)**
+  2. **Using Embedded Documents (Denormalization)**
+
+---
+
+#### 2. Approach 1: Using References (Normalization)
+
+* Each entity has its own collection:
+
+  * `authors` collection → stores author documents.
+  * `courses` collection → stores course documents with an **author ID reference**.
+* Example:
+
+  -------------------code----------------------
+  author: ObjectId("12345")
+  -------------------code----------------------
+* This means the course refers to an author document by its ID.
+
+**Key Points:**
+
+* In **relational databases**, relationships enforce data integrity.
+* In **MongoDB**, relationships are **not enforced**.
+
+  * MongoDB will not check if the referenced ID exists or is valid.
+* A course can have **multiple authors** by storing an array of author IDs.
+
+**Advantages:**
+
+* **Consistency:** There is a single source of truth for each author.
+
+  * Changing an author’s name automatically affects all referencing courses.
+
+**Disadvantages:**
+
+* **Performance:** Requires multiple queries.
+
+  * You must query the author separately when loading a course.
+
+---
+
+#### 3. Approach 2: Using Embedded Documents (Denormalization)
+
+* Instead of a separate collection, embed the author document directly inside the course document.
+* Example:
+
+  -------------------code----------------------
+  {
+    title: "Course A",
+    author: {
+      name: "Mosh",
+      website: "example.com"
+    }
+  }
+  -------------------code----------------------
+
+**Advantages:**
+
+* **Performance:** Only one query is needed to retrieve a course and its author.
+* Ideal when query speed is critical.
+
+**Disadvantages:**
+
+* **Inconsistency:**
+
+  * If an author’s name changes, it must be updated in multiple documents.
+  * If updates fail, data may become inconsistent.
+
+---
+
+#### 4. Trade-off Between Consistency and Performance
+
+| Approach                   | Consistency | Performance                 |
+| -------------------------- | ----------- | --------------------------- |
+| References (Normalization) | High        | Lower (needs extra queries) |
+| Embedded (Denormalization) | Lower       | High (fewer queries)        |
+
+* You must decide which is more important based on your application’s needs.
+* Always design your schema with **query requirements** in mind.
+
+---
+
+#### 5. Approach 3: Hybrid Approach
+
+* Combines both normalization and denormalization.
+* Example:
+
+  * Maintain a separate `authors` collection with full author details.
+  * In each `course` document, embed only **partial author data** (e.g., `id` and `name`).
+
+  -------------------code----------------------
+  {
+    title: "Course A",
+    author: {
+      id: ObjectId("12345"),
+      name: "Mosh"
+    }
+  }
+  -------------------code----------------------
+
+**Advantages:**
+
+* Balances **query performance** and **data consistency**.
+* Avoids full data duplication.
+* Useful for maintaining **data snapshots**.
+
+**Example Use Case:**
+
+* **E-commerce orders:**
+
+  * You want to store the product details (e.g., price) at the time of purchase.
+  * Even if the product price changes later, the order should retain the original data.
+
+---
+
+#### 6. Summary
+
+* **Normalization (References):**
+
+  * Pros: Data consistency, single source of truth.
+  * Cons: Slower queries, multiple lookups.
+* **Denormalization (Embedded Documents):**
+
+  * Pros: Faster reads, fewer queries.
+  * Cons: Risk of inconsistent data on updates.
+* **Hybrid Approach:**
+
+  * Mix of both methods for balance and flexibility.
+* The choice depends entirely on the **application’s design and query patterns**.
+
+---
+
+#### 7. Next Steps
+
+* The following lectures will cover practical implementation of:
+
+  1. Normalized relationships
+  2. Denormalized relationships
+  3. Hybrid structures
