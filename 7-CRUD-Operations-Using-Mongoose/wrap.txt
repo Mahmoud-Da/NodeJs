@@ -737,7 +737,7 @@ const courseSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
   isPublished: Boolean
 });
-```
+-------------------code----------------------
 
 **Explanation:**
 - `name`: String type property.
@@ -764,4 +764,76 @@ const courseSchema = new mongoose.Schema({
 
 **Next Step:**  
 Creating and saving documents based on the defined schema.
+
+
+*** 6- Models ***
+**Lecture Notes: Compiling Schemas into Models in Mongoose**
+
+**Overview:**
+After defining a schema that determines the structure of documents in MongoDB, the next step is to compile that schema into a **model**.  
+A model in Mongoose is a class from which we can create objects (documents) that will be stored in a MongoDB collection.
+
+---
+
+### 1. **Understanding Models**
+
+- A **schema** defines the shape of the documents.
+- A **model** acts as a **class** (blueprint) based on that schema.
+- Each instance (object) created from this class corresponds to a **document** in the database.
+
+**Analogy:**
+- **Class** → Blueprint (e.g., `Human`)
+- **Object** → Instance (e.g., `John`)
+
+In our application:
+- **Model (Class):** `Course`
+- **Object (Instance):** `nodeCourse`
+
+---
+
+### 2. **Creating a Model from a Schema**
+
+We use the `mongoose.model()` method, which takes two arguments:
+1. The **singular name** of the collection.
+2. The **schema** that defines the shape of documents in that collection.
+
+-------------------code----------------------
+const Course = mongoose.model('Course', courseSchema);
+-------------------code----------------------
+
+**Explanation:**
+- `'Course'` is the singular name of the collection (`courses` in MongoDB).
+- `courseSchema` is the schema defined earlier.
+- The result is a **class** called `Course`, following **PascalCase** naming convention.
+
+---
+
+### 3. **Creating an Object (Document) from the Model**
+
+Once the model is created, you can use it to create new document instances.
+
+-------------------code----------------------
+const course = new Course({
+  name: 'Node.js Course',
+  author: 'Mahmoud',
+  tags: ['node', 'backend'],
+  isPublished: true
+});
+-------------------code----------------------
+
+**Notes:**
+- The object `course` uses **camelCase** naming convention.
+- The `tags` field is an **array of strings**, something MongoDB supports natively.
+- The `date` field is omitted here because it already has a default value (`Date.now`).
+- In relational databases, modeling a structure like `tags` would require multiple tables (e.g., `Courses`, `Tags`, and a join table).  
+  In MongoDB, such complex structures can be embedded directly within a single document.
+
+---
+
+### 4. **Recap**
+
+1. Define a **schema** → describes document structure.  
+2. Compile the schema into a **model** → creates a class.  
+3. Create an **object** from the model → represents a MongoDB document.  
+4. The next step is saving this document to the database.
 
