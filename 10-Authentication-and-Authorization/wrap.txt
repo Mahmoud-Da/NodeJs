@@ -218,3 +218,269 @@ exports.validate = validateUser;
 ### 7. Next Step
 
 In the next lecture, a **route** will be added to **register new users** using this `User` model.
+
+
+*** 3- Registering Users ***
+**Lecture Notes: Creating the User Registration Route in Vid.ly Application**
+
+---
+
+### 1. Objective
+
+In this lecture, the goal is to **create a new API route to register users** in the application.
+This route will handle user validation, prevent duplicate registrations, and save new users in MongoDB.
+
+---
+
+### 2. Setting Up the Route File
+
+* Navigate to the **routes** folder.
+* Create a new file named **`users.js`**.
+* To save time, copy the **require statements** and the **first route** from `genres.js` and modify them for users.
+
+**Required Modules:**
+
+-------------------code----------------------
+const mongoose = require('mongoose');
+const express = require('express');
+const router = express.Router();
+const { User, validate } = require('../models/user');
+-------------------code----------------------
+
+---
+
+### 3. Defining the POST Route
+
+The route will handle **POST requests** for registering new users.
+
+**Basic structure:**
+
+-------------------code----------------------
+router.post('/', async (req, res) => {
+  // validation, duplicate check, saving new user
+});
+-------------------code----------------------
+
+Finally, export the router:
+
+-------------------code----------------------
+module.exports = router;
+-------------------code----------------------
+
+---
+
+### 4. Registering the Route in index.js
+
+To make the new route accessible, update the main entry file (`index.js`):
+
+-------------------code----------------------
+const users = require('./routes/users');
+app.use('/api/users', users);
+-------------------code----------------------
+
+This tells Express to use the users router for any endpoint starting with `/api/users`.
+
+---
+
+### 5. Implementing the Registration Logic
+
+Inside `users.js`, implement the route logic.
+
+**Steps:**
+
+#### a. Validate the Request
+
+Use the `validate` function from the user model to check if the input is valid.
+
+-------------------code----------------------
+const { error } = validate(req.body);
+if (error) return res.status(400).send(error.details[0].message);
+-------------------code----------------------
+
+If the input data (name, email, or password) is invalid, return a **400 Bad Request**.
+
+---
+
+#### b. Check for Existing User
+
+Before creating a new user, ensure that the email is not already registered.
+
+-------------------code----------------------
+let user = await User.findOne({ email: req.body.email });
+if (user) return res.status(400).send('User already registered.');
+-------------------code----------------------
+
+* `findOne()` looks up a document based on a field (email in this case).
+* If a user is found, return a 400 error.
+
+---
+
+#### c. Create and Save the User
+
+If validation passes and the user does not exist, create a new user object.
+
+-------------------code----------------------
+user = new User({
+  name: req.body.name,
+  email: req.body.email,
+  password: req.body.password
+});
+await user.save();
+res.send(user);
+-------------------code----------------------
+
+* The user is saved to the database.
+* The response returns the saved user object.
+
+---
+
+### 6. Testing the Route with Postman
+
+**Endpoint:**
+`POST http://localhost:3000/api/users`
+
+**Request Body (JSON):**
+
+-------------------code----------------------
+{
+  "name": "Mosh",
+  "email": "programmingwithmosh@gmail.com",
+  "password": "12345"
+}
+-------------------code----------------------
+
+**Test Results:**
+
+1. **Invalid Input** → returns `400 Bad Request` with the validation error message.
+
+   * Example: “Name length must be at least 5 characters long.”
+2. **Invalid Email** → returns `400 Bad Request`.
+3. **Missing Password** → returns `400 Bad Request`.
+4. **Valid Input** → returns `200 OK` with a user object containing `id`, `name`, `email`, and `password`.
+5. **Duplicate Registration** → returns `400 Bad Request` with the message “User already registered.”
+
+---
+
+### 7. Next Step
+
+Currently, the response includes the **password** field, which should not be returned to the client.
+In the **next lecture**, the response will be modified to **exclude sensitive data** such as the password.
+
+---
+
+### 8. Summary
+
+* Created `users.js` route for registering users.
+* Validated request data using Joi.
+* Checked if the user already exists with `findOne()`.
+* Saved new users in MongoDB.
+* Tested using Postman to ensure all validations work correctly.
+* Next step: sanitize response to hide sensitive information.
+
+
+## This error is happening because **your version of the MongoDB Node.js driver (used by Mongoose)** is **too old** for the version of MongoDB server you’re connecting to.
+
+MongoDB 5.0+ and later versions (especially 7.x) **removed support for the old “OP_QUERY” wire protocol**, and older MongoDB drivers still use it internally.
+So, when Mongoose tries to list collection indexes, MongoDB throws:
+
+> `Unsupported OP_QUERY command: listIndexes. The client driver may require an upgrade.`
+
+---
+
+### **What’s Happening**
+
+Your stack looks something like this:
+
+* **Mongoose** (older version, possibly 5.x or early 6.x)
+* **MongoDB Server** (modern, likely 6.x or 7.x)
+* Mongoose internally uses an old MongoDB Node driver that calls a deprecated “OP_QUERY” command.
+* The MongoDB server refuses it.
+
+---
+
+### **Solution**
+
+#### 1. Upgrade Mongoose to the latest version
+
+Run this command in your project root:
+
+-------------------code----------------------
+npm install mongoose@latest
+-------------------code----------------------
+
+That will automatically bring in a newer MongoDB Node.js driver compatible with MongoDB 7.x.
+
+---
+
+#### 2. (Optional but Recommended) Also update the MongoDB Node.js driver
+
+You can explicitly update it too, though Mongoose will include it:
+
+-------------------code----------------------
+npm install mongodb@latest
+-------------------code----------------------
+
+---
+
+#### 3. Verify your versions
+
+After installing, check:
+
+-------------------code----------------------
+npm list mongoose mongodb
+-------------------code----------------------
+
+You should see something like:
+
+-------------------code----------------------
+mongoose@8.x.x
+mongodb@6.x.x
+-------------------code----------------------
+
+These are fully compatible with MongoDB 7+.
+
+---
+
+#### 4. Restart the server
+
+After updates, restart nodemon:
+
+-------------------code----------------------
+rs
+-------------------code----------------------
+
+or manually stop and rerun:
+
+-------------------code----------------------
+nodemon index.js
+-------------------code----------------------
+
+---
+
+### **If You’re Using an Older MongoDB Server (e.g., 4.x)**
+
+Make sure your MongoDB service version matches the driver:
+
+* Old driver → old server
+* New driver → new server
+
+But since you’re on a modern local or Atlas instance, upgrading Mongoose is the correct fix.
+
+---
+
+### **Summary**
+
+| Issue                                                   | Cause                                                 | Fix                                                    |
+| ------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------ |
+| `MongoError: Unsupported OP_QUERY command: listIndexes` | Old MongoDB driver using deprecated OP_QUERY protocol | Upgrade Mongoose (and optionally the `mongodb` driver) |
+
+---
+
+**Command Summary:**
+
+-------------------code----------------------
+npm install mongoose@latest mongodb@latest
+nodemon index.js
+-------------------code----------------------
+
+That will fix the error and let your app connect to MongoDB properly.
