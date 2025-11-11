@@ -1048,3 +1048,106 @@ node index.js
 
 Next, the lecture will cover more advanced filtering techniques.
 
+
+
+*** 9- Comparison Query Operators ***
+
+---
+
+### Lecture: Comparison Operators in MongoDB
+
+#### Overview
+
+This lecture explains how to use **comparison operators** in MongoDB to build more complex queries using Mongoose. These operators allow filtering documents based on conditions such as equality, inequality, and value ranges.
+
+---
+
+### Comparison Operators in MongoDB
+
+MongoDB provides several standard comparison operators, all of which are also available in **Mongoose**.
+
+| Operator | Meaning                  | Example Description                                                             |
+| -------- | ------------------------ | ------------------------------------------------------------------------------- |
+| `$eq`    | Equal                    | Matches documents where the value equals a specified value                      |
+| `$ne`    | Not Equal                | Matches documents where the value is not equal                                  |
+| `$gt`    | Greater Than             | Matches documents where the value is greater than a specified value             |
+| `$gte`   | Greater Than or Equal To | Matches documents where the value is greater than or equal to a specified value |
+| `$lt`    | Less Than                | Matches documents where the value is less than a specified value                |
+| `$lte`   | Less Than or Equal To    | Matches documents where the value is less than or equal to a specified value    |
+| `$in`    | In                       | Matches documents where the value is in an array of specified values            |
+| `$nin`   | Not In                   | Matches documents where the value is not in an array of specified values        |
+
+---
+
+### Example 1: Equality
+
+To find all courses priced at **$10**:
+
+-------------------code----------------------
+Course.find({ price: 10 })
+-------------------code----------------------
+
+This retrieves documents where the `price` field equals 10.
+
+---
+
+### Example 2: Greater Than
+
+To find courses that cost **more than $10**:
+
+-------------------code----------------------
+Course.find({ price: { $gt: 10 } })
+-------------------code----------------------
+
+Explanation:
+
+* `price` is the field being compared.
+* `{ $gt: 10 }` uses an object to represent the condition "greater than 10".
+
+To include $10 in the results (greater than or equal to):
+
+-------------------code----------------------
+Course.find({ price: { $gte: 10 } })
+-------------------code----------------------
+
+---
+
+### Example 3: Range Query (Between Values)
+
+To find courses priced between **$10 and $20**:
+
+-------------------code----------------------
+Course.find({ price: { $gte: 10, $lte: 20 } })
+-------------------code----------------------
+
+This query matches all courses with prices from 10 to 20 inclusive.
+
+---
+
+### Example 4: Multiple Specific Values
+
+To find courses priced at **$10**, **$15**, or **$20**:
+
+-------------------code----------------------
+Course.find({ price: { $in: [10, 15, 20] } })
+-------------------code----------------------
+
+Explanation:
+
+* `$in` operator checks if `price` matches any value within the array `[10, 15, 20]`.
+
+---
+
+### Key Takeaway
+
+You don’t need to memorize MongoDB query syntax. Instead, think **logically**:
+
+* Use **objects** to express conditions.
+* Use **arrays** to represent multiple values.
+* Prefix operators with `$` to indicate MongoDB commands.
+
+---
+
+### Next Topic
+
+In the next lecture: **Logical Operators** in MongoDB.
