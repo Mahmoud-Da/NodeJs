@@ -2139,3 +2139,188 @@ By creating a reusable authentication middleware:
 * We avoid duplicating code in multiple route files.
 * We ensure all modifying operations are protected by authentication checks.
 * This leads to cleaner, safer, and more maintainable Express applications.
+
+
+*** 14- Protecting Routes ***
+### Lecture Notes: Applying Authentication Middleware Selectively in Express
+
+---
+
+#### **1. Background**
+
+* Previously, we created an authentication middleware (`auth.js`) that verifies JSON Web Tokens (JWTs) and ensures that only authenticated users can access protected API endpoints.
+* Now we must decide **where and how** to apply this middleware within our Express application.
+
+---
+
+#### **2. Applying Middleware Globally vs. Selectively**
+
+* In `index.js`, middleware functions can be applied globally using:
+
+  -------------------code----------------------
+  app.use(auth);
+  -------------------code----------------------
+
+  This would execute the middleware **before every route handler**.
+
+* **However**, not all API endpoints require authentication:
+
+  * **Public endpoints:**
+
+    * Registering a new user
+    * Logging in
+    * Retrieving a list of genres or customers
+  * **Protected endpoints:**
+
+    * Creating, updating, or deleting data
+
+* Therefore, applying `auth` globally is not ideal.
+  Instead, we should apply it **selectively** to specific routes that modify data.
+
+---
+
+#### **3. Selective Application Example**
+
+##### **In `genres.js`:**
+
+* Import the `auth` middleware at the top:
+
+  -------------------code----------------------
+  const auth = require('../middleware/auth');
+  -------------------code----------------------
+
+* Use it in the route definition:
+
+  -------------------code----------------------
+  router.post('/', auth, async (req, res) => {
+    const genre = new Genre({ name: req.body.name });
+    await genre.save();
+    res.send(genre);
+  });
+  -------------------code----------------------
+
+**Explanation:**
+
+* The `router.post()` method accepts multiple arguments:
+
+  1. The **route path** (`'/'`).
+  2. One or more **middleware functions** (e.g., `auth`).
+  3. The **route handler** function that executes if all previous middleware succeed.
+
+* Here, `auth` will run **before** the route handler.
+  If authentication fails, the route handler never executes.
+
+---
+
+#### **4. Testing the Middleware**
+
+**Step 1: Missing Token**
+
+* Send a `POST` request to `/api/genres` without any headers.
+* Response:
+
+  -------------------code----------------------
+  Status: 401 Unauthorized
+  Message: Access denied. No token provided.
+  -------------------code----------------------
+
+**Step 2: Invalid Token**
+
+* In Postman, go to the **Headers** tab.
+* Add:
+
+  -------------------code----------------------
+  Key: X-Auth-Token
+  Value: <invalid-token>
+  -------------------code----------------------
+* Send the request.
+* Response:
+
+  -------------------code----------------------
+  Status: 400 Bad Request
+  Message: Invalid token.
+  -------------------code----------------------
+
+**Step 3: Valid Token**
+
+* Get a valid JWT from the registration or login endpoint.
+* Add it to the headers:
+
+  -------------------code----------------------
+  Key: X-Auth-Token
+  Value: <valid-token>
+  -------------------code----------------------
+* Send the request without a valid body.
+* Response:
+
+  -------------------code----------------------
+  Status: 400 Bad Request
+  Reason: Missing required data (e.g., name property).
+  -------------------code----------------------
+* Add a proper request body:
+
+  -------------------code----------------------on
+  {
+    "name": "new genre"
+  }
+  -------------------code----------------------
+* Send again.
+* Response:
+
+  -------------------code----------------------
+  Status: 200 OK
+  Body: { "_id": "123...", "name": "new genre" }
+  -------------------code----------------------
+
+---
+
+#### **5. Summary of Responses**
+
+| Situation                 | Status | Message                           | Explanation                              |
+| ------------------------- | ------ | --------------------------------- | ---------------------------------------- |
+| No token provided         | 401    | Access denied. No token provided. | Request lacks authentication token       |
+| Invalid token provided    | 400    | Invalid token.                    | Token is malformed or expired            |
+| Valid token, missing data | 400    | Bad request (e.g., missing name)  | Authentication passed, but input invalid |
+| Valid token and data      | 200    | Success (returns created data)    | Authorized and valid request             |
+
+---
+
+#### **6. Exercise**
+
+Apply the `auth` middleware to **all route handlers** that modify data, such as:
+
+* `router.put()` for updating a resource
+* `router.delete()` for removing a resource
+* Any `router.post()` that creates a new entry
+
+Example:
+
+-------------------code----------------------
+router.put('/:id', auth, async (req, res) => { ... });
+router.delete('/:id', auth, async (req, res) => { ... });
+-------------------code----------------------
+
+---
+
+#### **7. Key Takeaways**
+
+* Use authentication middleware **selectively**, not globally.
+* Public routes should remain accessible without authentication.
+* Protected routes should always include the `auth` middleware.
+* Middleware order matters: it must precede the route handler in the route definition.
+* Testing through tools like Postman helps verify correct status codes and behavior.
+
+---
+
+#### **8. Final Structure Example**
+
+-------------------code----------------------
+middleware/
+ └── auth.js          ← JWT verification logic
+routes/
+ ├── genres.js        ← POST/PUT/DELETE use auth middleware
+ ├── users.js         ← Register endpoint (public)
+ └── auth.js          ← Login endpoint (public)
+-------------------code----------------------
+
+This approach ensures that only authorized users can perform data modifications while keeping essential endpoints publicly accessible.
