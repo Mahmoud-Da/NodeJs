@@ -735,3 +735,240 @@ In the next lecture, password **hashing** will be implemented to securely store 
 * Installed and used **Lodash** for cleaner object handling.
 * Used `_.pick()` to select safe fields for database input and client output.
 * Prepared the ground for **password hashing** in the next lecture.
+
+
+*** 5- Hashing Passwords ***
+### Lecture Notes: Hashing Passwords with bcrypt
+
+#### 1. Purpose
+
+In this lecture, we learn how to **securely store user passwords** by hashing them using the **bcrypt** library.
+Hashing protects passwords by converting them into an irreversible encrypted format.
+
+---
+
+#### 2. Installing bcrypt
+
+Run the following command in the terminal:
+
+-------------------code----------------------
+npm install bcrypt
+-------------------code----------------------
+
+*(Version used: 1.0.3)*
+
+bcrypt is a widely used and trusted library for password hashing in Node.js.
+
+---
+
+#### 3. Creating a Playground File
+
+To understand how bcrypt works, create a new file named `hash.js`.
+
+At the top of the file:
+
+-------------------code----------------------
+const bcrypt = require('bcrypt');
+-------------------code----------------------
+
+---
+
+#### 4. Understanding Salt
+
+A **salt** is a random string added to a password before hashing to ensure that:
+
+* Even if two users have the same password, their hashes will be different.
+* Attackers cannot easily match hashed passwords using precomputed tables.
+
+Example:
+
+* Password: `1234`
+* Salt: a random string added before hashing.
+* Result: different hashes each time, even for the same password.
+
+---
+
+#### 5. Generating a Salt
+
+Use the asynchronous method `bcrypt.genSalt()`:
+
+-------------------code----------------------
+async function run() {
+  const salt = await bcrypt.genSalt(10); // 10 = number of rounds
+  console.log(salt);
+}
+
+run();
+-------------------code----------------------
+
+Notes:
+
+* The higher the number of rounds, the stronger and slower the hashing process.
+* Default value: **10**
+* Always use the **asynchronous version** to avoid blocking Node.js’s single thread.
+
+---
+
+#### 6. Hashing a Password
+
+Once the salt is generated, use it to hash a password:
+
+-------------------code----------------------
+async function run() {
+  const salt = await bcrypt.genSalt(10);
+  const hashed = await bcrypt.hash('1234', salt);
+
+  console.log(salt);
+  console.log(hashed);
+}
+
+run();
+-------------------code----------------------
+
+Output:
+
+* The first line shows the generated salt.
+* The second line shows the hashed password, which includes the salt.
+
+The salt is embedded inside the hashed password so bcrypt can extract it later when verifying user credentials.
+
+---
+
+#### 7. Integrating Hashing into User Registration
+
+After testing, move this logic into the **user registration route** (`users.js`).
+
+At the top of the file:
+
+-------------------code----------------------
+const bcrypt = require('bcrypt');
+-------------------code----------------------
+
+Inside the route handler:
+
+-------------------code----------------------
+const salt = await bcrypt.genSalt(10);
+user.password = await bcrypt.hash(user.password, salt);
+await user.save();
+-------------------code----------------------
+
+Now, passwords will be stored in their hashed form in the database.
+
+---
+
+#### 8. Cleaning Up Old Users
+
+Before testing, delete the existing users collection because the old records contain plain text passwords:
+
+* Open MongoDB Compass.
+* Delete the **users** collection.
+
+---
+
+#### 9. Testing the Implementation
+
+1. Run the server:
+
+   -------------------code----------------------
+   nodemon index.js
+   -------------------code----------------------
+2. Send a **POST** request in **Postman** to register a new user.
+3. Check MongoDB Compass:
+
+   * The new user’s password should appear as a **hashed string**, not plain text.
+
+---
+
+#### 10. Summary
+
+* Installed and used bcrypt to hash passwords.
+* Learned about **salt** and how it enhances password security.
+* Integrated hashing into user registration.
+* Verified that passwords are now securely stored in the database.
+
+---
+
+#### 11. Next Step
+
+The next lecture will cover **authenticating users**, which involves verifying plain text passwords against the stored hashed passwords using bcrypt’s comparison method.
+
+
+## why if i make the number larger of the salt it takes too much time
+Excellent question — and very important for understanding **how password hashing works securely.**
+
+Let’s break it down clearly.
+
+---
+
+### 1. What `bcrypt.genSalt(10)` Does
+
+When you call:
+
+-------------------code----------------------
+bcrypt.genSalt(10);
+-------------------code----------------------
+
+the number you pass (`10`) is called the **cost factor** or **number of rounds**.
+
+This number controls **how many times bcrypt internally runs its hashing algorithm** on the password.
+It doesn’t mean “10 random characters” — it means **how computationally expensive the hashing process will be.**
+
+---
+
+### 2. Why a Larger Number Takes More Time
+
+Each time you increase the cost factor by 1,
+bcrypt **doubles** the amount of computation needed.
+
+So roughly:
+
+* `10` → baseline speed (used by most apps)
+* `11` → ~2× slower than 10
+* `12` → ~4× slower than 10
+* `13` → ~8× slower than 10
+* and so on...
+
+That’s because bcrypt uses an **exponential scaling algorithm**.
+The more rounds, the more CPU cycles are required to calculate the hash.
+
+---
+
+### 3. Why That’s Actually a Good Thing
+
+This delay is **intentional and desirable** — it makes it much harder for attackers to guess or brute-force passwords.
+
+If a hacker tries to crack passwords by testing millions of guesses, bcrypt’s computational cost slows them down drastically.
+
+---
+
+### 4. Choosing the Right Number
+
+Typical values:
+
+* **10** → standard for production use (fast and secure)
+* **12** → more secure, slightly slower
+* **14+** → for high-security systems, but hashing can take noticeable time (hundreds of milliseconds per password)
+
+You should choose a number that:
+
+* Is **slow enough** to deter attackers
+* But **fast enough** to not annoy legitimate users during login or signup
+
+---
+
+### 5. Summary
+
+| Cost Factor | Approx Relative Time | Notes                      |
+| ----------- | -------------------- | -------------------------- |
+| 8           | Fast, less secure    | For testing only           |
+| 10          | Standard             | Common default             |
+| 12          | Strong security      | Slower but safe            |
+| 14+         | Very secure          | Might delay authentication |
+
+---
+
+So in short:
+
+> Increasing the number in `bcrypt.genSalt()` makes the hashing **computationally harder**,
+> which is **why it takes more time** — and also **why it’s more secure**.
+
