@@ -837,3 +837,103 @@ const course = new Course({
 3. Create an **object** from the model → represents a MongoDB document.  
 4. The next step is saving this document to the database.
 
+
+*** 7- Saving a Document ***
+**Lecture Notes: Saving Documents in MongoDB Using Mongoose**
+
+**Overview:**
+In this lecture, the focus is on saving a Mongoose object (document) into a MongoDB database. This process is asynchronous and involves working with promises.
+
+---
+
+### 1. **Saving a Document**
+
+After creating a `course` object, we can save it to the database using the `save()` method:
+
+-------------------code----------------------
+const result = await course.save();
+-------------------code----------------------
+
+- The `save()` method performs an **asynchronous operation**.
+- It returns a **promise** that resolves to the actual document saved in the database.
+- Once saved, MongoDB automatically assigns a **unique identifier** (`_id`) to the document.
+
+---
+
+### 2. **Using an Async Function**
+
+Since `await` can only be used inside an `async` function, the saving process is placed inside one:
+
+-------------------code----------------------
+async function createCourse() {
+  const course = new Course({
+    name: 'Node.js Course',
+    author: 'Mahmoud',
+    tags: ['node', 'backend'],
+    isPublished: true
+  });
+
+  const result = await course.save();
+  console.log(result);
+}
+
+createCourse();
+-------------------code----------------------
+
+**Explanation:**
+- The `createCourse()` function creates and saves the course.
+- After saving, the `result` variable holds the document that was inserted into MongoDB.
+- The document now includes the automatically generated `_id` field.
+
+---
+
+### 3. **Running the Application**
+
+Run the application using Node instead of Nodemon:
+
+-------------------code----------------------bash
+node index.js
+-------------------code----------------------
+
+**Reason:**  
+Using Nodemon would re-run the script each time a small change is made, which could create duplicate documents in the database.
+
+Once executed:
+- The course document is stored in the **MongoDB database**.
+- You can confirm this in **MongoDB Compass** under:
+  - Database: `playground`
+  - Collection: `courses`
+
+You should see the saved document, including the `_id` assigned by MongoDB.
+
+---
+
+### 4. **Adding Another Document**
+
+To create another document:
+1. Modify the course data in the code:
+
+-------------------code----------------------
+const course = new Course({
+  name: 'Angular Course',
+  author: 'Mahmoud',
+  tags: ['angular', 'frontend'],
+  isPublished: true
+});
+-------------------code----------------------
+
+2. Save it again with the same function.
+
+After running the script again:
+- A second document will appear in the `courses` collection.
+
+---
+
+### 5. **Summary**
+
+- `save()` is asynchronous and returns a promise.
+- MongoDB automatically creates a unique `_id` for each document.
+- No need to predefine or script tables as in relational databases.
+- MongoDB collections grow dynamically as new documents are added.
+- Next, you will learn how to **query documents** from the database.
+
