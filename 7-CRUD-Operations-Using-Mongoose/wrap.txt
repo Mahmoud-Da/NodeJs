@@ -1925,3 +1925,154 @@ Four courses:
 ### Next Topic
 
 The next lecture will cover **how to update documents in MongoDB using Mongoose methods.**
+
+
+*** 17- Updating a Document- Query First ***
+### Lecture: Updating Documents in MongoDB – Query First Approach
+
+#### Objective
+
+Learn how to update documents in a MongoDB database using **Mongoose** with the **query first** approach.
+
+---
+
+### Step 1: Overview of Update Methods
+
+There are **two main ways** to update a document in MongoDB:
+
+1. **Query First**
+
+   * Find the document using `findById`.
+   * Modify its properties.
+   * Call the `save()` method to update it.
+
+2. **Update First**
+
+   * Directly update the document in the database without retrieving it first.
+   * Optionally return the updated document.
+
+This lecture focuses on the **Query First** approach.
+
+---
+
+### Step 2: Define the Function
+
+Create an asynchronous function called `updateCourse` that takes a course ID as a parameter.
+
+-------------------code----------------------
+async function updateCourse(id) {
+  const course = await Course.findById(id);
+  if (!course) return;
+
+  course.isPublished = true;
+  course.author = 'Another Author';
+
+  const result = await course.save();
+  console.log(result);
+}
+-------------------code----------------------
+
+**Explanation:**
+
+* `Course.findById(id)` retrieves the document with the specified ID.
+* If no course is found, the function returns early.
+* Otherwise, the desired properties are modified.
+* The `save()` method commits those changes to the database.
+
+---
+
+or we can use the set method 
+-------------------code----------------------
+async function updateCourse(id) {
+  const course = await Course.findById(id);
+  if (!course) return;
+
+  course.set({
+    isPublished: true,
+    author: 'Another Author'
+  });
+
+  const result = await course.save();
+  console.log(result);
+}
+-------------------code----------------------
+
+### Step 3: Steps Breakdown
+
+1. **Find the document**
+
+   -------------------code----------------------
+   const course = await Course.findById(id);
+   -------------------code----------------------
+
+   Retrieves the target document.
+
+2. **Check existence**
+
+   -------------------code----------------------
+   if (!course) return;
+   -------------------code----------------------
+
+   Ensures that a valid course exists before attempting to modify it.
+
+3. **Modify properties**
+
+   -------------------code----------------------
+   course.isPublished = true;
+   course.author = 'Another Author';
+   -------------------code----------------------
+
+   Updates the desired fields in memory.
+
+4. **Save the changes**
+
+   -------------------code----------------------
+   const result = await course.save();
+   console.log(result);
+   -------------------code----------------------
+
+   Saves the modifications back to MongoDB and logs the updated document.
+
+---
+
+### Step 4: Run the Function
+
+1. Copy a valid course ID from **MongoDB Compass**.
+2. Pass it into the `updateCourse` function when calling it:
+
+   -------------------code----------------------
+   updateCourse('64abc1234f56d7890ef12345');
+   -------------------code----------------------
+3. Execute the script:
+
+   -------------------code----------------------
+   node updateCourse.js
+   -------------------code----------------------
+
+---
+
+### Step 5: Expected Output
+
+In the terminal, you should see the updated document:
+
+-------------------code----------------------
+{
+  _id: '64abc1234f56d7890ef12345',
+  name: 'Node Course',
+  author: 'Another Author',
+  isPublished: true,
+  ...
+}
+-------------------code----------------------
+
+---
+
+### Step 6: Key Takeaways
+
+* **Query First** involves:
+
+  1. Retrieving the document.
+  2. Making local modifications.
+  3. Saving changes using `.save()`.
+* It’s a simple and clear approach, especially useful when you need to perform validation or apply logic before saving.
+* In the next lecture, the **Update First** approach will be introduced to modify documents directly in the database.
