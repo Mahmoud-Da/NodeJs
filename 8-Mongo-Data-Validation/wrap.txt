@@ -924,3 +924,176 @@ router.get('/:id', async (req, res) => {
 **Result:**
 All endpoints now use MongoDB via Mongoose.
 The project is successfully migrated from an in-memory array to a fully persistent database-backed API.
+
+*** 8- Project- Build the Customers API ***
+---
+
+### **Building the Customers Endpoint**
+
+#### **1. Objective**
+
+Create an endpoint to manage customers in the Vidly project using **Express**, **Mongoose**, and **Joi**.
+
+Each customer has three properties:
+
+* `isGold` (Boolean)
+* `name` (String)
+* `phone` (String)
+
+---
+
+### **2. Setting Up the Customers Module**
+
+#### **Step 1: Create a new route file**
+
+* File: `routes/customers.js`
+* This module will contain all routes related to customers.
+
+#### **Step 2: Load the customers route in `index.js`**
+
+-------------------code----------------------
+const customers = require('./routes/customers');
+app.use('/api/customers', customers);
+-------------------code----------------------
+
+This approach keeps route logic modular and prevents `index.js` from being cluttered.
+
+---
+
+### **3. Creating the Customer Model**
+
+In `customers.js`, import required packages and define the schema.
+
+-------------------code----------------------
+const mongoose = require('mongoose');
+const express = require('express');
+const Joi = require('joi');
+const router = express.Router();
+-------------------code----------------------
+
+#### **Schema definition**
+
+-------------------code----------------------
+const Customer = mongoose.model('Customer', new mongoose.Schema({
+  isGold: {
+    type: Boolean,
+    default: false
+  },
+  name: {
+    type: String,
+    required: true,
+    minlength: 5,
+    maxlength: 50
+  },
+  phone: {
+    type: String,
+    required: true,
+    minlength: 5,
+    maxlength: 50
+  }
+}));
+-------------------code----------------------
+
+**Notes:**
+
+* Default value for `isGold` is `false`.
+* Both `name` and `phone` are required strings.
+* Standardized string length between **5** and **50** characters.
+
+---
+
+### **4. Defining Route Handlers**
+
+#### **a. GET `/api/customers`**
+
+Retrieve all customers from the database.
+
+-------------------code----------------------
+router.get('/', async (req, res) => {
+  const customers = await Customer.find().sort('name');
+  res.send(customers);
+});
+-------------------code----------------------
+
+---
+
+#### **b. POST `/api/customers`**
+
+Add a new customer after validating input.
+
+-------------------code----------------------
+router.post('/', async (req, res) => {
+  const { error } = validateCustomer(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+
+  let customer = new Customer({
+    name: req.body.name,
+    phone: req.body.phone,
+    isGold: req.body.isGold
+  });
+
+  customer = await customer.save();
+  res.send(customer);
+});
+-------------------code----------------------
+
+---
+
+### **5. Validation Function with Joi**
+
+Define input validation schema for customers.
+
+-------------------code----------------------
+function validateCustomer(customer) {
+  const schema = Joi.object({
+    name: Joi.string().min(5).max(50).required(),
+    phone: Joi.string().min(5).max(50).required(),
+    isGold: Joi.boolean()
+  });
+
+  return schema.validate(customer);
+}
+-------------------code----------------------
+
+**Note on Duplication:**
+
+* There is some overlap between the **Mongoose schema** and the **Joi schema**, but that’s acceptable.
+* Mongoose is for database-level validation, while Joi is for request-level validation.
+* These validation rules rarely change, so the duplication is minor and manageable.
+
+---
+
+### **6. Exporting the Router**
+
+At the bottom of `customers.js`:
+
+-------------------code----------------------
+module.exports = router;
+-------------------code----------------------
+
+---
+
+### **7. Next Steps (Exercise)**
+
+Implement the remaining route handlers (similar to the genres module):
+
+* **PUT** `/api/customers/:id` → Update a customer.
+* **DELETE** `/api/customers/:id` → Delete a customer.
+* **GET** `/api/customers/:id` → Retrieve a single customer.
+
+---
+
+### **8. Summary**
+
+| Operation         | Method | Route                | Description                         |
+| ----------------- | ------ | -------------------- | ----------------------------------- |
+| Get all customers | GET    | `/api/customers`     | Retrieve all customers              |
+| Add a customer    | POST   | `/api/customers`     | Add a new customer after validation |
+| Update customer   | PUT    | `/api/customers/:id` | Update an existing customer         |
+| Delete customer   | DELETE | `/api/customers/:id` | Remove a customer                   |
+| Get one customer  | GET    | `/api/customers/:id` | Retrieve a customer by ID           |
+
+---
+
+**Result:**
+A new **customers API** is created with proper validation, database integration, and clean modular structure, following the same architectural pattern as the **genres** module.
