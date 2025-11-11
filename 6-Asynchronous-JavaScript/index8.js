@@ -1,16 +1,24 @@
 console.log("Before");
-getUser(1, getRepositoriesForUser);
+
+// getUser(1, (user) => {
+//   getRepositories(user.githubUsername, (repos) => {
+//     getCommits(repos[0], (commits) => {
+//       console.log(commits);
+//       // Callback Hell
+//     });
+//   });
+// });
+
+const promise = getUser(1);
+promise.then((user) => console.log(user));
+
+getUser(1)
+  .then((user) => getRepositories(user.gitHubUsername))
+  .then((repos) => getCommits(repos[0]))
+  .then((commits) => console.log(commits))
+  .catch((err) => console.log("Error:", err.message));
+
 console.log("After");
-
-getUser(1, (user) => {
-  getRepositories(user.githubUsername, (repos) => {
-    getCommits(repos[0], (commits) => {
-      console.log(commits);
-      // Callback Hell
-    });
-  });
-});
-
 function getUser(id) {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
