@@ -2648,4 +2648,155 @@ This means:
 
 ---
 
-Would you like me to show you an example of how to configure HTTPS using **Nginx + Express** (the standard production method)?
+*** 17- Role-based Authorization ***
+**Lecture Notes: Implementing Role-Based Authorization**
+
+---
+
+### 1. **Objective**
+
+Enhance the authentication and authorization system to support **role-based access control (RBAC)**, where only admin users can perform certain operations (e.g., deleting data).
+
+---
+
+### 2. **Updating the User Model**
+
+* Go to the **User Schema**.
+* Currently contains: `name`, `email`, `password`.
+* Add a new property:
+
+-------------------code----------------------
+isAdmin: {
+  type: Boolean,
+  default: false
+}
+-------------------code----------------------
+
+This property will determine whether a user has administrative privileges.
+
+---
+
+### 3. **Assigning an Admin User**
+
+* Open **MongoDB Compass**.
+* Select a user document to promote to admin.
+* Add a new field:
+  `isAdmin: true`
+  (Ensure the type is **Boolean**, not string.)
+* Save the change using **Apply Update**.
+
+---
+
+### 4. **Including isAdmin in JWT**
+
+When an admin user logs in, we include their `isAdmin` status in the JWT payload.
+
+**Reason:**
+This allows the server to know if a user is an admin without querying the database every time.
+
+**Security Note:**
+The JWT includes a digital signature.
+A malicious user cannot alter the `isAdmin` value because doing so would invalidate the signature (which requires the private key stored on the server).
+
+**Implementation:**
+In the user model where the authentication token is generated:
+
+-------------------code----------------------
+generateAuthToken() {
+  const token = jwt.sign(
+    { _id: this._id, isAdmin: this.isAdmin },
+    config.get('jwtPrivateKey')
+  );
+  return token;
+}
+-------------------code----------------------
+
+This ensures the `isAdmin` flag is included in the token payload.
+
+---
+
+### 5. **Creating the Admin Middleware**
+
+Create a new middleware file:
+`middleware/admin.js`
+
+**Purpose:** Check if the current user is an admin before allowing access to certain routes.
+
+-------------------code----------------------
+module.exports = function (req, res, next) {
+  // Authorization middleware runs before this and sets req.user
+  if (!req.user.isAdmin)
+    return res.status(403).send('Access denied.');
+
+  next();
+};
+-------------------code----------------------
+
+**Explanation:**
+
+* The `auth` middleware ensures the user is authenticated.
+* The `admin` middleware ensures the authenticated user has admin privileges.
+
+---
+
+### 6. **HTTP Status Codes Clarification**
+
+* **401 Unauthorized:**
+  Used when the client fails to provide a valid JWT.
+  The user can try again with valid credentials.
+
+* **403 Forbidden:**
+  Used when the client provides a valid JWT but lacks sufficient privileges.
+  This means the request should not be retried.
+
+---
+
+### 7. **Applying Admin Middleware to Routes**
+
+In the route file (e.g., `routes/genres.js`), apply both `auth` and `admin` middlewares to protected routes.
+
+Example for the DELETE method:
+
+-------------------code----------------------
+router.delete('/:id', [auth, admin], async (req, res) => {
+  const genre = await Genre.findByIdAndRemove(req.params.id);
+  if (!genre)
+    return res.status(404).send('The genre with the given ID was not found.');
+
+  res.send(genre);
+});
+-------------------code----------------------
+
+**Middleware execution order:**
+
+1. `auth` → Verifies JWT and sets `req.user`.
+2. `admin` → Checks if `req.user.isAdmin` is true.
+3. Route handler executes only if both pass.
+
+**Importing the middleware:**
+
+-------------------code----------------------
+const admin = require('../middleware/admin');
+-------------------code----------------------
+
+---
+
+### 8. **Testing**
+
+* Log in as a **non-admin user** → Deletion should return `403 Access denied`.
+* Log in as an **admin user** → Deletion should succeed.
+
+---
+
+### **Summary**
+
+| Step | Description                                                      |
+| ---- | ---------------------------------------------------------------- |
+| 1    | Add `isAdmin` field to user schema                               |
+| 2    | Set a user as admin in MongoDB                                   |
+| 3    | Include `isAdmin` in JWT payload                                 |
+| 4    | Create `admin` middleware                                        |
+| 5    | Use `auth` and `admin` middlewares together in restricted routes |
+| 6    | Use 401 for unauthorized and 403 for forbidden cases             |
+
+This structure allows secure and efficient **role-based authorization** in your application.
