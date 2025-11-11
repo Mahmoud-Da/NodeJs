@@ -1097,3 +1097,94 @@ Implement the remaining route handlers (similar to the genres module):
 
 **Result:**
 A new **customers API** is created with proper validation, database integration, and clean modular structure, following the same architectural pattern as the **genres** module.
+
+*** 9- Restructuring the Project ***
+
+---
+
+### **Lecture Notes: Applying the Single Responsibility Principle (SRP)**
+
+#### **1. Initial Structure**
+
+* In the **vid.ly** application, the `customers` module contains:
+
+  * Definition of the **customer model**
+  * **Route handlers** for customer operations
+  * **Validation function** for customer data
+* Total lines of code: **86 lines**.
+* Even though the current customer model is simple, in real-world applications it would be more complex, making this module grow significantly.
+
+#### **2. Identifying the Problem**
+
+* The current module mixes **routing logic**, **model definition**, and **validation**.
+* This violates the **Single Responsibility Principle (SRP)** — each module should handle only one responsibility.
+* Since `customers.js` is part of the **routes** folder, it should only define and handle **Express routes**, not model or validation logic.
+
+#### **3. Applying the Single Responsibility Principle**
+
+* To separate concerns, create a **models** folder.
+* Inside the folder, create a new file:
+  **`models/customer.js`**
+* Move the **customer model definition** from `routes/customers.js` to this new file.
+
+#### **4. Handling Dependencies**
+
+* The new file requires **Mongoose** (for model definition) and **Joi** (for validation).
+* Copy the `require()` statements for both from the old module into `models/customer.js`.
+
+#### **5. Moving the Validation Function**
+
+* Move the **validateCustomer** function from `customers.js` to `models/customer.js`.
+* Now, the model file (`customer.js`) includes:
+
+  * The Mongoose schema and model
+  * The validation function for customer objects
+
+#### **6. Exporting the Model and Validation Function**
+
+* At the end of `models/customer.js`, export both components:
+
+  -------------------code----------------------
+  module.exports.Customer = Customer;
+  module.exports.validate = validateCustomer;
+  -------------------code----------------------
+
+  Or, using object shorthand:
+
+  -------------------code----------------------
+  module.exports = { Customer, validate: validateCustomer };
+  -------------------code----------------------
+
+#### **7. Updating the Customers Route Module**
+
+* In `routes/customers.js`:
+
+  * Remove the **Joi import** (no longer needed).
+  * Import the new module using destructuring:
+
+    -------------------code----------------------
+    const { Customer, validate } = require('../models/customer');
+    -------------------code----------------------
+* This avoids repetitive syntax like `customerModule.Customer` or `customerModule.validate`.
+
+#### **8. Code Cleanup**
+
+* Replace all instances of `validateCustomer` with `validate` for clarity.
+* The updated `customers.js` module now:
+
+  * Contains **only Express route handlers**.
+  * No longer mixes model or validation logic.
+* Lines of code reduced from **86** to about **57**, resulting in cleaner and more maintainable code.
+
+#### **9. Exercise**
+
+* Apply the same process to the **genres** module:
+
+  * Move the **genre model** from `routes/genres.js` to `models/genre.js`.
+  * Export both the model and validation function.
+  * Update the routes file to import them cleanly.
+
+---
+
+**Key Takeaway:**
+Separating the **model**, **validation**, and **routing** logic improves maintainability, readability, and follows the **Single Responsibility Principle**, keeping each module focused on a single purpose.
