@@ -1269,3 +1269,93 @@ module.exports = router;
 * It has **three parts**: header, payload, and signature.
 * It enables **stateless authentication**, meaning the server doesn’t need to keep a session for each user.
 * The next step will be implementing JWT generation on the server and sending it to the client upon login.
+
+*** 9- Generating Authentication Tokens ***
+
+### Lecture Notes: Generating JSON Web Tokens (JWT) in Node.js
+
+#### 1. Installing the JWT Library
+
+* On the [jwt.io](https://jwt.io) website, you can see libraries for working with JWTs in different programming languages (e.g., .NET, Python, Node.js).
+* In Node.js, install the JWT package by running in the terminal:
+
+  -------------------code----------------------
+  npm install jsonwebtoken@8.1.1
+  -------------------code----------------------
+
+#### 2. Importing the Library
+
+* In the **auth module**, import the library at the top of the file:
+
+  -------------------code----------------------
+  const jwt = require('jsonwebtoken');
+  -------------------code----------------------
+
+#### 3. Creating a Token
+
+* Inside the route handler (the authentication endpoint), create a JWT **before returning the response**.
+* Use the `jwt.sign()` method:
+
+  -------------------code----------------------
+  const token = jwt.sign({ _id: user._id }, 'jwtPrivateKey');
+  -------------------code----------------------
+
+  * **First argument (payload):**
+
+    * The data you want to include inside the token.
+    * In this example, it is an object containing one property:
+
+      -------------------code----------------------
+      { _id: user._id }
+      -------------------code----------------------
+    * This allows the client or the server to identify the user based on their database ID.
+
+  * **Second argument (private key):**
+
+    * A secret key used to generate the **digital signature**.
+    * For now, it’s hardcoded as `'jwtPrivateKey'`.
+    * In real-world applications, you **must not store secrets in the source code**.
+    * Later, this key will be stored in an **environment variable** for security.
+
+#### 4. Returning the Token
+
+* Once the token is created, send it as the response to the client:
+
+  -------------------code----------------------
+  res.send(token);
+  -------------------code----------------------
+* This token will be used by the client for future API calls to authenticate requests.
+
+#### 5. Testing the Token
+
+* Open **Postman** (or any API testing tool).
+* Send a valid **email** and **password** to the `/api/auth` endpoint.
+* The response should contain a long string — this is your JWT.
+
+#### 6. Inspecting the Token
+
+* Copy the token and visit **[jwt.io](https://jwt.io)**.
+* In the **debugger** section:
+
+  * Delete the existing example token.
+  * Paste your generated token.
+* You will see the **decoded payload**, which includes:
+
+  -------------------code----------------------
+  {
+    "_id": "userObjectIdFromMongoDB",
+    "iat": 1731000000
+  }
+  -------------------code----------------------
+
+  * `_id`: The MongoDB user ID.
+  * `iat`: “Issued At” — a timestamp showing when the token was created.
+  * This helps determine the token’s age and validity period.
+
+#### 7. Summary
+
+* Installed and imported the `jsonwebtoken` library.
+* Created a JWT with `jwt.sign()` using a payload and private key.
+* Returned the generated token to the client.
+* Verified the token’s contents on **jwt.io**.
+* Next step: **Move the private key to an environment variable** for improved security.
