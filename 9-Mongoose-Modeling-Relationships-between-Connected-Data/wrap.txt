@@ -1215,3 +1215,170 @@ In the following lecture, an **NPM package** will be introduced to simulate tran
 * Understand the need for **transaction safety** when performing multiple database updates.
 
 ---
+
+
+*** 8- Transactions ***
+---
+
+## Lecture Notes: Implementing Transactions in MongoDB with Fawn
+
+### 1. Introduction to Transactions
+
+In relational databases such as **SQL Server** or **MySQL**, a **transaction** is a group of operations that must be executed as a single unit:
+
+* Either **all operations succeed**, and the database is updated.
+* Or, if **one operation fails**, all previous operations are **rolled back**, leaving the database unchanged.
+
+This ensures **data consistency**.
+
+---
+
+### 2. Transactions in MongoDB
+
+MongoDB does **not** natively support transactions in the same way as relational databases (at least in standalone setups).
+Instead, MongoDB uses a technique called the **Two-Phase Commit**, which ensures that multiple operations either complete together or not at all.
+
+To learn more about this mechanism:
+
+* Reference: *MongoDB Documentation → Perform Two-Phase Commits.*
+
+However, the two-phase commit process is complex and beyond the scope of this course.
+Instead, a library named **Fawn** is introduced, which **simulates transactions** in Mongoose using this two-phase commit internally.
+
+---
+
+### 3. Installing and Setting Up Fawn
+
+#### Installation
+
+-------------------code----------------------
+npm install fawn
+-------------------code----------------------
+
+Version used: **2.1.5**
+
+#### Initialization
+
+In the `rentals.js` file:
+
+-------------------code----------------------
+const Fawn = require('fawn');
+Fawn.init(mongoose);
+-------------------code----------------------
+
+* `Fawn` is a class.
+* You must call `Fawn.init()` and pass the `mongoose` object to initialize it.
+
+---
+
+### 4. Using Fawn to Create a Transaction
+
+Previously, the code explicitly:
+
+1. Created and saved a rental document.
+2. Decremented the movie stock count.
+3. Saved the movie again.
+
+Now, both steps will be handled **as a single transaction** using Fawn.
+
+#### Creating a Transaction Task
+
+-------------------code----------------------
+try {
+  new Fawn.Task()
+    .save('rentals', rental) // 1. Save rental
+    .update('movies', { _id: movie._id }, {
+      $inc: { numberInStock: -1 } // 2. Decrement stock
+    })
+    .run(); // Execute the transaction
+}
+catch (ex) {
+  res.status(500).send('Something failed.');
+}
+-------------------code----------------------
+
+**Explanation:**
+
+* `Fawn.Task()` creates a new transaction-like task.
+* `.save()` and `.update()` define operations to perform.
+* Collection names (e.g., `'rentals'`, `'movies'`) must match MongoDB’s actual lowercase collection names.
+* `.run()` executes all operations as one atomic unit.
+* If anything fails, no operation is applied.
+* Wrapped in a **try-catch block** to handle exceptions.
+
+---
+
+### 5. Error Handling and Logging
+
+If a transaction fails:
+
+* The server responds with **HTTP 500 (Internal Server Error)**.
+* In a real-world application, the exception should be **logged** for later investigation.
+
+Error handling and logging are covered in a separate course section.
+
+---
+
+### 6. Demonstration and Verification
+
+#### Step 1: Check Current Stock
+
+Before creating a rental:
+
+* The movie in the database shows `numberInStock = 8`.
+
+#### Step 2: Create a Rental (Postman)
+
+* Send a POST request to `/api/rentals` with valid `customerId` and `movieId`.
+
+#### Step 3: Verify Transaction
+
+* Response shows the new rental with properties such as `_id`, `customer`, `movie`, and `dateOut`.
+* After refreshing the movies collection in MongoDB Compass,
+  `numberInStock` becomes **7**, confirming that the transaction succeeded.
+
+---
+
+### 7. Understanding Default Values in Mongoose
+
+After running the transaction:
+
+* The rental document contains `_id` and `dateOut`, even though these weren’t set manually.
+
+**Reason:**
+
+* These values are automatically assigned by **Mongoose**, not MongoDB.
+* Mongoose uses the schema definition to:
+
+  * Generate `_id` before saving the document.
+  * Set default values such as the current date for `dateOut`.
+
+---
+
+### 8. Fawn’s Internal Mechanism
+
+After executing a Fawn transaction, a new collection appears in the database.
+This collection is automatically created and managed by Fawn.
+
+**Purpose:**
+
+* Fawn temporarily stores transaction metadata in this collection while operations are in progress.
+* Once all operations complete successfully, the corresponding document is deleted.
+* This mechanism simulates **two-phase commits** within MongoDB.
+
+---
+
+### 9. Key Takeaways
+
+* **Transactions** ensure that multiple operations succeed or fail together.
+* **MongoDB** lacks native transactions like relational databases, but **Fawn** simulates them using a **two-phase commit**.
+* **Fawn workflow:**
+
+  1. Initialize with `Fawn.init(mongoose)`.
+  2. Chain operations with `.save()` and `.update()`.
+  3. Finalize with `.run()`.
+* Always **wrap transactions in try-catch blocks** for safety.
+* Mongoose automatically sets default values like `_id` and `dateOut`.
+* Fawn creates an internal collection to manage transaction states.
+
+---
