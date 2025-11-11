@@ -709,3 +709,218 @@ Schema type properties like `lowercase`, `trim`, `get`, and `set` help ensure da
 ---
 
 Next lecture: **Schema Type Options — Immutable Properties and Aliases**.
+
+
+**** 7- Project- Add Persistence to Genres API ***
+---
+
+### **Connecting the Vidly Project to MongoDB Using Mongoose**
+
+#### **1. Transition from In-Memory Array to MongoDB**
+
+* Previously, the *genres* module in the Vidly project used an **array** to store genres.
+* Now that we’re using **MongoDB** and **Mongoose**, we will:
+
+  * Remove the array.
+  * Replace all array operations (`get`, `post`, `put`, `delete`) with database operations.
+
+---
+
+### **2. Setting Up Mongoose**
+
+#### **Step 1: Install Mongoose**
+
+-------------------code----------------------
+npm install mongoose
+-------------------code----------------------
+
+#### **Step 2: Connect to MongoDB**
+
+* The connection should be made **once** at the **application level** (not in route modules).
+
+* In `index.js`:
+
+  -------------------code----------------------
+  const mongoose = require('mongoose');
+
+  mongoose.connect('mongodb://localhost/vidly')
+    .then(() => console.log('Connected to MongoDB...'))
+    .catch(err => console.error('Could not connect to MongoDB...', err));
+  -------------------code----------------------
+
+* We connect once when the app starts.
+  Each route module (e.g., `genres.js`) should only define and use models, not open new connections.
+
+---
+
+### **3. Creating the Genre Schema and Model**
+
+#### **In `genres.js`:**
+
+1. Import Mongoose:
+
+   -------------------code----------------------
+   const mongoose = require('mongoose');
+   -------------------code----------------------
+
+2. Define the schema:
+
+   -------------------code----------------------
+   const genreSchema = new mongoose.Schema({
+     name: {
+       type: String,
+       required: true,
+       minlength: 5,
+       maxlength: 50
+     }
+   });
+   -------------------code----------------------
+
+3. Create the model:
+
+   -------------------code----------------------
+   const Genre = mongoose.model('Genre', genreSchema);
+   -------------------code----------------------
+
+* The **ID** field is automatically created by MongoDB (`_id`).
+* You can define the schema inline if you prefer:
+
+  -------------------code----------------------
+  const Genre = mongoose.model('Genre', new mongoose.Schema({...}));
+  -------------------code----------------------
+
+---
+
+### **4. Updating the Route Handlers**
+
+#### **a. GET `/api/genres`**
+
+Retrieve all genres from the database and sort them by name.
+
+-------------------code----------------------
+router.get('/', async (req, res) => {
+  const genres = await Genre.find().sort('name');
+  res.send(genres);
+});
+-------------------code----------------------
+
+---
+
+#### **b. POST `/api/genres`**
+
+Add a new genre to the database.
+
+-------------------code----------------------
+router.post('/', async (req, res) => {
+  const { error } = validateGenre(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+
+  let genre = new Genre({ name: req.body.name });
+  genre = await genre.save();
+
+  res.send(genre);
+});
+-------------------code----------------------
+
+* `save()` returns a promise containing the saved document (with `_id`).
+
+---
+
+#### **c. PUT `/api/genres/:id`**
+
+Update an existing genre.
+
+-------------------code----------------------
+router.put('/:id', async (req, res) => {
+  const { error } = validateGenre(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+
+  const genre = await Genre.findByIdAndUpdate(
+    req.params.id,
+    { name: req.body.name },
+    { new: true }
+  );
+
+  if (!genre)
+    return res.status(404).send('The genre with the given ID was not found.');
+
+  res.send(genre);
+});
+-------------------code----------------------
+
+* The `{ new: true }` option returns the **updated document**.
+
+---
+
+#### **d. DELETE `/api/genres/:id`**
+
+Remove a genre by ID.
+
+-------------------code----------------------
+router.delete('/:id', async (req, res) => {
+  const genre = await Genre.findByIdAndRemove(req.params.id);
+
+  if (!genre)
+    return res.status(404).send('The genre with the given ID was not found.');
+
+  res.send(genre);
+});
+-------------------code----------------------
+
+---
+
+#### **e. GET `/api/genres/:id`**
+
+Retrieve a single genre by ID.
+
+-------------------code----------------------
+router.get('/:id', async (req, res) => {
+  const genre = await Genre.findById(req.params.id);
+
+  if (!genre)
+    return res.status(404).send('The genre with the given ID was not found.');
+
+  res.send(genre);
+});
+-------------------code----------------------
+
+---
+
+### **5. Common Mistakes and Fixes**
+
+| Mistake                      | Explanation                                 | Fix                                               |
+| ---------------------------- | ------------------------------------------- | ------------------------------------------------- |
+| Using `new mongoose.model()` | `model()` is a function, not a class.       | Remove `new` keyword.                             |
+| Missing Joi import           | Validation fails with `Joi is not defined`. | Add `const Joi = require('joi');` to `genres.js`. |
+| Connecting in multiple files | Causes redundant connections.               | Connect only once in `index.js`.                  |
+
+---
+
+### **6. Testing with Postman**
+
+1. **GET /api/genres** → returns an empty array if no genres exist.
+2. **POST /api/genres** with `{ "name": "Thriller" }` → creates a new genre.
+
+   * Returns the created object with `_id` and `__v` fields.
+3. **PUT /api/genres/:id** → updates a genre by ID.
+4. **DELETE /api/genres/:id** → removes a genre and returns it.
+5. **Validation tests**:
+
+   * Empty `name` → returns `400 Bad Request`.
+   * Invalid ID → returns `404 Not Found`.
+
+---
+
+### **7. Summary**
+
+| Operation      | Method                   | Description                        |
+| -------------- | ------------------------ | ---------------------------------- |
+| Get all genres | GET `/api/genres`        | Retrieve all genres sorted by name |
+| Add a genre    | POST `/api/genres`       | Add a new genre after validation   |
+| Update a genre | PUT `/api/genres/:id`    | Update name of a genre             |
+| Delete a genre | DELETE `/api/genres/:id` | Remove a genre by ID               |
+| Get one genre  | GET `/api/genres/:id`    | Retrieve a genre by ID             |
+
+**Result:**
+All endpoints now use MongoDB via Mongoose.
+The project is successfully migrated from an in-memory array to a fully persistent database-backed API.
