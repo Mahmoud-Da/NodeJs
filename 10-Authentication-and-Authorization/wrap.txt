@@ -1798,3 +1798,165 @@ const config = require('config');
 * Returning JWTs in **headers** keeps the response cleaner.
 * Automatic login after registration enhances user experience for trusted environments.
 * Using `X-Auth-Token` standardizes custom authentication headers.
+
+*** 12- Encapsulating Logic in Mongoose Models ***
+### Lecture Notes: Encapsulating JSON Web Token (JWT) Logic in the User Model
+
+---
+
+#### **Problem Overview**
+
+* In the current implementation:
+
+  * The `users` module (line 22) and the `auth` module (line 21) both generate a **JSON Web Token (JWT)** using the same logic.
+  * The payload of the JWT currently includes only the user’s **ID**.
+  * In the future, more properties (e.g., **name**, **email**, **role**) may need to be added to the payload.
+
+* **Issue:**
+  Each time we modify the payload, we must update multiple modules (auth, users, etc.).
+  This is **error-prone** and **violates the DRY (Don’t Repeat Yourself)** principle.
+
+---
+
+#### **Goal**
+
+Encapsulate the JWT generation logic in a **single place** to ensure maintainability and reusability.
+
+---
+
+#### **Initial (Incorrect) Approach**
+
+* A beginner might think of creating a utility function like:
+
+  -------------------code----------------------
+  function generateAuthToken() { ... }
+  -------------------code----------------------
+
+  and import it wherever needed.
+
+* While this works, it leads to **scattered functions** across the codebase and poor organization.
+
+---
+
+#### **Better Approach: Information Expert Principle**
+
+* **Definition:**
+  The object that has enough information to perform a specific task should be responsible for it.
+
+* **Analogy:**
+  A **chef** cooks because they have the necessary knowledge and tools — not the waiter.
+  Likewise, the **user object** has all the necessary information for generating its own JWT.
+
+---
+
+#### **Implementation Steps**
+
+1. **Identify the responsible object**
+   → The **User** object is the best candidate since it holds user-related data.
+
+2. **Move the token generation logic into the User model**
+
+   **Before:**
+   JWT logic exists in both `auth.js` and `users.js`.
+
+   **After:**
+   The logic resides as a **method inside the user schema**.
+
+---
+
+#### **Code Changes**
+
+##### **1. Define a schema constant**
+
+In `user.js`:
+
+-------------------code----------------------
+const userSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  password: String
+});
+-------------------code----------------------
+
+##### **2. Add a method to the schema**
+
+-------------------code----------------------
+userSchema.methods.generateAuthToken = function() {
+  const token = jwt.sign(
+    { _id: this._id },
+    config.get('jwtPrivateKey')
+  );
+  return token;
+};
+-------------------code----------------------
+
+> **Notes:**
+>
+> * Use a **regular function**, not an arrow function.
+> * `this` refers to the user instance.
+> * Arrow functions don’t bind their own `this`.
+
+##### **3. Create the model**
+
+-------------------code----------------------
+const User = mongoose.model('User', userSchema);
+-------------------code----------------------
+
+##### **4. Refactor other modules**
+
+* **In `auth.js`:**
+
+  -------------------code----------------------
+  const token = user.generateAuthToken();
+  -------------------code----------------------
+
+* **In `users.js`:**
+
+  -------------------code----------------------
+  const token = user.generateAuthToken();
+  -------------------code----------------------
+
+* Remove duplicate JWT logic and `require` statements from these modules.
+
+##### **5. Import necessary dependencies in `user.js`:**
+
+-------------------code----------------------
+const jwt = require('jsonwebtoken');
+const config = require('config');
+-------------------code----------------------
+
+---
+
+#### **Testing**
+
+1. Register a new user.
+2. Observe JWT generation.
+3. If an error appears (e.g., `jwt is not defined`), ensure imports are placed correctly in `user.js`.
+
+**After fixing imports:**
+
+* The user registers successfully.
+* JWT is generated correctly and returned in the response.
+
+---
+
+#### **Key Takeaways**
+
+* Centralizing logic simplifies maintenance.
+* Follow the **Information Expert Principle**: let the object with the right data handle the relevant logic.
+* Avoid code duplication between modules.
+* Use **regular functions** for object methods when referencing `this`.
+
+---
+
+#### **Final Structure**
+
+-------------------code----------------------
+models/
+ └── user.js       ← contains schema + generateAuthToken method
+routes/
+ ├── auth.js       ← uses user.generateAuthToken()
+ └── users.js      ← uses user.generateAuthToken()
+-------------------code----------------------
+
+This organization ensures cleaner, modular, and more maintainable code.
