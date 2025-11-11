@@ -42,6 +42,43 @@ One of the most important concepts in Express is **middleware** (or middleware f
    * It does not terminate the cycle but instead passes control to the next middleware function.
 
 ---
+**Request Processing Pipeline** in Express:
+
+-------------------code----------------------
+          ┌──────────────────────────────┐
+          │        Client Request        │
+          └──────────────┬───────────────┘
+                         │
+                         ▼
+              ┌─────────────────────┐
+              │ Middleware #1       │
+              │ (e.g. express.json) │
+              └─────────┬───────────┘
+                        │
+                        ▼
+              ┌─────────────────────┐
+              │ Middleware #2       │
+              │ (e.g. Logger, Auth) │
+              └─────────┬───────────┘
+                        │
+                        ▼
+              ┌─────────────────────┐
+              │ Route Handler       │
+              │ (Sends Response)    │
+              └─────────┬───────────┘
+                        │
+                        ▼
+          ┌──────────────────────────────┐
+          │       Client Response        │
+          └──────────────────────────────┘
+-------------------code----------------------
+
+**Explanation:**
+
+* Each incoming request from the client travels through a sequence of middleware functions.
+* Each middleware can process or modify the request and decide whether to pass it on or send a response.
+* The final middleware (route handler) usually sends the response and ends the cycle.
+
 
 ### **Request Processing Pipeline**
 
@@ -114,3 +151,117 @@ An Express application is essentially a collection of middleware functions arran
 
 **Next Topic:**
 Creating custom middleware functions in Express.
+
+*** 3- Creating Custom Middleware ***
+**Lecture Notes: Creating Custom Middleware Functions in Express**
+
+---
+
+### **1. Purpose of Custom Middleware**
+
+Custom middleware functions allow developers to handle cross-cutting concerns such as logging, authentication, and error handling. In Express, you can define and install your own middleware functions in the **request processing pipeline**.
+
+---
+
+### **2. Adding a Middleware Function**
+
+You can add middleware to the pipeline using the `app.use()` method.
+
+**Example:**
+
+-------------------code----------------------
+app.use(function (req, res, next) {
+  console.log('Logging...');
+  next();
+});
+-------------------code----------------------
+
+**Explanation:**
+
+* The function receives three parameters:
+
+  * `req` → request object
+  * `res` → response object
+  * `next` → reference to the next middleware function in the pipeline
+* After performing its task (for example, logging), it **must call `next()`** to pass control to the next middleware.
+* If `next()` is not called and the middleware doesn’t send a response, the request will hang because the request-response cycle is not terminated.
+
+---
+
+### **3. Example of Middleware Execution Order**
+
+When multiple middleware functions are defined, Express executes them in the order they are added.
+
+-------------------code----------------------
+app.use(function (req, res, next) {
+  console.log('Logging...');
+  next();
+});
+
+app.use(function (req, res, next) {
+  console.log('Authenticating...');
+  next();
+});
+-------------------code----------------------
+
+**Execution flow for a request:**
+
+1. The **logging** middleware runs first.
+2. The **authentication** middleware runs next.
+3. Finally, the **route handler** (which is also a middleware function) runs and sends the response.
+
+This demonstrates that middleware functions are called **in sequence**.
+
+---
+
+### **4. Structuring Middleware Code**
+
+To keep the code clean, avoid defining all middleware directly in `index.js`.
+Instead, define each middleware in its **own module**.
+
+**Example: `logger.js`**
+
+-------------------code----------------------
+function log(req, res, next) {
+  console.log('Logging...');
+  next();
+}
+
+module.exports = log;
+-------------------code----------------------
+
+**In `index.js`:**
+
+-------------------code----------------------
+const logger = require('./logger');
+app.use(logger);
+-------------------code----------------------
+
+**Explanation:**
+
+* `logger.js` exports a single function (`log`) which is the middleware.
+* The main file (`index.js`) imports and installs it using `app.use(logger)`.
+
+---
+
+### **5. Understanding Built-in Middleware**
+
+When you use built-in middleware like `express.json()`, it also returns a function with the same signature:
+
+-------------------code----------------------
+(req, res, next)
+-------------------code----------------------
+
+This function parses the incoming request body, converts it to a JSON object, attaches it to `req.body`, and then calls `next()` to pass control to the next middleware.
+
+---
+
+### **6. Summary**
+
+* Middleware functions can either **handle** the request or **pass it** to the next function.
+* Use `next()` to continue the request flow.
+* Organize custom middleware functions in **separate files** for better readability and maintainability.
+* Express applications are built as a sequence (pipeline) of middleware functions.
+
+**Exercise:**
+Create a second middleware function for authentication in a separate module and integrate it into the pipeline, following the same pattern as the logger middleware.
