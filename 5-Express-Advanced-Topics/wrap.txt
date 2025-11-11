@@ -1,0 +1,18 @@
+*** 1- Introduction ***
+**Lecture Notes: Advanced Topics in Express**
+
+**Overview:**
+In the previous section, we learned how to build RESTful services using Express. In this section, we will move forward to explore more advanced concepts in Express.
+
+**Topics Covered:**
+
+1. **Middleware** – Understanding how middleware functions work and how to configure them properly in an Express application.
+2. **Configuration** – Learning how to handle application settings for different environments (development, production, etc.).
+3. **Debugging** – Using debugging tools and techniques to identify and resolve issues in Express applications.
+4. **Templating Engines** – Integrating and using templating engines to render dynamic HTML views.
+5. **Other Advanced Topics** – Additional Express functionalities to enhance flexibility and maintainability.
+
+**Goal:**
+To gain a deeper understanding of Express and learn how to apply its advanced features for building robust and 
+maintainable web applications.
+
