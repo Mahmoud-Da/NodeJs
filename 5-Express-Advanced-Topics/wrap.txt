@@ -500,3 +500,124 @@ app.use(morgan('combined', { stream: accessLogStream }));
 ### **7. Next Topic**
 
 In the next lecture, we will explore how to handle **different environments** (development, testing, and production) and how to configure middleware or features differently depending on the environment.
+
+*** 6- Environments ***
+### Lecture Notes: Working with Environments in Node.js
+
+#### 1. **Purpose of Environment Awareness**
+
+In larger or enterprise-level applications, it’s important to know the environment where your code is running.
+Common environments include:
+
+* **Development**: For local testing and debugging.
+* **Testing**: For automated tests and QA.
+* **Staging**: A pre-production environment that mimics production.
+* **Production**: The live environment serving users.
+
+You may want to **enable or disable certain features** depending on the environment.
+Example: Enable HTTP request logging only in development but not in production.
+
+---
+
+#### 2. **Using the `process` Object**
+
+* `process` is a **global object** in Node.js that provides access to the current process.
+* It includes a property called `env`, which stores environment variables.
+
+-------------------code----------------------
+process.env.NODE_ENV
+-------------------code----------------------
+
+* `NODE_ENV` is a **standard environment variable** used to define the current environment.
+* If it’s not set, the value is `undefined`.
+
+You can set it manually from the terminal:
+
+* On **Mac/Linux**:
+
+  -------------------code----------------------
+  export NODE_ENV=production
+  -------------------code----------------------
+* On **Windows**:
+
+  -------------------code----------------------
+  set NODE_ENV=production
+  -------------------code----------------------
+
+---
+
+#### 3. **Using the `app` Object in Express**
+
+The Express `app` object also provides an alternative method to get environment information:
+
+-------------------code----------------------
+app.get('env')
+-------------------code----------------------
+
+* Internally, it checks `process.env.NODE_ENV`.
+* If `NODE_ENV` is not set, it defaults to **"development"**.
+
+**Example:**
+
+-------------------code----------------------
+console.log(`Node environment: ${process.env.NODE_ENV}`);
+console.log(`App environment: ${app.get('env')}`);
+-------------------code----------------------
+
+Output when no variable is set:
+
+-------------------code----------------------
+Node environment: undefined
+App environment: development
+-------------------code----------------------
+
+---
+
+#### 4. **Conditional Logic Based on Environment**
+
+You can use conditional statements to enable or disable features depending on the environment.
+
+**Example: Enable Morgan only in development**
+
+-------------------code----------------------
+if (app.get('env') === 'development') {
+  app.use(morgan('tiny'));
+  console.log('Morgan enabled...');
+}
+-------------------code----------------------
+
+---
+
+#### 5. **Testing Environment Switching**
+
+1. **In Development (default)**:
+
+   * Run the app without setting `NODE_ENV`.
+   * Output:
+
+     -------------------code----------------------
+     Morgan enabled...
+     Listening on port 3000...
+     -------------------code----------------------
+
+2. **In Production**:
+
+   * Stop the app (`Ctrl + C`).
+   * Set `NODE_ENV` to `production`.
+   * Run again:
+
+     -------------------code----------------------
+     Listening on port 3000...
+     -------------------code----------------------
+   * Notice: Morgan is not enabled.
+
+---
+
+#### 6. **Summary**
+
+* Use `process.env.NODE_ENV` or `app.get('env')` to check the environment.
+* By default, `app.get('env')` returns `"development"`.
+* You can conditionally enable features like logging based on the environment.
+* Setting environment variables differs between operating systems.
+
+---
