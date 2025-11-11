@@ -1091,4 +1091,85 @@ module.exports = router;
 
 ---
 
-Would you like me to include the **next step** from the lecture — generating a JWT after successful login?
+*** 7- Testing the Authentication ***
+### Lecture Notes: Testing the Authentication Endpoint
+
+#### 1. Testing the “Create User” Endpoint
+
+* Begin by testing the **user registration** endpoint.
+* To save time when testing later:
+
+  * Save the request in your API testing tool (like Postman).
+  * Give it a name, e.g., **“Register User”**.
+  * Create a new **collection** called **“vidly”**.
+  * This allows you to reuse the saved request easily without recreating it each time.
+
+#### 2. Setting Up for Authentication Testing
+
+* Open a **new tab** in the API testing tool.
+* Send a **POST** request to:
+
+  -------------------code----------------------
+  http://localhost/api/auth
+  -------------------code----------------------
+* In the **body**, send a JSON object with the following fields:
+
+  -------------------code----------------------
+  {
+    "email": "programmingwithmosh10@gmail.com",
+    "password": "12345"
+  }
+  -------------------code----------------------
+
+#### 3. Fixing the “Joy is not defined” Error
+
+* When sending the request, if it **hangs** or throws an error in the terminal:
+
+  -------------------code----------------------
+  Joy is not defined
+  -------------------code----------------------
+* Cause: The `Joi` library (used for input validation) was referenced but **not imported**.
+* Fix:
+
+  * At the top of `os.js`, add:
+
+    -------------------code----------------------
+    const Joi = require("joi");
+    -------------------code----------------------
+
+#### 4. Retesting After the Fix
+
+* Send the request again after importing Joi.
+* Expected result:
+
+  * Response status: **200 OK**
+  * Response body:
+
+    -------------------code----------------------
+    true
+    -------------------code----------------------
+  * This confirms successful authentication.
+
+#### 5. Testing Invalid Credentials
+
+* Try changing the password:
+
+  * Example: `"password": "wrongpass"`
+  * Response: **400 Bad Request**
+  * Message: `"Invalid email or password"`
+* Try changing the email:
+
+  * Example: `"email": "wrongemail@gmail.com"`
+  * Response: **400 Bad Request**
+  * Same generic message to prevent leaking which field is incorrect.
+
+#### 6. Summary of Behavior
+
+* Valid credentials → `200 OK` with `true` response.
+* Invalid credentials → `400 Bad Request` with `"Invalid email or password"`.
+* The endpoint now works correctly and handles errors securely.
+
+#### 7. Next Step
+
+* In the next lecture, the instructor will modify the authentication response to include a **JSON Web Token (JWT)** instead of a simple boolean response.
+
