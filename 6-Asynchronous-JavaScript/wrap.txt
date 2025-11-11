@@ -124,3 +124,75 @@ In the following lessons, you will learn:
 
 * Different patterns for writing asynchronous code.
 * How to handle asynchronous operations cleanly and maintainably.
+
+*** 2- Patterns for Dealing with Asynchronous Code ***
+**Lecture Notes: Asynchronous Programming – Understanding Callback Structure**
+
+**1. Refactoring the Program**
+
+* The instructor demonstrates how to make the program more realistic by moving certain lines of code into a new function called `getUser`.
+* The goal of `getUser` is to simulate fetching a user from a database.
+
+**Example structure:**
+
+-------------------code----------------------
+function getUser(id) {
+  // Simulated database call
+  setTimeout(() => {
+    return { id: id, githubUsername: "mosh" };
+  }, 2000);
+}
+-------------------code----------------------
+
+* The function takes an `id` parameter.
+* It should return a user object containing properties like:
+
+  * `id`
+  * `githubUsername`
+
+**2. Problem: Returning Values from Asynchronous Code**
+
+* The instructor calls the function as follows:
+
+  -------------------code----------------------
+  const user = getUser(1);
+  console.log(user);
+  -------------------code----------------------
+* The output is:
+
+  -------------------code----------------------
+  before
+  undefined
+  after
+  -------------------code----------------------
+* This happens because the `setTimeout` function delays execution, so the `return` statement inside it runs *after* `getUser` has already finished.
+
+**3. Key Concept**
+
+* When a function includes asynchronous behavior (like reading from a database or calling an API), the return value is **not immediately available**.
+* `setTimeout` is used here to simulate that delay.
+* Therefore, trying to return the result directly from the asynchronous function will result in `undefined`.
+
+**4. Why the Return Doesn’t Work**
+
+* The function `getUser` executes `setTimeout` and schedules a task for later.
+* The main program continues running before the delayed task finishes.
+* By the time the inner function returns the user object, the outer `getUser` function has already returned.
+
+**5. Simulating Immediate vs Delayed Return**
+
+* Returning a simple value like `1` works immediately because it’s synchronous.
+* But returning data that depends on asynchronous operations (like database reads) requires a different approach.
+
+**6. Ways to Handle Asynchronous Code**
+There are three main patterns to handle asynchronous results in JavaScript:
+
+1. **Callbacks** – Pass a function that will be called once the asynchronous operation completes.
+2. **Promises** – Use `.then()` and `.catch()` to handle asynchronous results in a cleaner way.
+3. **Async/Await** – A syntactical improvement over promises that allows writing asynchronous code in a synchronous style.
+
+**7. Summary**
+
+* The example introduces the challenge of handling asynchronous results.
+* Returning values directly from asynchronous functions doesn’t work because the result isn’t ready immediately.
+* Next, the instructor will introduce **callbacks** as the first solution to access the result of an asynchronous operation.
