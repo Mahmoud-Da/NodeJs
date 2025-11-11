@@ -2800,3 +2800,130 @@ const admin = require('../middleware/admin');
 | 6    | Use 401 for unauthorized and 403 for forbidden cases             |
 
 This structure allows secure and efficient **role-based authorization** in your application.
+
+*** 18- Testing the Authorization ***
+**Lecture Notes: Testing Role-Based Authorization and Expanding to Multi-Role Systems**
+
+---
+
+### 1. **Testing Authorization with Postman**
+
+#### Step 1: Delete Request Without Token
+
+* In **MongoDB Compass**, get the `_id` of an existing genre from the `genres` collection.
+* In **Postman**, open a new tab and send a **DELETE** request to:
+
+-------------------code----------------------
+http://localhost/api/genres/<genre_id>
+-------------------code----------------------
+
+* No token is sent yet.
+* **Response:**
+  `401 Unauthorized` — This means no JSON Web Token (JWT) was provided.
+
+---
+
+#### Step 2: Delete Request with a Non-Admin Token
+
+* Go to the login endpoint in another Postman tab.
+* Log in with a **non-admin user** account and copy the JWT from the response.
+* Use [jwt.io](https://jwt.io) to decode and verify the token.
+
+  * The payload contains only the `_id` field — no `isAdmin` property.
+  * This confirms the user is **not an admin**.
+* Back in the DELETE request tab:
+
+  * In **Headers**, set:
+    `x-auth-token: <your_non_admin_token>`
+* **Send the request.**
+* **Response:**
+  `403 Forbidden` — The message is `"Access denied."`
+
+  * This means the user is authenticated but not authorized to delete a genre.
+
+---
+
+#### Step 3: Delete Request with an Admin Token
+
+* In the database, identify a user whose `isAdmin` field is `true` (e.g., `programwithmosh10@gmail.com`).
+* Log in using this admin account in Postman.
+* Copy the new JWT and inspect it on [jwt.io](https://jwt.io):
+
+  * The payload now includes `"isAdmin": true`.
+* Replace the previous token in the DELETE request header with the admin token:
+
+  * `x-auth-token: <admin_token>`
+* **Send the request.**
+* **Response:**
+  Successful deletion of the genre — authorization passed.
+
+---
+
+### 2. **Understanding Multi-Role Authorization**
+
+In this demo, we only used a single property:
+
+-------------------code----------------------
+isAdmin: Boolean
+-------------------code----------------------
+
+However, real-world applications often require more granular access control.
+
+#### Option 1: Role-Based Access
+
+Instead of a Boolean, define a `roles` property:
+
+-------------------code----------------------
+roles: [String]
+-------------------code----------------------
+
+Example:
+
+-------------------code----------------------
+roles: ["admin", "moderator"]
+-------------------code----------------------
+
+Each middleware can then check if a specific role exists in this array.
+
+---
+
+#### Option 2: Operation-Based Access
+
+For fine-grained control, define allowed **operations** rather than roles.
+
+Example:
+
+-------------------code----------------------
+operations: [
+  { resource: "genres", actions: ["create", "delete"] },
+  { resource: "movies", actions: ["read"] }
+]
+-------------------code----------------------
+
+* This allows defining permissions per user and per resource.
+* Middleware checks if the current user’s token includes permission for the requested operation.
+
+---
+
+### 3. **Core Concept Recap**
+
+| Concept                | Description                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------- |
+| **JWT Payload**        | Includes user ID and access-related properties (e.g., `isAdmin`, `roles`, or `operations`). |
+| **Auth Middleware**    | Verifies token validity and sets `req.user`.                                                |
+| **Admin Middleware**   | Checks user’s access level or role and either grants or denies access.                      |
+| **401 (Unauthorized)** | User didn’t provide or provided an invalid token.                                           |
+| **403 (Forbidden)**    | User provided a valid token but doesn’t have sufficient privileges.                         |
+
+---
+
+### 4. **Conclusion**
+
+* **Basic authorization:** Boolean `isAdmin` flag.
+* **Intermediate authorization:** Array of `roles`.
+* **Advanced authorization:** Array of `operations` defining specific permissions.
+
+Regardless of complexity, the **core principle remains the same**:
+
+1. Encode the user’s access level in the JWT.
+2. Use middleware to enforce restrictions before route handlers execute.
