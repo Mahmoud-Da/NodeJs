@@ -1960,3 +1960,182 @@ routes/
 -------------------code----------------------
 
 This organization ensures cleaner, modular, and more maintainable code.
+
+*** 13- Authorization Middleware ***
+### Lecture Notes: Implementing Authentication Middleware in Express
+
+---
+
+#### **Goal**
+
+Protect all routes that **modify data** (e.g., POST, PUT, DELETE) by ensuring they are accessible **only to authenticated users**.
+
+---
+
+#### **1. The Problem**
+
+* Currently, routes like the `POST /api/genres` endpoint can be accessed by anyone.
+* We want only **authenticated users** (those with a valid JSON Web Token) to be able to create, update, or delete data.
+
+---
+
+#### **2. Initial Implementation Idea**
+
+* In the route handler (e.g., `genres.js`), we could manually:
+
+  1. Read the request headers.
+  2. Extract the token from `x-auth-token`.
+  3. Validate the token.
+  4. Allow or deny access based on validation results.
+
+**Example (conceptual):**
+
+-------------------code----------------------
+const token = req.header('x-auth-token');
+if (!token) return res.status(401).send('Access denied. No token provided.');
+-------------------code----------------------
+
+However, repeating this logic in every route that modifies data leads to **code duplication** and **poor maintainability**.
+
+---
+
+#### **3. Solution: Use Middleware**
+
+* **Middleware functions** in Express allow us to encapsulate reusable logic that executes before route handlers.
+* We can create a **custom authentication middleware** that:
+
+  * Checks for the presence of a token.
+  * Verifies the token’s validity.
+  * Adds the decoded user info to the request object.
+  * Either terminates the request or passes control to the next handler.
+
+---
+
+#### **4. Implementation Steps**
+
+##### **Step 1: Create a Middleware Folder**
+
+Structure:
+
+-------------------code----------------------
+project/
+ ├── middleware/
+ │    └── auth.js
+ ├── routes/
+ │    └── genres.js
+ ├── models/
+ │    └── user.js
+-------------------code----------------------
+
+##### **Step 2: Define the Auth Middleware**
+
+In `middleware/auth.js`:
+
+-------------------code----------------------
+const jwt = require('jsonwebtoken');
+const config = require('config');
+
+module.exports = function (req, res, next) {
+  const token = req.header('x-auth-token');
+  if (!token) return res.status(401).send('Access denied. No token provided.');
+
+  try {
+    const decoded = jwt.verify(token, config.get('jwtPrivateKey'));
+    req.user = decoded; // Attach the decoded payload (e.g., user ID) to the request
+    next(); // Pass control to the next middleware or route handler
+  } 
+  catch (ex) {
+    res.status(400).send('Invalid token.');
+  }
+};
+-------------------code----------------------
+
+**Notes:**
+
+* Use `401` for missing token → unauthorized access.
+* Use `400` for invalid token → bad request.
+* The `try...catch` block ensures that invalid tokens don’t crash the server.
+* The decoded payload is stored as `req.user`, so route handlers can easily access it.
+
+---
+
+#### **5. Applying the Middleware**
+
+In `routes/genres.js`:
+
+-------------------code----------------------
+const auth = require('../middleware/auth');
+
+router.post('/', auth, async (req, res) => {
+  // Only authenticated users can reach this point
+  const genre = new Genre({ name: req.body.name });
+  await genre.save();
+  res.send(genre);
+});
+-------------------code----------------------
+
+* The `auth` middleware runs **before** the route handler.
+* If the token is invalid or missing, the route handler never executes.
+
+---
+
+#### **6. Token Generation Recap**
+
+In the `user.js` model, we already have the following method:
+
+-------------------code----------------------
+userSchema.methods.generateAuthToken = function () {
+  const token = jwt.sign({ _id: this._id }, config.get('jwtPrivateKey'));
+  return token;
+};
+-------------------code----------------------
+
+* The payload of the JWT includes user data such as `_id`.
+* When decoded in the middleware, this becomes `req.user`, allowing downstream code to know which user made the request.
+
+---
+
+#### **7. Middleware Behavior Summary**
+
+| Condition         | Action          | Status Code | Message                             |
+| ----------------- | --------------- | ----------- | ----------------------------------- |
+| No token provided | Request denied  | 401         | “Access denied. No token provided.” |
+| Invalid token     | Request denied  | 400         | “Invalid token.”                    |
+| Valid token       | Request allowed | —           | —                                   |
+
+---
+
+#### **8. Key Concepts**
+
+* **Middleware Function:**
+  Executes before route handlers; can either terminate the request or call `next()` to continue the pipeline.
+
+* **Token Verification:**
+  Ensures that only legitimate users (with valid JWTs) can modify resources.
+
+* **Error Handling:**
+  Always handle missing or invalid tokens to prevent server crashes and improve client-side debugging.
+
+---
+
+#### **9. Final Structure Overview**
+
+-------------------code----------------------
+models/
+ └── user.js          ← defines generateAuthToken()
+middleware/
+ └── auth.js          ← verifies JWT and protects routes
+routes/
+ └── genres.js        ← uses auth middleware for protected endpoints
+-------------------code----------------------
+
+---
+
+#### **10. Summary**
+
+By creating a reusable authentication middleware:
+
+* We centralize JWT verification logic.
+* We avoid duplicating code in multiple route files.
+* We ensure all modifying operations are protected by authentication checks.
+* This leads to cleaner, safer, and more maintainable Express applications.
