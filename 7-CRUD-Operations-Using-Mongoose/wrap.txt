@@ -537,3 +537,150 @@ This means the MongoDB server is running correctly.
 | 7    | Connect using MongoDB Compass on `localhost:27017` |
 
 ---
+
+*** 4- Connecting to MongoDB ***
+
+### **Lecture Notes: Setting Up a Node.js Project and Connecting to MongoDB Using Mongoose**
+
+#### **1. Creating a New Project**
+
+1. Create a new folder for the project:
+
+   -------------------code----------------------
+   mkdir mongo-demo
+   -------------------code----------------------
+2. Navigate into the folder:
+
+   -------------------code----------------------
+   cd mongo-demo
+   -------------------code----------------------
+3. Initialize a new Node.js project:
+
+   -------------------code----------------------
+   npm init -y
+   -------------------code----------------------
+
+   * The `-y` flag automatically accepts all default settings.
+
+---
+
+#### **2. Installing Mongoose**
+
+* Install **Mongoose**, a Node.js library that provides a simple and elegant API for working with MongoDB:
+
+  -------------------code----------------------
+  npm install mongoose@5.0.1
+  -------------------code----------------------
+* **Version note:**
+
+  * At the time of recording, version **5.0.1** is used.
+  * Installing the same version ensures consistent behavior with the lecture examples.
+
+---
+
+#### **3. Setting Up the Project in VS Code**
+
+1. Open the project folder in **Visual Studio Code**:
+
+   -------------------code----------------------
+   code .
+   -------------------code----------------------
+2. Create a new file named:
+
+   -------------------code----------------------
+   index.js
+   -------------------code----------------------
+
+---
+
+#### **4. Connecting to MongoDB**
+
+In `index.js`, write the following code:
+
+-------------------code----------------------javascript
+const mongoose = require('mongoose');
+
+mongoose.connect('mongodb://localhost/playground')
+  .then(() => console.log('Connected to MongoDB...'))
+  .catch(err => console.error('Could not connect to MongoDB...', err));
+-------------------code----------------------
+
+**Explanation:**
+
+* **`mongoose.connect()`**
+
+  * Used to connect the application to the MongoDB server.
+  * Takes a connection string as an argument.
+
+* **Connection string format:**
+
+  -------------------code----------------------
+  mongodb://localhost/<database_name>
+  -------------------code----------------------
+
+  * `localhost` refers to the MongoDB instance running on your local machine.
+  * `<database_name>` specifies which database to connect to (e.g., `playground`).
+
+* **Automatic database creation:**
+
+  * If the specified database (`playground`) doesn’t exist, MongoDB will create it automatically the first time data is written to it.
+
+---
+
+#### **5. Handling Connection Results**
+
+* The `connect()` method returns a **Promise**, so we can use `.then()` and `.catch()`:
+
+  * **`.then()`** executes when the connection is successful.
+
+    -------------------code----------------------javascript
+    console.log('Connected to MongoDB...');
+    -------------------code----------------------
+  * **`.catch()`** handles any errors that occur during connection.
+
+    -------------------code----------------------javascript
+    console.error('Could not connect to MongoDB...', err);
+    -------------------code----------------------
+
+---
+
+#### **6. Debugging Notes**
+
+* **For simplicity**, the example uses `console.log()` and `console.error()`.
+* In a real-world application, it’s better to use the **`debug`** module for better control over logging output.
+
+---
+
+#### **7. Running the Application**
+
+* In the terminal, run:
+
+  -------------------code----------------------
+  node index.js
+  -------------------code----------------------
+* Expected output (if MongoDB is running):
+
+  -------------------code----------------------
+  Connected to MongoDB...
+  -------------------code----------------------
+
+If there’s an error, you’ll see:
+
+-------------------code----------------------
+Could not connect to MongoDB... <error details>
+-------------------code----------------------
+
+---
+
+#### **8. Summary**
+
+| Step | Description                                                  |
+| ---- | ------------------------------------------------------------ |
+| 1    | Create a new folder and initialize Node.js project           |
+| 2    | Install Mongoose (version 5.0.1)                             |
+| 3    | Create `index.js`                                            |
+| 4    | Connect to MongoDB using `mongoose.connect()`                |
+| 5    | Handle success and error cases with `.then()` and `.catch()` |
+| 6    | Run the application using `node index.js`                    |
+
+---
