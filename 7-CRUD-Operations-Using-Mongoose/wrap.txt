@@ -52,3 +52,327 @@
   * How to start using it within your Node.js environment.
 
 ---
+
+
+*** 2- Installing MongoDB on Mac ***
+
+---
+
+### **Lecture Notes: Installing MongoDB on macOS**
+
+#### **1. Introduction**
+
+* This lecture demonstrates how to **install MongoDB** on a **Mac machine**.
+* Windows users can **skip** this lecture and watch the next one instead.
+
+---
+
+#### **2. Installing Homebrew**
+
+* Visit the **Homebrew** website: [https://brew.sh](https://brew.sh).
+* **Homebrew** is a **package manager for macOS**, similar to **NPM** for Node.js.
+* If Homebrew is not already installed:
+
+  1. Copy the installation command from the Homebrew website.
+  2. Open the **Terminal**.
+  3. Paste the command and press **Enter**.
+  4. Enter your **password** when prompted.
+  5. Wait for Homebrew to finish downloading and installing required binaries.
+
+---
+
+#### **3. Installing MongoDB**
+
+* Once Homebrew is installed, use it to install MongoDB with the command:
+
+  -------------------code----------------------
+  brew install mongodb
+  -------------------code----------------------
+* This is similar to running `npm install` for Node.js packages.
+* If MongoDB is already installed, a **warning** message will appear.
+* For first-time installations, it may take a few seconds to complete.
+
+
+MEMO: Perfect — that output explains exactly what’s going on.
+Homebrew **no longer provides the `mongodb` server** under the simple formula name `mongodb`.
+
+
+---
+
+### **Why This Happens**
+
+MongoDB, Inc. removed the original `mongodb` formula from the Homebrew core repository.
+Now, the official and correct way to install it on macOS is through **MongoDB’s tap** (custom repository) — not directly via `brew install mongodb`.
+
+---
+
+### **Correct Installation Steps for MongoDB Community Edition on macOS**
+
+#### **Step 1: Tap MongoDB’s Official Repository**
+
+Run this command to add MongoDB’s official tap:
+
+-------------------code----------------------
+brew tap mongodb/brew
+-------------------code----------------------
+
+#### **Step 2: Install MongoDB Community Edition**
+
+Now install the server package:
+
+-------------------code----------------------
+brew install mongodb-community
+-------------------code----------------------
+
+This installs:
+
+* `mongod` (the MongoDB server)
+* `mongosh` (the shell client)
+* Related utilities
+
+#### **Step 3: Start MongoDB as a Background Service**
+
+You can start MongoDB as a macOS service with:
+
+-------------------code----------------------
+brew services start mongodb/brew/mongodb-community
+-------------------code----------------------
+
+This automatically:
+
+* Runs `mongod` in the background
+* Creates and manages the data directory under `/usr/local/var/mongodb`
+
+#### **Step 4: Verify It’s Running**
+
+Check the status:
+
+-------------------code----------------------
+brew services list
+-------------------code----------------------
+
+or simply test:
+
+-------------------code----------------------
+ps aux | grep mongod
+-------------------code----------------------
+
+#### **Step 5: Connect Using Mongo Shell**
+
+Once it’s running, you can connect via:
+
+-------------------code----------------------
+mongosh
+-------------------code----------------------
+
+If it connects successfully, you’ll see something like:
+
+-------------------code----------------------
+test> 
+-------------------code----------------------
+
+which means you’re inside the Mongo shell.
+
+---
+
+### **Optional: If You Don’t Want It as a Service**
+
+You can also manually start MongoDB using:
+
+-------------------code----------------------
+mongod --config /usr/local/etc/mongod.conf
+-------------------code----------------------
+
+This uses the configuration Homebrew created for you.
+
+---
+
+### **Summary**
+
+| Command                                              | Purpose                   |
+| ---------------------------------------------------- | ------------------------- |
+| `brew tap mongodb/brew`                              | Add official MongoDB tap  |
+| `brew install mongodb-community`                     | Install MongoDB server    |
+| `brew services start mongodb/brew/mongodb-community` | Run MongoDB in background |
+| `mongosh`                                            | Open MongoDB shell        |
+| `brew services stop mongodb/brew/mongodb-community`  | Stop MongoDB service      |
+
+---
+
+#### **4. Creating the Data Directory**
+
+* MongoDB stores data by default in the following directory:
+
+  -------------------code----------------------
+  /data/db
+  -------------------code----------------------
+* Create this directory using the command:
+
+  -------------------code----------------------
+  mkdir -p /data/db
+  -------------------code----------------------
+* If you receive a **“Permission denied”** error, run the command with **sudo**:
+
+  -------------------code----------------------
+  sudo mkdir -p /data/db
+  -------------------code----------------------
+* Enter your password when prompted.
+
+
+Good question — that’s a common issue on **macOS**, especially on **recent versions (macOS Catalina and later)**.
+Let’s go over what’s happening and how to fix it.
+
+---
+
+### **Why You Got the Error**
+
+You ran:
+
+-------------------code----------------------
+sudo mkdir -p /data/db
+-------------------code----------------------
+
+and got:
+
+-------------------code----------------------
+mkdir: /data: Read-only file system
+-------------------code----------------------
+
+This happens because:
+
+* Modern macOS versions **protect the root filesystem** (`/`) with **System Integrity Protection (SIP)**.
+* You can’t create new folders directly under `/` — it’s **read-only** for security reasons.
+* So `/data/db` can’t exist at the root level anymore.
+
+---
+
+### **Solution: Create MongoDB Data Directory Somewhere Writable**
+
+You can create MongoDB’s data directory **under your user’s home directory** instead.
+For example:
+
+-------------------code----------------------
+mkdir -p ~/data/db
+-------------------code----------------------
+
+Then give MongoDB permission to access it:
+
+-------------------code----------------------
+sudo chown -R `id -un` ~/data/db
+-------------------code----------------------
+
+Now, when you start MongoDB, you just need to tell it to use that path.
+
+---
+
+### **Starting MongoDB with Custom Path**
+
+If you’re using Homebrew MongoDB, run:
+
+-------------------code----------------------
+mongod --dbpath ~/data/db
+-------------------code----------------------
+
+That command tells MongoDB to use your local folder as its data directory.
+
+You should then see output like:
+
+-------------------code----------------------
+[initandlisten] waiting for connections on port 27017
+-------------------code----------------------
+
+---
+
+### **Optional: Automate It**
+
+If you want MongoDB to always use that path, you can:
+
+1. Add it to your `.zshrc` or `.bashrc` file:
+
+   -------------------code----------------------
+   alias mongostart='mongod --dbpath ~/data/db'
+   -------------------code----------------------
+2. Then, next time, just type:
+
+   -------------------code----------------------
+   mongostart
+   -------------------code----------------------
+
+---
+
+### **Summary**
+
+| Issue                                 | Cause                   | Fix                                             |
+| ------------------------------------- | ----------------------- | ----------------------------------------------- |
+| `mkdir: /data: Read-only file system` | macOS root is read-only | Create directory under `~/data/db`              |
+| MongoDB can’t find `/data/db`         | Default path invalid    | Use `--dbpath ~/data/db` when starting `mongod` |
+
+---
+
+#### **5. Setting Directory Permissions**
+
+* Ensure MongoDB has the correct permissions to read and write to the data directory:
+
+  -------------------code----------------------
+  sudo chown -R `id -un` /data/db
+  -------------------code----------------------
+* Explanation:
+
+  * `sudo` grants administrative privileges.
+  * `chown` changes ownership of the directory.
+  * `` `id -un` `` dynamically inserts the current username.
+* After running this, the data directory will be properly configured.
+
+---
+
+#### **6. Running the MongoDB Server**
+
+* Start the **MongoDB Daemon (MongoD)**, which runs in the background and listens for connections:
+
+  -------------------code----------------------
+  mongod
+  -------------------code----------------------
+* You should see output indicating that **MongoD** is waiting for connections on port **27017**.
+
+---
+
+#### **7. Installing MongoDB Compass (GUI Client)**
+
+* Go to [https://mongodb.com](https://mongodb.com).
+* Click **Download** at the top of the page.
+* Select the **Compass** tab — this is the MongoDB GUI client.
+
+  * Compass allows you to visually manage and query your MongoDB databases.
+* Choose **macOS (OSX)** as the platform, then **Download**.
+* Open the downloaded **DMG** file and **drag MongoDB Compass** into your **Applications** folder.
+
+---
+
+#### **8. Connecting to MongoDB with Compass**
+
+* Launch **MongoDB Compass** from Applications.
+* On the connection screen:
+
+  * Hostname: **localhost**
+  * Port: **27017** (default port)
+* Click **Connect**.
+* Once connected, you’ll see two default databases:
+
+  * **admin**
+  * **local**
+* These databases are used internally by MongoDB; you don’t need to modify them.
+
+---
+
+#### **9. Summary**
+
+* You have successfully:
+
+  1. Installed **Homebrew**.
+  2. Installed **MongoDB** using Homebrew.
+  3. Created and configured the data directory.
+  4. Started the MongoDB server (`mongod`).
+  5. Installed and connected to MongoDB via **Compass**.
+
+---
+
