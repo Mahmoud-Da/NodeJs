@@ -12,6 +12,8 @@ getUser(1, (user) => {
   });
 });
 
+console.log("After");
+
 function getUser(id, callback) {
   setTimeout(() => {
     console.log("Reading a user from a database...");
@@ -29,5 +31,3 @@ function getRepositories(username, callback) {
     callback(["repo1", "repo2", "repo3"]);
   }, 2000);
 }
-
-console.log("After");
