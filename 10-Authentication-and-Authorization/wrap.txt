@@ -2259,7 +2259,7 @@ By creating a reusable authentication middleware:
   -------------------code----------------------
 * Add a proper request body:
 
-  -------------------code----------------------on
+  -------------------code----------------------
   {
     "name": "new genre"
   }
@@ -2324,3 +2324,188 @@ routes/
 -------------------code----------------------
 
 This approach ensures that only authorized users can perform data modifications while keeping essential endpoints publicly accessible.
+
+*** 15- Getting the Current User ***
+### Lecture Notes: Getting the Currently Logged-In User in Express
+
+---
+
+#### **1. Overview**
+
+In many web applications, it is common to need information about the **currently logged-in user** — for example, to display their profile or account data.
+In this lecture, we will implement an API endpoint to retrieve that user’s information securely.
+
+---
+
+#### **2. Current Situation**
+
+* In the `users` module, there is currently only one route handler for **creating a new user** (a `POST` request).
+* We now need to add a **GET** endpoint that returns the data of the currently authenticated user.
+
+---
+
+#### **3. Security Considerations**
+
+* One possible approach is to create a route like:
+
+  -------------------code----------------------
+  router.get('/:id', async (req, res) => { ... });
+  -------------------code----------------------
+
+  This would require the client to send the user ID in the request path.
+
+* However, this can pose **security risks**:
+
+  * A user could send another person’s ID and access information they shouldn’t see.
+  * For example, sending `/api/users/123` might expose private data.
+
+* To avoid this, we use a **“me”** endpoint:
+
+  -------------------code----------------------
+  GET /api/users/me
+  -------------------code----------------------
+
+  * The client does **not** send the user ID.
+  * The server extracts the ID from the **JSON Web Token (JWT)**, ensuring the request truly belongs to the logged-in user.
+  * This approach is safer and more common in production applications.
+
+---
+
+#### **4. Implementation Steps**
+
+##### **Step 1: Add the Route Handler**
+
+In `users.js`:
+
+-------------------code----------------------
+router.get('/me', auth, async (req, res) => {
+  const user = await User.findById(req.user._id).select('-password');
+  res.send(user);
+});
+-------------------code----------------------
+
+##### **Explanation:**
+
+* `'/me'` → defines a custom endpoint for the current user.
+* `auth` → applies the authentication middleware to ensure only logged-in users can access it.
+* `req.user._id` → comes from the JWT payload decoded in the `auth` middleware.
+* `.select('-password')` → excludes the password field before sending data to the client.
+
+---
+
+#### **5. Loading the Middleware**
+
+On top of `users.js`:
+
+-------------------code----------------------
+const auth = require('../middleware/auth');
+-------------------code----------------------
+
+**Note on Terminology:**
+
+* `auth` here stands for **authorization**, not authentication.
+
+  * **Authentication** verifies a user’s credentials (e.g., username/password).
+  * **Authorization** determines whether an authenticated user can access a specific resource.
+
+---
+
+#### **6. How It Works**
+
+1. A client sends a request to `/api/users/me`.
+2. The `auth` middleware runs first:
+
+   * It looks for a valid token in the request header (`x-auth-token`).
+   * If the token is missing or invalid, the request is rejected with:
+
+     -------------------code----------------------
+     401 Access denied. No token provided.
+     -------------------code----------------------
+3. If the token is valid:
+
+   * The middleware decodes it, attaches the user information to `req.user`.
+   * The request continues to the route handler.
+4. In the handler:
+
+   * The user is fetched from the database using the ID from `req.user`.
+   * Sensitive fields (like `password`) are excluded.
+   * The user object is returned as the response.
+
+---
+
+#### **7. Testing the Endpoint**
+
+**Step 1: Without a Token**
+
+* Method: `GET`
+* URL: `http://localhost:3000/api/users/me`
+* No token in headers.
+* **Response:**
+
+  -------------------code----------------------
+  Status: 401 Unauthorized
+  Message: Access denied. No token provided.
+  -------------------code----------------------
+
+**Step 2: With a Valid Token**
+
+* Go to the **Headers** tab in Postman.
+* Add:
+
+  -------------------code----------------------
+  Key: x-auth-token
+  Value: <valid JWT token>
+  -------------------code----------------------
+* Send the request again.
+* **Response:**
+
+  -------------------code----------------------
+  {
+    "_id": "671e92b3f5a8b2c0c8a5c233",
+    "name": "John Doe",
+    "email": "john@example.com"
+  }
+  -------------------code----------------------
+
+  The `password` field is excluded from the output.
+
+---
+
+#### **8. Summary of Key Points**
+
+| Concept            | Description                           |
+| ------------------ | ------------------------------------- |
+| **Endpoint**       | `/api/users/me`                       |
+| **Method**         | `GET`                                 |
+| **Access Control** | Protected by `auth` middleware        |
+| **Purpose**        | Return the current user’s info        |
+| **Data Source**    | JWT token (contains the user’s ID)    |
+| **Sensitive Data** | Excluded using `.select('-password')` |
+
+---
+
+#### **9. Security Benefits**
+
+* Users cannot request information for other users.
+* The user ID comes from a verified JWT, preventing tampering.
+* No sensitive data (like passwords) is exposed.
+* The same logic can later be reused for role-based access control (admin routes, etc.).
+
+---
+
+#### **10. Final Code Structure**
+
+-------------------code----------------------
+models/
+ └── user.js          ← defines user schema and generateAuthToken()
+middleware/
+ └── auth.js          ← verifies JWT and sets req.user
+routes/
+ └── users.js         ← includes '/me' route for current user
+-------------------code----------------------
+
+---
+
+#### **11. Summary**
+
+By adding a secure `/api/users/me` endpoint and using the `auth` middleware, the application can safely return information about the currently logged-in user without requiring a user ID in the request. This enhances both **security** and **user experience**.
