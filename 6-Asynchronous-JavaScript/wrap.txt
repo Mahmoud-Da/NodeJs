@@ -932,3 +932,133 @@ Always include a `.catch()` block at the end of a promise chain to handle unexpe
 * Promise chaining enables readable and maintainable asynchronous workflows.
 
 In the next lecture, the code will be made even simpler using *async and await*.
+
+*** 9- Creating Settled Promises ***
+**Lecture Notes: The Promise API in JavaScript**
+
+---
+
+### **Overview**
+
+In this lecture, we explore the **Promise API** in JavaScript more deeply.
+Specifically, we learn how to create **already resolved** or **already rejected** promises using static methods of the `Promise` class.
+This approach is useful for testing or simulating asynchronous operations without performing real asynchronous work.
+
+---
+
+### **1. Setting Up the Playground**
+
+Create a new file named **`promise-api.js`** to practice using promise methods.
+
+-------------------code----------------------
+touch promise-api.js
+-------------------code----------------------
+
+This file will serve as a sandbox to experiment with different promise behaviors.
+
+---
+
+### **2. Creating an Already Resolved Promise**
+
+Sometimes, you want to simulate a successful asynchronous operation — for example, when testing a function that depends on a resolved promise.
+
+You can use **`Promise.resolve()`** to create an already resolved promise.
+
+-------------------code----------------------
+const p = Promise.resolve({ id: 1, name: 'Mosh' });
+
+p.then(result => console.log(result));
+-------------------code----------------------
+
+**Explanation:**
+
+* `Promise.resolve(value)` creates a promise that is already resolved with the provided value.
+* The `value` can be a primitive, object, or any data.
+* The `.then()` method is used to access the resolved value.
+
+**Example Output:**
+
+-------------------code----------------------
+{ id: 1, name: 'Mosh' }
+-------------------code----------------------
+
+This promise does not wait; it is immediately resolved.
+
+---
+
+### **3. Creating an Already Rejected Promise**
+
+To simulate an error or failed operation, use **`Promise.reject()`**.
+
+-------------------code----------------------
+const p = Promise.reject(new Error('Something failed'));
+
+p.catch(error => console.log(error));
+-------------------code----------------------
+
+**Explanation:**
+
+* `Promise.reject(reason)` creates a promise that is immediately rejected.
+* The `reason` should describe why the operation failed.
+* The `.catch()` method handles the rejection.
+
+**Example Output:**
+
+-------------------code----------------------
+Error: Something failed
+    at Object.<anonymous> (promise-api.js:2:23)
+    ...
+-------------------code----------------------
+
+---
+
+### **4. Importance of Using Error Objects**
+
+When rejecting promises, it is best practice to use an **Error object** rather than a simple string.
+
+#### **Using an Error Object**
+
+-------------------code----------------------
+Promise.reject(new Error('Something failed'));
+-------------------code----------------------
+
+**Output:**
+Includes both the error message and a **call stack**, which helps with debugging.
+
+#### **Using a String**
+
+-------------------code----------------------
+Promise.reject('Something failed');
+-------------------code----------------------
+
+**Output:**
+
+-------------------code----------------------
+Something failed
+-------------------code----------------------
+
+In this case, no call stack is included, making it harder to trace the source of the error.
+
+---
+
+### **5. Summary of Static Methods**
+
+| **Method**               | **Description**                     | **Returns**                              | **Handled With** |
+| ------------------------ | ----------------------------------- | ---------------------------------------- | ---------------- |
+| `Promise.resolve(value)` | Creates an already resolved promise | A promise with the given value           | `.then()`        |
+| `Promise.reject(reason)` | Creates an already rejected promise | A rejected promise with the given reason | `.catch()`       |
+
+---
+
+### **6. Best Practices**
+
+* Use `Promise.resolve()` when you need an immediately resolved promise (for example, in unit tests or simulations).
+* Use `Promise.reject()` to simulate errors.
+* Always use an **Error object** when rejecting a promise to retain the call stack for debugging.
+
+---
+
+### **Key Takeaway**
+
+The `Promise` class provides convenient static methods — `resolve()` and `reject()` — that help create pre-set promises for testing and error handling scenarios.
+Using `Error` objects ensures meaningful debugging information is available when a promise fails.
