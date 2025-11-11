@@ -1373,3 +1373,172 @@ Error: Could not get the repos
 
 **Key Takeaway:**
 Async/await allows writing asynchronous code in a **linear, readable style** while maintaining non-blocking behavior and robust error handling.
+
+why the function dont need await when calling?
+-------------------code----------------------
+async function displayCommits() {
+  try {
+    const user = await getUser(1);
+    const repos = await getRepositories(user.gitHubUsername);
+    const commits = await getCommits(repos[0]);
+    console.log(commits);
+  } catch (error) {
+    console.log("Error:", error.message);
+  }
+}
+-------------------code----------------------
+
+Excellent question — this is a subtle but important point about how `async` functions work in JavaScript.
+
+Let’s unpack it step by step.
+
+---
+
+### **1. What happens when you call an async function**
+
+When you define an `async` function like this:
+
+-------------------code----------------------
+async function displayCommits() { ... }
+-------------------code----------------------
+
+and then call it:
+
+-------------------code----------------------
+displayCommits();
+-------------------code----------------------
+
+it **immediately returns a promise** — it doesn’t block or wait for anything.
+
+In other words:
+
+-------------------code----------------------
+const result = displayCommits();
+console.log(result); // Promise {<pending>}
+-------------------code----------------------
+
+Even though the function body *looks* synchronous because of `await`, the execution of that body happens asynchronously. The returned promise will be **fulfilled or rejected** when the function completes or throws an error.
+
+---
+
+### **2. Why we don’t need `await` when calling it**
+
+You don’t need to use `await displayCommits()` unless you actually **need to wait for its completion** before continuing with the next line of code.
+
+For example:
+
+-------------------code----------------------
+displayCommits();
+console.log('This runs immediately after calling displayCommits');
+-------------------code----------------------
+
+This is perfectly fine — the message logs right away, and then `displayCommits` runs in the background.
+
+But if you wanted to wait for it to finish (for instance, inside another async function), then you would use `await`:
+
+-------------------code----------------------
+async function run() {
+  await displayCommits();
+  console.log('displayCommits finished!');
+}
+run();
+-------------------code----------------------
+
+---
+
+### **3. Summary Table**
+
+| Situation                                                 | Code Example                             | Explanation                                        |
+| --------------------------------------------------------- | ---------------------------------------- | -------------------------------------------------- |
+| You just want to **start** the async task                 | `displayCommits();`                      | Fire-and-forget. The function runs asynchronously. |
+| You need to **wait for it to complete** before continuing | `await displayCommits();`                | Only valid inside another async function.          |
+| You want to **handle the result or errors manually**      | `displayCommits().then(...).catch(...);` | Works just like a normal promise.                  |
+
+---
+
+### **4. Analogy**
+
+Think of `displayCommits()` as starting a background job that returns a “ticket” (a promise).
+You can either:
+
+* Ignore the ticket (`displayCommits();`)
+* Wait for it to finish (`await displayCommits();`)
+* Or attach callbacks (`displayCommits().then(...).catch(...);`)
+
+---
+
+### **5. In your example**
+
+You don’t need `await` because you’re not waiting for the function’s completion — you’re just starting it.
+If you wanted to execute something *after* it’s done, you’d use one of the waiting methods above.
+
+---
+
+
+- show a short example where using `await` **does** make a difference in output order?
+
+Here’s a simple example showing the difference between calling an async function **with** and **without** `await`:
+
+---
+
+### **Example Code**
+
+-------------------code----------------------
+async function delayLog(message, delay) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      console.log(message);
+      resolve();
+    }, delay);
+  });
+}
+
+async function example() {
+  console.log("Start");
+
+  // Call async function WITHOUT await
+  delayLog("No await → this runs in background", 2000);
+
+  console.log("Middle (runs immediately)");
+
+  // Call async function WITH await
+  await delayLog("With await → waits before continuing", 2000);
+
+  console.log("End (runs after await finishes)");
+}
+
+example();
+-------------------code----------------------
+
+---
+
+### **Output Explanation**
+
+When you run this code, you’ll see something like:
+
+-------------------code----------------------
+Start
+Middle (runs immediately)
+No await → this runs in background
+With await → waits before continuing
+End (runs after await finishes)
+-------------------code----------------------
+
+---
+
+### **Step-by-step**
+
+1. `delayLog("No await...")` starts an async task but **does not wait** — execution continues right away.
+2. `"Middle (runs immediately)"` is logged next.
+3. When we reach `await delayLog("With await...")`, the function **pauses** until that async operation finishes.
+4. After the 2-second delay, it logs `"With await → waits before continuing"`.
+5. Finally, it logs `"End"` once everything has finished.
+
+---
+
+### **Conclusion**
+
+* Without `await`: the function runs asynchronously in the background (fire-and-forget).
+* With `await`: JavaScript pauses the current async function until the awaited task finishes.
+
+Would you like me to add another version of this example showing how the same behavior looks when using `.then()` instead of `await`?
