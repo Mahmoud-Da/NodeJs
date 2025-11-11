@@ -49,6 +49,7 @@ async function createCourse() {
 
   try {
     await course.save();
+    console.log(course);
   } catch (ex) {
     console.log(ex.message);
   }

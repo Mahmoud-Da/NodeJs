@@ -573,3 +573,139 @@ A course should have at least one tag.
 ---
 
 Next lecture: **Schema Types in Mongoose**.
+
+*** 6- SchemaType Options ***
+---
+
+### **Additional Schema Type Properties in Mongoose**
+
+#### **1. Schema Type Object Recap**
+
+* In Mongoose, each property in a schema can be defined using either:
+
+  * A simple type (e.g., `String`, `Number`, etc.), or
+  * A **schema type object**, which allows specifying additional options and validators.
+
+**Example:**
+
+-------------------code----------------------
+category: { type: String, required: true }
+-------------------code----------------------
+
+This object form supports multiple useful options beyond `type`, `required`, and `enum`.
+
+---
+
+### **2. String-Specific Properties**
+
+Mongoose provides extra configuration options for **string** fields:
+
+| Property    | Description                                    | Example           |
+| ----------- | ---------------------------------------------- | ----------------- |
+| `lowercase` | Converts the string to lowercase before saving | `lowercase: true` |
+| `uppercase` | Converts the string to uppercase before saving | `uppercase: true` |
+| `trim`      | Removes leading and trailing whitespace        | `trim: true`      |
+
+**Example:**
+
+-------------------code----------------------
+category: {
+  type: String,
+  lowercase: true,
+  trim: true
+}
+-------------------code----------------------
+
+**Demonstration:**
+
+* If you set:
+
+  -------------------code----------------------
+  category: ' Web '
+  -------------------code----------------------
+* The saved result in the database will be:
+
+  -------------------code----------------------
+  category: 'web'
+  -------------------code----------------------
+* These transformations are handled automatically by Mongoose.
+
+---
+
+### **3. Getters and Setters**
+
+These functions allow you to customize how data is **stored** and **retrieved**.
+
+#### **Setter**
+
+* Executed **before saving** the value to the database.
+* Commonly used to modify or sanitize the value before storage.
+
+#### **Getter**
+
+* Executed **when reading** the value from the database.
+* Useful for formatting or transforming stored values when accessed.
+
+---
+
+#### **Example: Rounding Prices**
+
+-------------------code----------------------
+price: {
+  type: Number,
+  get: v => Math.round(v),
+  set: v => Math.round(v)
+}
+-------------------code----------------------
+
+**Behavior:**
+
+* When saving `price: 15.8`, it will store `16`.
+* When reading a previously stored value (e.g., `15.8`), it will return `16` through the getter.
+
+---
+
+#### **Demonstration Steps:**
+
+1. **Save a Course**
+
+   -------------------code----------------------
+   price: 15.8
+   -------------------code----------------------
+
+   **Result in database:** `price = 16`
+
+2. **Manually edit the document** in MongoDB to `15.8`.
+
+3. **Read the document using Mongoose.**
+
+   * Output: `price = 16`
+     (The getter function automatically rounded the value.)
+
+---
+
+### **4. Notes**
+
+* `lowercase`, `uppercase`, and `trim` apply only to **string** fields.
+* `get` and `set` can be used on **any type of field**.
+* Use getters for data formatting and setters for data consistency.
+* Both can be combined with validation logic or other schema options.
+
+---
+
+### **5. Summary**
+
+| Feature     | Applies To | Purpose                                   |
+| ----------- | ---------- | ----------------------------------------- |
+| `lowercase` | String     | Converts value to lowercase before saving |
+| `uppercase` | String     | Converts value to uppercase before saving |
+| `trim`      | String     | Removes leading/trailing spaces           |
+| `get`       | Any type   | Format/transform value when **reading**   |
+| `set`       | Any type   | Modify/transform value when **saving**    |
+
+**Key takeaway:**
+Schema type properties like `lowercase`, `trim`, `get`, and `set` help ensure data is clean, consistent, and formatted correctly both when stored and retrieved.
+
+---
+
+Next lecture: **Schema Type Options — Immutable Properties and Aliases**.

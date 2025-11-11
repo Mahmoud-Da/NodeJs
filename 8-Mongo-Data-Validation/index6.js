@@ -36,6 +36,8 @@ const courseSchema = new mongoose.Schema({
     },
     min: 10,
     max: 200,
+    get: (v) => Math.round(v),
+    set: (v) => Math.round(v),
   },
 });
 
@@ -45,10 +47,10 @@ async function createCourse() {
   const course = new Course({
     name: "Node.js Course",
     author: "Mahmoud",
-    category: "-",
-    tags: [],
+    category: "web",
+    tags: ["front-end"],
     isPublished: true,
-    price: 20,
+    price: 15.8,
   });
 
   try {
@@ -57,7 +59,6 @@ async function createCourse() {
   } catch (ex) {
     for (field in ex.errors) {
       const validationError = ex.errors[field];
-      // console.log(validationError);
       console.log(validationError.message);
     }
   }
