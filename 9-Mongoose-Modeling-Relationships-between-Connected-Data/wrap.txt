@@ -286,7 +286,7 @@ const courseSchema = new mongoose.Schema({
 
 Example:
 
--------------------code----------------------on
+-------------------code----------------------
 {
   "_id": ObjectId("665def67890"),
   "name": "Node Course",
@@ -315,3 +315,184 @@ Example:
 5. Verify the stored relationship in **MongoDB Compass**.
 
 This sets the foundation for learning how to populate referenced documents, which will be covered in upcoming lectures.
+
+*** 3- Population ***
+
+### Lecture Notes: Populating Referenced Documents in MongoDB
+
+#### 1. Introduction
+
+* The goal of this lecture is to **load related documents** in MongoDB using **Mongoose’s `populate()` method**.
+* We will retrieve all courses along with their corresponding authors.
+
+---
+
+#### 2. Preparing the Code
+
+* In the `population.js` file, scroll to the bottom where the `listCourses()` function is defined.
+* Enable this function call to execute it when running the script.
+* Inside the function, the code retrieves all courses from the database:
+
+  -------------------code----------------------
+  const courses = await Course.find().select('name');
+  -------------------code----------------------
+* Run the script in the terminal:
+
+  -------------------code----------------------
+  node population.js
+  -------------------code----------------------
+* Output: only the `_id` and `name` fields of each course are shown.
+
+---
+
+#### 3. Including the Author Field
+
+* Modify the code to also select the `author` field:
+
+  -------------------code----------------------
+  const courses = await Course.find().select('name author');
+  -------------------code----------------------
+* Run the script again.
+* Now, the output shows each course’s `_id`, `name`, and `author` fields.
+* However, the `author` currently appears only as an **ObjectId** reference.
+
+---
+
+#### 4. Using the `populate()` Method
+
+* To load full author details instead of just the ObjectId, use the `populate()` method:
+
+  -------------------code----------------------
+  const courses = await Course
+    .find()
+    .select('name author')
+    .populate('author');
+  -------------------code----------------------
+* **Explanation:**
+
+  * `populate('author')` tells Mongoose to replace the `author` ObjectId with the actual author document.
+  * When defining the Course schema, the `author` field was declared as:
+
+    -------------------code----------------------
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Author'
+    }
+    -------------------code----------------------
+
+    This `ref` allows Mongoose to know which collection to query when populating.
+
+---
+
+#### 5. Running the Code
+
+* Run again in the terminal:
+
+  -------------------code----------------------
+  node population.js
+  -------------------code----------------------
+* Output:
+
+  * Courses without an author show no `author` field.
+  * Courses with an author now display the full author document (e.g., `name`, `bio`, `website`).
+
+---
+
+#### 6. Selecting Specific Author Properties
+
+* In real-world scenarios, authors may have many properties.
+* When listing courses, you may not want to retrieve all of them.
+* You can limit which fields to populate by adding a **second argument** to `populate()`:
+
+  -------------------code----------------------
+  const courses = await Course
+    .find()
+    .select('name author')
+    .populate('author', 'name');
+  -------------------code----------------------
+* Run again:
+
+  * The output now includes only `name` and `_id` for the author.
+
+---
+
+#### 7. Excluding the Author’s `_id`
+
+* To exclude a property, prefix it with a minus (`-`):
+
+  -------------------code----------------------
+  const courses = await Course
+    .find()
+    .select('name author')
+    .populate('author', 'name -_id');
+  -------------------code----------------------
+* Run again:
+
+  * The author object now contains only the `name` field.
+
+---
+
+#### 8. Populating Multiple References
+
+* You can populate more than one field by chaining multiple `populate()` calls.
+* Example (if `course` also has a `category` field):
+
+  -------------------code----------------------
+  const courses = await Course
+    .find()
+    .select('name author category')
+    .populate('author', 'name -_id')
+    .populate('category', 'name');
+  -------------------code----------------------
+* Each `populate()` specifies which related document and fields to include.
+
+---
+
+#### 9. Handling Invalid References
+
+* MongoDB does **not enforce relationships** for data integrity.
+* You can assign an invalid ObjectId as a reference without error.
+* Example: if you modify a course’s author ID to an invalid one in MongoDB Compass (e.g., change `0c` to `1c`),
+  MongoDB will accept it without complaint.
+* When running the script again:
+
+  -------------------code----------------------
+  node population.js
+  -------------------code----------------------
+
+  The result shows:
+
+  -------------------code----------------------on
+  "author": null
+  -------------------code----------------------
+
+  because Mongoose cannot find a matching author document.
+
+---
+
+#### 10. Key Takeaways
+
+* `.populate()` is used to load referenced documents automatically.
+* You can control which fields to include or exclude using the second argument of `populate()`.
+* Multiple `populate()` calls can load different related fields.
+* MongoDB allows invalid references; Mongoose will simply return `null` for those.
+* Always design your schema and queries based on your application’s data integrity requirements.
+
+---
+
+#### 11. Summary of the `listCourses()` Function Example
+
+Final version of the function:
+
+-------------------code----------------------
+async function listCourses() {
+  const courses = await Course
+    .find()
+    .select('name author')
+    .populate('author', 'name -_id');
+  console.log(courses);
+}
+-------------------code----------------------
+
+**Result:**
+Courses are listed with each author’s name, while ignoring unnecessary fields and invalid references.

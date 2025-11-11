@@ -47,7 +47,7 @@ async function createCourse(name, author) {
 }
 
 async function listCourses() {
-  const courses = await Course.find().select("name author");
+  const courses = await Course.find().select("name");
   console.log(courses);
 }
 
@@ -56,4 +56,4 @@ async function listCourses() {
 // createCourse('Node Course', 'authorId')
 // createCourse("Node Course", "6909a0e550880c53247dd752");
 
-listCourses();
+// listCourses();
