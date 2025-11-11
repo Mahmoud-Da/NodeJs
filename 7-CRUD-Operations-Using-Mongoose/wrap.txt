@@ -1151,3 +1151,86 @@ You don’t need to memorize MongoDB query syntax. Instead, think **logically**:
 ### Next Topic
 
 In the next lecture: **Logical Operators** in MongoDB.
+
+
+*** 10- Logical Query Operators ***
+Here are your organized lecture notes:
+
+---
+
+### Lecture: Logical Query Operators in MongoDB
+
+#### Overview
+
+This lecture explains how to use **logical operators** in MongoDB to combine multiple query conditions. Logical operators allow filtering documents that meet one or more criteria simultaneously.
+
+---
+
+### Logical Operators in MongoDB
+
+MongoDB provides two main logical operators:
+
+| Operator | Description                                                             |
+| -------- | ----------------------------------------------------------------------- |
+| `$or`    | Matches documents that satisfy **at least one** of the given conditions |
+| `$and`   | Matches documents that satisfy **all** of the given conditions          |
+
+---
+
+### Example 1: OR Operator
+
+**Scenario:**
+You want to get courses that are either **authored by “Mosh”** or **published** (or both).
+
+**Query:**
+
+-------------------code----------------------
+Course.find()
+  .or([{ author: 'Mosh' }, { isPublished: true }])
+-------------------code----------------------
+
+**Explanation:**
+
+* The `.or()` method accepts an **array** of filter objects.
+* Each object defines a condition.
+* The query returns all courses that match **either** condition.
+
+---
+
+### Example 2: AND Operator
+
+**Scenario:**
+You want to get courses that are **authored by “Mosh”** **and** are **published**.
+
+**Query:**
+
+-------------------code----------------------
+Course.find()
+  .and([{ author: 'Mosh' }, { isPublished: true }])
+-------------------code----------------------
+
+**Explanation:**
+
+* The `.and()` method also takes an array of filter objects.
+* It returns only documents that satisfy **all** conditions.
+* This is functionally similar to:
+
+  -------------------code----------------------
+  Course.find({ author: 'Mosh', isPublished: true })
+  -------------------code----------------------
+* However, the `.and()` method can be useful when building **complex or dynamic queries**.
+
+---
+
+### Key Concepts
+
+* Use **arrays** to group multiple filter objects when applying logical operators.
+* `$or` is used to match **any** condition in the array.
+* `$and` is used to match **all** conditions in the array.
+* Logical operators can be combined with comparison operators to form complex queries.
+
+---
+
+### Next Topic
+
+In the next lecture: **Using Regular Expressions** in MongoDB.

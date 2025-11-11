@@ -27,22 +27,15 @@ async function createCourse() {
   console.log(result);
 }
 
-// eq => equals to
-// ne => not equal to
-// gt => greater than
-// gte => greater than or equal to
-// lt => less than
-// lte => less than or equal to
-// in => in
-// nin=> not in
+// or => at least one conditions
+// and => all conditions
 
 async function getCourses() {
-  const courses = await Course
-    // .find({ author: "Mahmoud", isPublished: true })
-    // .find({ price: 10 }) // find all courses priced at **$10**
-    // .find({ price: { $gt: 10 } }) // find courses that cost **more than $10**
-    // .find({ price: { $gt2: 10 } }) // find courses that cost **greater than or equal to $10**
-    .find({ price: { $gte: 10, $lte: 20 } }) // find courses priced between **$10 and $20**
+  const courses = await Course;
+  // .find({ author: "Mahmoud", isPublished: true })
+  find()
+    .or([{ author: "Mosh" }, { isPublished: true }])
+    .and([{ author: "Mosh" }, { isPublished: true }])
     .limit(10)
     .sort({ name: 1 })
     .select({ name: 1, tags: 1 });
