@@ -196,3 +196,144 @@ There are three main patterns to handle asynchronous results in JavaScript:
 * The example introduces the challenge of handling asynchronous results.
 * Returning values directly from asynchronous functions doesn’t work because the result isn’t ready immediately.
 * Next, the instructor will introduce **callbacks** as the first solution to access the result of an asynchronous operation.
+
+*** 3- Callbacks ***
+**Lecture Notes: Asynchronous Programming – Callbacks in JavaScript**
+
+**1. Review of Previous Lesson**
+
+* Previously, it was shown that returning a value directly from an asynchronous function like `getUser` does not work because the result is not immediately available.
+* In this lecture, the focus is on using **callbacks** to handle asynchronous results.
+
+---
+
+**2. Modifying the getUser Function**
+
+* The `getUser` function is updated to accept a **callback** parameter.
+* A **callback** is a function that is called once an asynchronous operation (such as fetching data) is complete.
+
+**Example:**
+
+-------------------code----------------------
+function getUser(id, callback) {
+  setTimeout(() => {
+    console.log('Reading a user from a database...');
+    callback({ id: id, githubUsername: 'mosh' });
+  }, 2000);
+}
+-------------------code----------------------
+
+**Explanation:**
+
+* The second parameter `callback` is a function passed in by the caller.
+* Inside `setTimeout`, once the simulated delay ends, the callback is invoked with the `user` object.
+* Instead of returning data, we *call* the callback function to deliver the result.
+
+---
+
+**3. Using the Callback**
+
+* Since `getUser` no longer returns a value, the main program passes a callback function to handle the result.
+
+**Example:**
+
+-------------------code----------------------
+console.log('Before');
+getUser(1, function(user) {
+  console.log('User', user);
+});
+console.log('After');
+-------------------code----------------------
+
+**Output:**
+
+-------------------code----------------------
+Before
+After
+Reading a user from a database...
+User { id: 1, githubUsername: 'mosh' }
+-------------------code----------------------
+
+**Explanation:**
+
+* The asynchronous code (`setTimeout`) runs after the main thread continues.
+* “Before” and “After” are printed first, followed by the asynchronous result.
+
+---
+
+**4. Arrow Function Syntax**
+
+* The callback function can also be written with arrow syntax for brevity:
+
+-------------------code----------------------
+getUser(1, user => {
+  console.log('User', user);
+});
+-------------------code----------------------
+
+---
+
+**5. Exercise: Creating an Asynchronous getRepositories Function**
+
+* **Objective:** Simulate fetching GitHub repositories for a user after retrieving their username.
+
+**Step 1: Create a synchronous version**
+
+-------------------code----------------------
+function getRepositories(username) {
+  return ['repo1', 'repo2', 'repo3'];
+}
+-------------------code----------------------
+
+**Step 2: Convert to asynchronous**
+
+* Use `setTimeout` to simulate a 2-second API call.
+* Add a callback parameter to handle the result asynchronously.
+
+**Example Solution:**
+
+-------------------code----------------------
+function getRepositories(username, callback) {
+  setTimeout(() => {
+    console.log('Calling GitHub API...');
+    callback(['repo1', 'repo2', 'repo3']);
+  }, 2000);
+}
+-------------------code----------------------
+
+---
+
+**6. Integrating Both Asynchronous Functions**
+
+* After fetching the user, call `getRepositories` inside the callback.
+
+**Example:**
+
+-------------------code----------------------
+console.log('Before');
+getUser(1, user => {
+  getRepositories(user.githubUsername, repos => {
+    console.log('Repos', repos);
+  });
+});
+console.log('After');
+-------------------code----------------------
+
+**Output:**
+
+-------------------code----------------------
+Before
+After
+Reading a user from a database...
+Calling GitHub API...
+Repos [ 'repo1', 'repo2', 'repo3' ]
+-------------------code----------------------
+
+---
+
+**7. Key Takeaways**
+
+* **Callbacks** are functions passed as arguments to be executed later, once asynchronous data becomes available.
+* Returning values directly from asynchronous functions does not work; you must use a callback or other async mechanisms.
+* Nesting callbacks (e.g., calling `getRepositories` inside `getUser`) can make code less readable, a situation often called **callback hell**.
+* Future lessons will introduce **Promises** and **async/await** to make handling asynchronous code more elegant.
