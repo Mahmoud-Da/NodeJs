@@ -1173,3 +1173,99 @@ module.exports = router;
 
 * In the next lecture, the instructor will modify the authentication response to include a **JSON Web Token (JWT)** instead of a simple boolean response.
 
+*** 8- JSON Web Tokens ***
+### Lecture Notes: JSON Web Tokens (JWT)
+
+#### 1. Purpose of Modifying the Response
+
+* The authentication endpoint currently returns a simple `true` value upon success.
+* This needs to be replaced with a **JSON Web Token (JWT)**.
+* A JWT acts as an **identifier** for the user — similar to a **driver’s license** or **passport**.
+
+#### 2. Concept of a JSON Web Token
+
+* When a user logs in:
+
+  1. The **server** generates a JWT.
+  2. The **client** (browser or mobile app) receives it and stores it.
+  3. For future API calls, the client sends this token to the server as proof of identity.
+
+* This token allows the client to access protected endpoints without needing to log in again.
+
+#### 3. Storage on the Client
+
+* **For web applications (React, Angular, etc.):**
+  Use **local storage** in the browser to store the JWT.
+* **For mobile applications:**
+  Use the platform’s equivalent secure storage mechanism.
+
+#### 4. Example of a JWT
+
+* Go to **[jwt.io](https://jwt.io)** — a site with a JWT debugger.
+* The **encoded section** displays the JWT as a long string.
+* When decoded, it becomes a **JSON object**.
+* The JWT is divided into **three parts**, each color-coded:
+
+  1. **Header (red)**
+  2. **Payload (purple)**
+  3. **Signature (blue)**
+
+#### 5. Structure of a JWT
+
+1. **Header**
+
+   * Contains metadata about the token:
+
+     -------------------code----------------------
+     {
+       "alg": "HS256",
+       "typ": "JWT"
+     }
+     -------------------code----------------------
+   * `alg` → the algorithm used for encoding.
+   * `typ` → token type, which is always `"JWT"`.
+   * Usually handled automatically — developers rarely modify it.
+
+2. **Payload**
+
+   * The main data section, containing **public information about the user**:
+
+     -------------------code----------------------
+     {
+       "sub": "user_id",
+       "name": "John Doe",
+       "admin": true
+     }
+     -------------------code----------------------
+   * Similar to a passport containing personal information (name, birth date, etc.).
+   * Can include:
+
+     * User ID (`sub`)
+     * User name
+     * Whether the user is an admin, etc.
+   * This allows the server to read user details **without querying the database** every time.
+
+3. **Signature**
+
+   * Ensures the token has **not been altered**.
+   * Created by combining:
+
+     * The encoded header and payload.
+     * A **secret (private key)** known **only to the server**.
+   * If the token is modified (e.g., setting `admin: true` manually), the signature becomes **invalid**, and the server **rejects** it.
+
+#### 6. Security and Validation
+
+* JWTs are **tamper-proof** because of their digital signature.
+* Even if a user modifies the payload, they cannot recreate a valid signature without the **server’s private key**.
+* Therefore:
+
+  * Any tampered token will be **rejected** by the server.
+  * The server can always verify the integrity of a JWT.
+
+#### 7. Summary
+
+* A **JWT** securely represents a user’s identity.
+* It has **three parts**: header, payload, and signature.
+* It enables **stateless authentication**, meaning the server doesn’t need to keep a session for each user.
+* The next step will be implementing JWT generation on the server and sending it to the client upon login.
