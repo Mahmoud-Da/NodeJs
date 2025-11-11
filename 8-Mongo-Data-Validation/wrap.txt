@@ -448,3 +448,128 @@ A course should have at least one tag.
 ---
 
 Next lecture: **Getting Access to Individual Validation Errors**.
+
+*** 5- Validation Errors ***
+---
+
+### **Understanding Validation Error Objects in Mongoose**
+
+#### **1. Overview**
+
+* When Mongoose validation fails, an **exception** is thrown.
+* This exception includes detailed information about each invalid field.
+* Inside the `catch` block, the error object contains a property called **`errors`**, which holds a set of **validation error objects**, one per invalid field.
+
+---
+
+#### **2. Example Setup**
+
+**Course Object Example:**
+
+-------------------code----------------------
+const course = new Course({
+  category: '-', // invalid value (enum error)
+  tags: []       // invalid value (custom validator)
+});
+-------------------code----------------------
+
+When validation fails, Mongoose throws an error object like this:
+
+-------------------code----------------------
+ValidationError: Course validation failed
+-------------------code----------------------
+
+This object has an **`errors`** property:
+
+-------------------code----------------------
+err.errors
+-------------------code----------------------
+
+Each property inside `err.errors` corresponds to a specific field that failed validation, such as:
+
+* `err.errors.category`
+* `err.errors.tags`
+
+---
+
+#### **3. Inspecting Validation Error Details**
+
+**Iterating Over Errors:**
+
+-------------------code----------------------
+for (field in err.errors) {
+  const validationError = err.errors[field];
+  console.log(validationError);
+}
+-------------------code----------------------
+
+Each `validationError` object contains several useful properties:
+
+| Property     | Description                       | Example                                    |
+| ------------ | --------------------------------- | ------------------------------------------ |
+| `message`    | The error message                 | `"A course should have at least one tag."` |
+| `name`       | Type of error object              | `"ValidatorError"`                         |
+| `properties` | Detailed info about the validator | Contains `type`, `path`, and `value`       |
+| `kind`       | Type of validation rule           | `"enum"`, `"user defined"`, etc.           |
+| `path`       | Field name that failed validation | `"category"` or `"tags"`                   |
+| `value`      | Invalid value passed              | `"-"` or `null`                            |
+
+---
+
+#### **4. Example Output Analysis**
+
+For the invalid course object above:
+
+* **Error 1 – `category`:**
+
+  -------------------code----------------------
+  message: '-' is not a valid enum value for path 'category'
+  kind: 'enum'
+  path: 'category'
+  value: '-'
+  -------------------code----------------------
+* **Error 2 – `tags`:**
+
+  -------------------code----------------------
+  message: 'A course should have at least one tag.'
+  kind: 'user defined'
+  path: 'tags'
+  value: null
+  -------------------code----------------------
+
+---
+
+#### **5. Extracting Only the Error Messages**
+
+To get only the messages for display or logging:
+
+-------------------code----------------------
+for (field in err.errors) {
+  console.log(err.errors[field].message);
+}
+-------------------code----------------------
+
+**Output:**
+
+-------------------code----------------------
+'-' is not a valid enum value for path 'category'
+A course should have at least one tag.
+-------------------code----------------------
+
+---
+
+### **6. Summary**
+
+* Mongoose groups all validation errors under the `errors` object.
+* Each field that fails validation produces a `ValidatorError` object.
+* Key details include:
+
+  * `message`: human-readable error
+  * `kind`: type of validation (e.g., `enum`, `user defined`)
+  * `path`: name of the field
+  * `value`: invalid value
+* To show user-friendly messages, simply access the `message` property for each error.
+
+---
+
+Next lecture: **Schema Types in Mongoose**.
