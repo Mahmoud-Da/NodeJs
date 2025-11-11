@@ -1245,3 +1245,131 @@ Asynchronous operation 2
 ### **Key Takeaway**
 
 JavaScript’s `Promise.all()` and `Promise.race()` enable running asynchronous tasks efficiently and handling their outcomes collectively or selectively—allowing for more flexible and performant asynchronous workflows.
+
+*** 11- Async and Await ***
+**Lecture Notes: Async and Await in JavaScript**
+
+---
+
+### **Overview**
+
+This lecture introduces **async and await**, a modern JavaScript feature that allows writing asynchronous code that looks and behaves like synchronous code.
+It is built on top of promises and provides a cleaner, more readable syntax compared to callbacks or chained `.then()` calls.
+
+---
+
+### **1. Rewriting Promises Using Async/Await**
+
+#### **Original Promise-based Approach**
+
+-------------------code----------------------
+getUser(1)
+  .then(user => getRepositories(user.gitHubUsername))
+  .then(repos => getCommits(repos[0]))
+  .then(commits => console.log(commits))
+  .catch(err => console.log('Error:', err.message));
+-------------------code----------------------
+
+#### **Async/Await Approach**
+
+-------------------code----------------------
+async function displayCommits() {
+  const user = await getUser(1);
+  const repos = await getRepositories(user.gitHubUsername);
+  const commits = await getCommits(repos[0]);
+  console.log(commits);
+}
+
+displayCommits();
+-------------------code----------------------
+
+**Explanation:**
+
+* The `await` keyword pauses the execution of the function until the promise resolves.
+* Code execution appears **synchronous** but runs asynchronously under the hood.
+* Each line returns a resolved value directly, eliminating the need for `.then()` chaining.
+
+---
+
+### **2. Using `async` Keyword**
+
+* The `await` keyword **must** be used inside a function declared with `async`.
+* Example:
+
+-------------------code----------------------
+async function displayCommits() { ... }
+-------------------code----------------------
+
+* An `async` function always **returns a promise**.
+  If it does not explicitly return a value, it returns a promise that resolves to `undefined` (void).
+
+---
+
+### **3. How Async/Await Works Internally**
+
+* Internally, `async`/`await` is syntactic sugar over promises.
+* The JavaScript engine executes the code asynchronously:
+
+  1. When `await getUser(1)` is executed, the thread is released for other work.
+  2. Once the promise resolves, execution resumes and the result is stored.
+  3. The same happens for the next awaited functions (`getRepositories` and `getCommits`).
+
+**Key Point:** Code looks synchronous, but execution is non-blocking.
+
+---
+
+### **4. Error Handling**
+
+* With promises, errors are handled using `.catch()`.
+* With async/await, errors are handled using a **try-catch block**:
+
+-------------------code----------------------
+async function displayCommits() {
+  try {
+    const user = await getUser(1);
+    const repos = await getRepositories(user.gitHubUsername);
+    const commits = await getCommits(repos[0]);
+    console.log(commits);
+  } catch (error) {
+    console.log('Error:', error.message);
+  }
+}
+-------------------code----------------------
+
+**Example of Simulating an Error:**
+
+* Modify `getRepositories` to reject:
+
+-------------------code----------------------
+return Promise.reject(new Error('Could not get the repos'));
+-------------------code----------------------
+
+* The catch block in `displayCommits` will handle it:
+
+-------------------code----------------------
+Error: Could not get the repos
+-------------------code----------------------
+
+---
+
+### **5. Benefits of Async/Await**
+
+* Makes asynchronous code **easier to read** and maintain.
+* Eliminates **callback hell** and deeply nested `.then()` chains.
+* Handles errors cleanly with `try-catch`.
+* Internally uses promises, so fully compatible with existing promise-based functions.
+
+---
+
+### **6. Summary**
+
+| Concept        | Explanation                                                                     |
+| -------------- | ------------------------------------------------------------------------------- |
+| `async`        | Declares a function as asynchronous; allows use of `await` inside it.           |
+| `await`        | Pauses execution until a promise resolves; returns the resolved value.          |
+| Error Handling | Use `try-catch` instead of `.catch()`.                                          |
+| Returns        | Async functions always return a promise, even if no explicit value is returned. |
+| Under the Hood | Async/await is syntactic sugar over promises; execution remains asynchronous.   |
+
+**Key Takeaway:**
+Async/await allows writing asynchronous code in a **linear, readable style** while maintaining non-blocking behavior and robust error handling.
