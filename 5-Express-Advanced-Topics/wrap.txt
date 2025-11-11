@@ -1286,3 +1286,29 @@ mongoose.connect('mongodb://localhost/mydatabase')
 
 ---
 
+*** 11- Authentication ***
+### **Lecture Notes: Authentication in Express**
+
+**Overview:**
+Express is designed as a minimal and unopinionated framework. This means it provides the core tools for handling HTTP requests and responses but leaves many higher-level features, such as authentication, for developers to implement using additional libraries.
+
+**Key Points:**
+
+1. **Authentication Scope:**
+
+   * Authentication is **outside the core functionality** of Express.
+   * Express does **not** provide built-in mechanisms for handling user authentication or authorization.
+
+2. **Reason:**
+
+   * Express is intended to remain **lightweight and flexible**, allowing developers to choose their own preferred approach or library for authentication.
+
+3. **What Comes Next:**
+
+   * A **comprehensive section** later in the course will cover:
+
+     * **Authentication:** Verifying the identity of users.
+     * **Authorization:** Controlling access to API endpoints and resources.
+
+**Summary:**
+Express itself does not handle authentication, but it provides a foundation upon which secure APIs can be built using additional tools and libraries.
