@@ -1020,3 +1020,198 @@ const movie = new Movie({
 * **Validation and safety:** Input checks prevent malformed or malicious data.
 
 ---
+
+
+*** 7- Project- Build the Rentals API ***
+---
+
+## Lecture Notes: Building the Rentals API (VidLib Project)
+
+### 1. Overview
+
+At this stage, the application already has APIs for **customers**, **genres**, and **movies**.
+The next step is to build an API for **rentals**.
+
+The Rentals API should allow:
+
+* **Creating a new rental** (`POST /api/rentals`)
+* **Getting a list of rentals** (`GET /api/rentals`)
+
+---
+
+### 2. Rental Model Design
+
+#### Schema Location
+
+A new file named **rental.js** is created in the `models` folder.
+
+#### Rental Schema Structure
+
+Each rental document in MongoDB will contain the following properties:
+
+1. **customer**
+
+   * **Type:** Custom schema (not reusing the full `Customer` schema)
+   * **Reason:**
+
+     * The customer object may have many properties (e.g., 50 or more).
+     * Only the essential fields needed for displaying rentals are included.
+   * **Included Fields:**
+
+     * `name`
+     * `isGold` (used for potential discounts)
+     * `phone`
+     * `_id` (so we can retrieve full customer info later if needed)
+
+2. **movie**
+
+   * **Type:** Custom schema (not reusing the full `Movie` schema)
+   * **Included Fields:**
+
+     * `title`
+     * `dailyRentalRate`
+     * `_id`
+   * **Reason:**
+
+     * Movies can have many properties; only the necessary ones for rentals are stored.
+     * This allows calculating the rental fee without extra queries.
+
+3. **dateOut**
+
+   * **Type:** Date
+   * **Required:** Yes
+   * **Default:** Current date and time (set automatically by Mongoose)
+
+4. **dateReturned**
+
+   * **Type:** Date
+   * **Required:** No (because it's initially unset until the movie is returned)
+
+5. **rentalFee**
+
+   * **Type:** Number
+   * **Min:** 0
+
+---
+
+### 3. Validation Schema (Joi)
+
+The Joi validation schema differs from the Mongoose schema.
+It defines what the **client** must send when creating a new rental.
+
+#### Required Client Inputs
+
+* `customerId`
+* `movieId`
+
+#### Server-Handled Properties
+
+* `dateOut` → automatically set to current date/time
+* `dateReturned` → initially empty, updated later
+* `rentalFee` → calculated by the server
+
+**Purpose:**
+Prevents clients from manipulating system-controlled fields.
+
+---
+
+### 4. Rentals API Implementation
+
+#### a. Get All Rentals
+
+**Endpoint:** `GET /api/rentals`
+
+* Returns the list of all rentals.
+* Rentals are **sorted by `dateOut` in descending order** (most recent first).
+
+-------------------code----------------------
+const rentals = await Rental.find().sort('-dateOut');
+res.send(rentals);
+-------------------code----------------------
+
+#### b. Create a New Rental
+
+**Endpoint:** `POST /api/rentals`
+
+**Steps:**
+
+1. **Validate request body** using Joi.
+
+   * If invalid → return **400 Bad Request**.
+
+2. **Validate `customerId`**
+
+   * Find customer by ID.
+   * If not found → return **400 Invalid Customer**.
+
+3. **Validate `movieId`**
+
+   * Find movie by ID.
+   * If not found → return **400 Invalid Movie**.
+
+4. **Check stock availability**
+
+   * If `movie.numberInStock` is 0 → return **400 Movie not in stock**.
+
+5. **Create a new rental object**
+
+   -------------------code----------------------
+   const rental = new Rental({
+     customer: {
+       _id: customer._id,
+       name: customer.name,
+       phone: customer.phone
+     },
+     movie: {
+       _id: movie._id,
+       title: movie.title,
+       dailyRentalRate: movie.dailyRentalRate
+     }
+   });
+   -------------------code----------------------
+
+   * `dateOut` is automatically set by Mongoose’s default value.
+
+6. **Update movie stock**
+
+   -------------------code----------------------
+   movie.numberInStock--;
+   -------------------code----------------------
+
+7. **Save both changes**
+
+   * Save rental and movie updates.
+
+---
+
+### 5. Transaction Problem
+
+**Issue:**
+Saving the rental and updating the movie stock are **two separate operations**.
+If something fails after the first operation (e.g., server crash, lost connection), the data could become inconsistent.
+
+**Ideal Solution:**
+Use a **transaction** so both operations either:
+
+* Complete successfully, or
+* Roll back entirely.
+
+**In MongoDB:**
+
+* Transactions are not natively supported for standalone operations.
+* A concept called **Two-Phase Commit** can simulate this behavior, but it’s an advanced topic.
+
+**Next Step:**
+In the following lecture, an **NPM package** will be introduced to simulate transaction-like behavior in Mongoose.
+
+---
+
+### 6. Key Takeaways
+
+* Use **embedded custom schemas** for efficiency and simplicity.
+* Keep only **essential fields** in embedded documents.
+* Let the **server handle computed fields** (e.g., rental fee, dates).
+* Apply **input validation** using Joi.
+* Understand the need for **transaction safety** when performing multiple database updates.
+
+---
