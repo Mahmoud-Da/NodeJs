@@ -368,3 +368,135 @@ The URL does not include the `public` folder name; static files are served from 
 ### **4. Next Topic**
 
 In the next lecture, we will study **third-party middleware** and how to integrate them into an Express application for additional features and functionality.
+
+*** 5- Third-party Middleware ***
+**Lecture Notes: Third-Party Middleware in Express**
+
+---
+
+### **1. Introduction**
+
+Express provides many **third-party middleware** that can be added to extend the functionality of your applications.
+You can find a list of them on the official Express website under **Resources → Middleware**.
+
+However, it is important to note that **each middleware function adds overhead** to the request processing pipeline.
+Only include middleware that provides necessary functionality for your application; unnecessary middleware can reduce performance.
+
+---
+
+### **2. Best Practice Middleware: Helmet**
+
+**Purpose:**
+Helmet helps **secure your Express applications** by setting various **HTTP headers** automatically.
+
+**Installation:**
+
+-------------------code----------------------
+npm install helmet
+-------------------code----------------------
+
+**Usage in Express:**
+
+-------------------code----------------------
+const helmet = require('helmet');
+app.use(helmet());
+-------------------code----------------------
+
+**Explanation:**
+
+* `helmet()` returns a middleware function.
+* When used with `app.use()`, it enhances security by adjusting response headers.
+* To understand the internal details of Helmet and available configuration options, consult its official documentation.
+
+**Example:**
+Helmet can help prevent attacks such as cross-site scripting (XSS) and clickjacking by configuring secure headers automatically.
+
+---
+
+### **3. Logging Middleware: Morgan**
+
+**Purpose:**
+Morgan is used for **logging HTTP requests** in Express applications. It helps developers monitor and debug request activity.
+
+**Installation:**
+
+-------------------code----------------------
+npm install morgan
+-------------------code----------------------
+
+**Usage in Express:**
+
+-------------------code----------------------
+const morgan = require('morgan');
+app.use(morgan('tiny'));
+-------------------code----------------------
+
+**Explanation:**
+
+* `morgan()` returns a middleware function that logs details about incoming HTTP requests.
+* The `'tiny'` format provides a minimal log output that includes:
+
+  * HTTP method (GET, POST, etc.)
+  * Request URL
+  * Status code (e.g., 200 for success)
+  * Response time
+
+**Example Output (Tiny Format):**
+
+-------------------code----------------------
+GET /api/courses 200 4.351 ms - 84
+-------------------code----------------------
+
+This indicates:
+
+* A GET request was made to `/api/courses`
+* The response status was 200 (OK)
+* It took about 4 milliseconds
+* The response size was 84 bytes
+
+---
+
+### **4. Logging Options**
+
+Morgan supports several predefined logging formats:
+
+* `tiny` – minimal and clean
+* `combined` – detailed with more request and user-agent information
+* `common`, `dev`, and others
+
+You can find the full list of formats in the Morgan documentation.
+
+Additionally, you can configure Morgan to **write logs to a file** instead of printing them to the console.
+However, writing logs to disk can **slow down request processing**, so it’s best used in **development or debugging environments**, not in production.
+
+**Example for writing logs to a file:**
+
+-------------------code----------------------
+const fs = require('fs');
+const path = require('path');
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
+app.use(morgan('combined', { stream: accessLogStream }));
+-------------------code----------------------
+
+---
+
+### **5. Performance Considerations**
+
+* Every middleware adds processing time to each request.
+* Avoid unnecessary middleware in production.
+* Enable certain middleware (like Morgan) only when needed, using configuration logic or environment variables.
+
+---
+
+### **6. Summary**
+
+| Middleware | Purpose                             | Example                   | Notes                                       |
+| ---------- | ----------------------------------- | ------------------------- | ------------------------------------------- |
+| `helmet()` | Secures app by setting HTTP headers | `app.use(helmet())`       | Recommended for production                  |
+| `morgan()` | Logs HTTP requests                  | `app.use(morgan('tiny'))` | Use selectively for debugging or monitoring |
+
+---
+
+### **7. Next Topic**
+
+In the next lecture, we will explore how to handle **different environments** (development, testing, and production) and how to configure middleware or features differently depending on the environment.
