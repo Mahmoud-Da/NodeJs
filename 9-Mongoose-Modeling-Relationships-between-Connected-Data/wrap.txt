@@ -1216,6 +1216,139 @@ In the following lecture, an **NPM package** will be introduced to simulate tran
 
 ---
 
+### What is wo-phase commit (2PC)?
+A **two-phase commit (2PC)** is a method used in databases to make sure a **transaction involving multiple operations or databases** either:
+
+* **Fully succeeds (all changes are saved)**, or
+* **Fully fails (nothing is changed)**
+
+— so that data stays consistent everywhere.
+
+---
+
+### Simple Explanation
+
+Imagine you have two bank accounts in **different databases**, and you want to **transfer money** from one to the other.
+
+1. **Phase 1 — Prepare (Ask everyone if ready):**
+   The system asks both databases:
+   “Can you complete this operation successfully?”
+   Each one checks and replies “Yes” or “No”.
+
+2. **Phase 2 — Commit or Rollback (Do it or cancel):**
+
+   * If **all** databases said “Yes,” the system tells them to **commit** (actually save the changes).
+   * If **any** said “No,” the system tells **everyone to rollback** (cancel their changes).
+
+---
+
+### Why It Matters
+
+Without this system, one database might update while another fails — causing inconsistent data.
+Two-phase commit ensures **either all changes happen together or none do**.
+
+---
+
+### In MongoDB
+
+MongoDB doesn’t have traditional transactions (like SQL databases), so it uses a **two-phase commit technique** to simulate this behavior — ensuring that multiple related operations act like a single, all-or-nothing transaction.
+
+Would you like me to show you a short example of how MongoDB simulates a two-phase commit using code (like with the `Fawn` library)?
+
+
+
+
+### Example: Two-Phase Commit with Fawn
+
+Let’s say we have a movie rental app.
+When a customer rents a movie, we want to:
+
+1. **Create a new rental record**
+2. **Decrease the movie stock by 1**
+
+Both operations must happen **together** — if one fails, the other should be canceled.
+This is where two-phase commit helps.
+
+---
+
+### 1. Install Fawn
+
+-------------------code----------------------
+npm install fawn
+-------------------code----------------------
+
+---
+
+### 2. Import and Initialize Fawn
+
+-------------------code----------------------
+const mongoose = require('mongoose');
+const Fawn = require('fawn');
+
+Fawn.init(mongoose);
+-------------------code----------------------
+
+This connects Fawn to MongoDB and prepares it to simulate transactions.
+
+---
+
+### 3. Create a “Transaction” (Task)
+
+Here’s how to perform both operations as a single transaction:
+
+-------------------code----------------------
+router.post('/', async (req, res) => {
+  const rental = new Rental({
+    customer: req.body.customerId,
+    movie: req.body.movieId
+  });
+
+  try {
+    // Start a Fawn task
+    new Fawn.Task()
+      // Operation 1: Save the rental document
+      .save('rentals', rental)
+
+      // Operation 2: Update the movie stock
+      .update('movies', { _id: rental.movie }, {
+        $inc: { numberInStock: -1 } // Decrease stock by 1
+      })
+
+      // Commit both operations together
+      .run();
+
+    res.send(rental);
+  } catch (err) {
+    res.status(500).send('Something failed.');
+  }
+});
+-------------------code----------------------
+
+---
+
+### 4. How It Works Internally (the two phases)
+
+**Phase 1 – Prepare:**
+Fawn adds a temporary document in a hidden collection in MongoDB (for example, `_fawn_jobs`).
+This stores all the operations that need to be executed.
+
+**Phase 2 – Commit or Rollback:**
+Fawn runs each operation one by one:
+
+* If all succeed → The temporary document is deleted (transaction committed).
+* If one fails → All changes are rolled back (transaction canceled).
+
+---
+
+### 5. Why Use It
+
+MongoDB (before version 4.0) didn’t support multi-document transactions natively, so libraries like `Fawn` were built to simulate them using the **two-phase commit** idea.
+
+Now, modern MongoDB versions have real multi-document transactions, but this concept remains important for understanding **how atomicity was achieved before that**.
+
+---
+
+
 
 *** 8- Transactions ***
 ---
@@ -1380,5 +1513,121 @@ This collection is automatically created and managed by Fawn.
 * Always **wrap transactions in try-catch blocks** for safety.
 * Mongoose automatically sets default values like `_id` and `dateOut`.
 * Fawn creates an internal collection to manage transaction states.
+
+---
+
+
+*** 9- ObjectID ***
+---
+
+## Lecture Notes: Understanding Object IDs in MongoDB
+
+### 1. Overview
+
+When you store a document in MongoDB, the database automatically assigns a unique `_id` value to it.
+This ID looks like a long string of 24 hexadecimal characters — each pair of characters represents **1 byte**, making it a total of **12 bytes**.
+
+---
+
+### 2. Structure of an ObjectID (12 bytes)
+
+| Component          | Size    | Description                                                                |
+| ------------------ | ------- | -------------------------------------------------------------------------- |
+| Timestamp          | 4 bytes | Time when the document was created.                                        |
+| Machine Identifier | 3 bytes | Identifies the machine on which the document was created.                  |
+| Process Identifier | 2 bytes | Identifies the process that created the document.                          |
+| Counter            | 3 bytes | Ensures uniqueness among documents created in the same process and second. |
+
+Because the timestamp is embedded within the ObjectID:
+
+* You don’t need a separate `createdAt` field.
+* You can sort documents by `_id` to get them in creation order.
+
+---
+
+### 3. How Uniqueness Works
+
+Each ObjectID is almost unique because of its combination of timestamp, machine ID, process ID, and counter.
+
+#### Byte breakdown:
+
+* 1 byte = 8 bits
+* Possible combinations per byte = 2⁸ = 256
+* The 3-byte counter = 2²⁴ = 16 million possibilities
+
+This means within the same machine, process, and second, MongoDB can safely generate about **16 million unique ObjectIDs** before the counter overflows.
+If more than 16 million documents are created in the same second under identical conditions, there is a tiny chance of collision — but it’s extremely rare.
+
+---
+
+### 4. Why MongoDB Doesn’t Guarantee 100% Uniqueness
+
+Relational databases (like MySQL or SQL Server) use **auto-incrementing IDs** that are guaranteed to be unique but reduce scalability, since they rely on a central sequence generator.
+
+MongoDB instead generates IDs **client-side** using the **MongoDB Driver**, not the database server.
+This allows:
+
+* Higher scalability.
+* No dependency on a central authority to create unique IDs.
+* Multiple database instances to generate IDs independently.
+
+---
+
+### 5. Role of Mongoose and MongoDB Driver
+
+When building applications with **Node.js** and **Mongoose**:
+
+* Mongoose is an abstraction layer built over the MongoDB driver.
+* When you create a new document, Mongoose communicates with the driver, which generates a new ObjectID before saving to the database.
+
+---
+
+### 6. Creating ObjectIDs Manually
+
+You can generate ObjectIDs manually without inserting a document into MongoDB.
+
+-------------------code----------------------
+const mongoose = require('mongoose');
+
+// Create a new ObjectID
+const id = new mongoose.Types.ObjectId();
+console.log(id);
+-------------------code----------------------
+
+Running this will print a unique ObjectID, created in memory.
+
+---
+
+### 7. Extracting the Timestamp
+
+The first 4 bytes of the ObjectID contain a timestamp.
+You can extract it like this:
+
+-------------------code----------------------
+console.log(id.getTimestamp());
+-------------------code----------------------
+
+This shows the exact time the ObjectID was generated.
+
+---
+
+### 8. Validating ObjectIDs
+
+Mongoose provides a static method to validate if a string is a valid ObjectID.
+
+-------------------code----------------------
+const isValid = mongoose.Types.ObjectId.isValid('1234');
+console.log(isValid); // false
+-------------------code----------------------
+
+---
+
+### 9. Summary
+
+* MongoDB ObjectIDs are 12-byte identifiers that are almost always unique.
+* Structure: 4 bytes timestamp + 3 bytes machine ID + 2 bytes process ID + 3 bytes counter.
+* Generated by the MongoDB driver (client-side), not the database.
+* Ensures scalability without relying on a central unique ID generator.
+* You can generate, inspect, and validate ObjectIDs directly using Mongoose.
 
 ---
