@@ -1498,3 +1498,164 @@ Course.find()
 ### Next Topic
 
 In the next lecture: **Sorting Query Results** in MongoDB.
+
+*** 14- Exercise 1 ***
+
+---
+
+### Lecture: Exercise – Querying Data with Mongoose
+
+#### Overview
+
+This exercise demonstrates how to import data into MongoDB and write a Mongoose program to query specific documents. You will practice using schema definitions, filters, sorting, and field selection.
+
+---
+
+### Step 1: Importing Data into MongoDB
+
+The provided ZIP file contains:
+
+1. **exercise-data.json** – A JSON file containing several course objects.
+2. **exercise.txt** – A file containing the MongoDB import command.
+
+#### Import Command
+
+Run the following command in your terminal to import the data:
+
+-------------------code----------------------
+mongoimport --db mongo-exercises --collection courses --file exercise-data.json --jsonArray
+-------------------code----------------------
+
+**Explanation of Flags:**
+
+* `--db mongo-exercises`: Creates or uses the database named *mongo-exercises*.
+* `--collection courses`: Creates or uses the collection named *courses*.
+* `--file exercise-data.json`: Specifies the source file.
+* `--jsonArray`: Indicates that the file contains an array of JSON objects.
+
+After running the command, you should see:
+
+-------------------code----------------------
+Imported 7 documents
+-------------------code----------------------
+
+Open **MongoDB Compass** to verify:
+
+* Database: `mongo-exercises`
+* Collection: `courses`
+* Documents: 7 total
+
+---
+
+### Step 2: Exercise Goal
+
+Write a program to:
+
+* Retrieve **all published backend courses**
+* **Sort** them by name
+* **Select only** the `name` and `author` properties
+
+---
+
+### Step 3: Creating the Solution
+
+Create a new file named **solution1.js**.
+
+#### 1. Load and Connect Mongoose
+
+-------------------code----------------------
+const mongoose = require('mongoose');
+
+mongoose.connect('mongodb://localhost/mongo-exercises')
+  .then(() => console.log('Connected to MongoDB...'))
+  .catch(err => console.error('Could not connect to MongoDB...', err));
+-------------------code----------------------
+
+#### 2. Define Schema
+
+-------------------code----------------------
+const courseSchema = new mongoose.Schema({
+  name: String,
+  author: String,
+  tags: [String],
+  date: Date,
+  isPublished: Boolean,
+  price: Number
+});
+-------------------code----------------------
+
+#### 3. Create Model
+
+-------------------code----------------------
+const Course = mongoose.model('Course', courseSchema);
+-------------------code----------------------
+
+#### 4. Query the Database
+
+-------------------code----------------------
+async function getCourses() {
+  return await Course
+    .find({ isPublished: true, tags: 'backend' })
+    .sort({ name: 1 })
+    .select({ name: 1, author: 1 });
+}
+-------------------code----------------------
+
+#### 5. Display Results
+
+-------------------code----------------------
+async function run() {
+  const courses = await getCourses();
+  console.log(courses);
+}
+
+run();
+-------------------code----------------------
+
+---
+
+### Step 4: Running the Program
+
+Execute the script:
+
+-------------------code----------------------
+node solution1.js
+-------------------code----------------------
+
+**Expected Output:**
+An array of four courses:
+
+1. Async .NET MVC Course
+2. Express.js Course
+3. Node Course
+4. Node Course (by Jack)
+
+Each course document should include only `name` and `author` fields.
+
+---
+
+### Step 5: Key Concepts
+
+* **Schema:** Defines the structure of MongoDB documents.
+* **Model:** A wrapper for the schema that allows querying.
+* **find():** Filters documents based on conditions.
+* **sort():** Orders results (1 for ascending, -1 for descending).
+* **select():** Chooses which fields to include in the output.
+* **async/await:** Used for handling asynchronous database operations cleanly.
+
+---
+
+### Summary
+
+This exercise demonstrated how to:
+
+* Import data using `mongoimport`
+* Define schemas and models in Mongoose
+* Filter, sort, and project specific fields
+* Structure asynchronous code with `async` and `await`
+
+---
+
+### Next Topic
+
+In the next lecture: **Updating Documents in MongoDB using Mongoose.**
