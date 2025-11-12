@@ -191,10 +191,23 @@ If your terminal doesn’t support splits:
   ps aux | grep mongod
   -------------------code----------------------
 
-  or stop it first:
+
+  Find the process ID (the number right after your username) and stop it:
 
   -------------------code----------------------
-  brew services stop mongodb-community@6.0
+  kill <PID>
+  -------------------code----------------------
+  
+  Example:
+  
+  -------------------code----------------------
+  kill 14321
+  -------------------code----------------------
+  
+  Or, if it doesn’t stop:
+  
+  -------------------code----------------------
+  kill -9 <PID>
   -------------------code----------------------
 
 * **Data directory missing error**:
@@ -211,3 +224,183 @@ If your terminal doesn’t support splits:
   -------------------code----------------------
 
 ---
+
+
+* ** Data directory /data/db not found.
+-------------------code----------------------
+NonExistentPath: Data directory /data/db not found.
+Create the missing directory or specify another path using --dbpath.
+exitCode: 100
+-------------------code----------------------
+
+MongoDB is **not running** because it **couldn’t find the default data directory `/data/db`**.
+Here’s the key part from your output:
+
+-------------------code----------------------
+NonExistentPath: Data directory /data/db not found.
+Create the missing directory or specify another path using --dbpath.
+exitCode: 100
+-------------------code----------------------
+
+Let’s fix that step-by-step on macOS:
+
+---
+
+if we have the DB file before 
+-------------------code----------------------
+mongod --dbpath /opt/homebrew/var/mongodb
+-------------------code----------------------
+
+if not use this instruction
+### **1. Create the required data directory**
+
+MongoDB stores its database files in `/data/db` by default.
+Create it manually with the following commands:
+
+-------------------code----------------------
+sudo mkdir -p /data/db
+sudo chown -R $(whoami) /data/db
+-------------------code----------------------
+
+Explanation:
+
+* `mkdir -p /data/db` → creates the folder (including any missing parents)
+* `chown -R $(whoami)` → gives you permission to read/write in it (MongoDB won’t run otherwise)
+
+---
+
+### **2. Start MongoDB again**
+
+Now rerun:
+
+-------------------code----------------------
+mongod
+-------------------code----------------------
+
+You should see a long log ending with something like:
+
+-------------------code----------------------
+Waiting for connections on port 27017
+-------------------code----------------------
+
+That means MongoDB is now running successfully.
+
+---
+
+### **3. (Optional) Specify a custom data directory**
+
+If you’d rather keep MongoDB’s data inside your project or your home folder, you can start it like this:
+
+-------------------code----------------------
+mongod --dbpath ~/mongodb-data
+-------------------code----------------------
+
+The first time, create that directory:
+
+-------------------code----------------------
+mkdir -p ~/mongodb-data
+-------------------code----------------------
+
+---
+
+### **4. Verify MongoDB is working**
+
+In a **new terminal tab** (keep `mongod` running), run:
+
+-------------------code----------------------
+mongosh
+-------------------code----------------------
+
+You should see:
+
+-------------------code----------------------
+test>
+-------------------code----------------------
+
+That means you’re successfully connected to your MongoDB server.
+
+---
+
+### **Summary**
+
+| Problem                                    | Solution                                             |
+| ------------------------------------------ | ---------------------------------------------------- |
+| `NonExistentPath: /data/db not found`      | Create `/data/db` or specify `--dbpath`              |
+| MongoDB shuts down immediately             | The data directory doesn’t exist or lacks permission |
+| Want MongoDB to always start automatically | Use `brew services start mongodb-community@8.2`      |
+
+---
+
+*** 2- Handling Rejected Promises ***
+---
+
+### **Handling Unhandled Promise Rejections**
+
+1. **Problem Overview**
+
+   * An *unhandled promise rejection* occurs when a promise fails but its rejection is not properly handled.
+   * This usually happens with asynchronous code, either using:
+
+     * **Promise syntax (`then`)** without `catch`
+     * **Async/await** without `try/catch`
+   * If unhandled, Node.js may terminate the process in future versions, making the server unavailable to clients.
+
+2. **Example in the Genres Module**
+
+   * Current implementation:
+
+     * Uses `await` to fetch genres.
+     * No `try/catch` block is used to handle rejected promises.
+   * Equivalent in promise syntax:
+
+     -------------------code----------------------
+     getGenres()
+       .then(data => res.send(data))
+       // Missing .catch to handle errors
+     -------------------code----------------------
+
+3. **Solution: Add Error Handling**
+
+   * Wrap asynchronous code in a `try` block.
+   * Use `catch` to handle exceptions.
+   * Send a proper response to the client:
+
+     -------------------code----------------------
+     try {
+       const genres = await Genre.find();
+       res.send(genres);
+     } catch (ex) {
+       res.status(500).send('Something failed.');
+       // Optional: log exception for debugging
+       console.error(ex);
+     }
+     -------------------code----------------------
+   * Key points:
+
+     * **Async/await → use `try/catch`.**
+     * **Promise `then` → always chain `catch`.**
+     * Return appropriate HTTP status code (e.g., `500 Internal Server Error`) and a clear message.
+
+4. **Demonstration Workflow**
+
+   1. Start MongoDB (`mongod`) in one terminal.
+   2. Run the Vid.ly Node application in another terminal.
+   3. Test API endpoints using Postman:
+
+      * Initially, requests succeed when MongoDB is running.
+      * Stop MongoDB during testing to simulate a failure.
+      * Send a request to `/api/genres`.
+   4. Result:
+
+      * Client receives `500 Internal Server Error` with message `'Something failed.'`
+      * Terminal no longer shows unhandled promise rejection.
+      * Server process continues running despite the temporary database outage.
+
+5. **Key Takeaways**
+
+   * Proper error handling prevents server crashes.
+   * Always log exceptions for later debugging and analysis.
+   * Incrementally improve the application by handling errors step by step.
+
+---
+
