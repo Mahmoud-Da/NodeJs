@@ -1889,3 +1889,156 @@ The next lecture will show the instructor’s solution.
 
 ---
 
+
+*** 12- Extracting the Db Logic ***
+---
+
+# Refactoring Database Initialization into `startup/db.js`
+
+## 1. Goal
+
+Extract database initialization logic from `index.js` into a dedicated module to improve separation of concerns and keep the entry file clean and focused.
+
+---
+
+# 2. Creating the Database Module
+
+### Step 1: Create `startup/db.js`
+
+Inside the `startup` folder, add a new file named `db.js`.
+
+### Step 2: Export a Function
+
+The module should export a function just like the routes module:
+
+-------------------code----------------------
+module.exports = function() {
+    // database initialization logic
+};
+-------------------code----------------------
+
+---
+
+# 3. Moving the Database Initialization Code
+
+Cut all database-related code from `index.js` and paste it inside the exported function in `db.js`.
+
+This includes:
+
+* The MongoDB connection logic using Mongoose.
+* Any connection configuration.
+
+---
+
+# 4. Improving Logging Behavior
+
+Originally, the database connection printed a message using `console.log`.
+We want to replace this with proper structured logging using Winston.
+
+### Step 1: Import Winston
+
+Add at the top of `db.js`:
+
+-------------------code----------------------
+const winston = require('winston');
+-------------------code----------------------
+
+### Step 2: Replace `console.log`
+
+Change the success message from:
+
+-------------------code----------------------
+console.log('Connected to MongoDB...');
+-------------------code----------------------
+
+to:
+
+-------------------code----------------------
+winston.info('Connected to MongoDB...');
+-------------------code----------------------
+
+This ensures consistent logging across the application.
+
+---
+
+# 5. Removing the Catch Block
+
+Originally, the database connection call had a `.catch()`:
+
+-------------------code----------------------
+mongoose.connect(...)
+  .then(...)
+  .catch(err => console.error(err));
+-------------------code----------------------
+
+This catch block must be removed because:
+
+* The rejected promise should be handled globally by the unhandled rejection handler.
+* We want Winston to log the error and terminate the process automatically.
+* Local handling here prevents the global error system from receiving the error.
+
+So, remove the `.catch()` entirely.
+
+---
+
+# 6. Importing Mongoose
+
+Remove the `mongoose` import from `index.js` and place it at the top of `db.js`:
+
+-------------------code----------------------
+const mongoose = require('mongoose');
+-------------------code----------------------
+
+Now, the database module has all its required dependencies and stays fully self-contained.
+
+---
+
+# 7. Final Structure of `db.js`
+
+The module is now clean, short, and has a single responsibility: connecting to MongoDB.
+
+---
+
+# 8. Connecting the Module in `index.js`
+
+In `index.js`, load and invoke the new database module:
+
+-------------------code----------------------
+require('./startup/db')();
+-------------------code----------------------
+
+This performs the database initialization during application startup.
+
+---
+
+# 9. Verifying Behavior
+
+To test that the new structure works correctly:
+
+1. Stop the MongoDB process.
+2. Run the application with:
+
+   -------------------code----------------------
+   node index.js
+   -------------------code----------------------
+3. Result:
+
+   * A connection error occurs.
+   * The global unhandled rejection handler logs the exception.
+   * The process terminates immediately.
+   * `uncaughtExceptions.log` contains the logged error.
+
+This confirms everything is behaving as intended.
+
+---
+
+# 10. Next Exercise
+
+As your next task:
+
+**Extract all logging initialization code from `index.js` into a new module named `startup/logging.js`.**
+
+This will continue improving the structure of the project. The solution will be shown in the next lecture.
+
+---
+
