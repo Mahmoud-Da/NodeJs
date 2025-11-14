@@ -2151,3 +2151,125 @@ This module should handle checking for essential configuration settings during a
 
 ---
 
+*** 14- Extracting the Config Logic ***
+
+---
+
+# Lecture Notes: Extracting Configuration Logic into `config.js`
+
+## 1. Creating the Configuration Module
+
+### Step 1: Add `config.js`
+
+Inside the `startup` folder, create a new file named:
+
+-------------------code----------------------
+startup/config.js
+-------------------code----------------------
+
+Export a function from this file:
+
+-------------------code----------------------
+module.exports = function () {
+  // configuration validation goes here
+};
+-------------------code----------------------
+
+This module will handle checking for essential configuration settings during application startup.
+
+---
+
+## 2. Moving Configuration Validation from `index.js`
+
+### Step 2: Relocate Configuration Logic
+
+Go to `index.js` and cut all code responsible for verifying application configuration values, such as:
+
+* Checking for required environment variables
+* Ensuring the JWT private key exists
+* Any startup validation that relies on the `config` package
+
+Paste this logic inside the exported function in `config.js`.
+
+---
+
+## 3. Importing Dependencies
+
+### Step 3: Move the `config` Module Import
+
+Since `config.js` uses the `config` package, take the import from `index.js`:
+
+-------------------code----------------------
+const config = require('config');
+-------------------code----------------------
+
+and place it at the top of `config.js`.
+
+This keeps `index.js` cleaner and ensures configuration checking is fully isolated in its own module.
+
+---
+
+## 4. Improving Error Handling
+
+### Step 4: Replace Console Output with Exceptions
+
+Instead of logging a console error and calling `process.exit()`, follow best practice:
+
+* Throw an exception when a required configuration setting is missing.
+
+Example:
+
+-------------------code----------------------
+if (!config.get('jwtPrivateKey')) {
+  throw new Error('FATAL ERROR: jwtPrivateKey is not defined.');
+}
+-------------------code----------------------
+
+This approach integrates seamlessly with the existing logging infrastructure:
+
+* The global error handlers will catch the thrown exception.
+* Winston will log the error.
+* The process will terminate cleanly.
+
+### Best Practice Reminder
+
+Always throw `Error` objects, not strings.
+Throwing a string removes stack trace information. Throwing an `Error` object preserves stack trace data.
+
+---
+
+## 5. Loading the New Module in `index.js`
+
+### Step 5: Call the Config Module
+
+In `index.js`, add:
+
+-------------------code----------------------
+require('./startup/config')();
+-------------------code----------------------
+
+Now the configuration is validated during application startup in a centralized and maintainable way.
+
+`index.js` becomes significantly cleaner. At this stage it should be around twelve lines of code.
+
+---
+
+## 6. Next Refactoring: Validation Setup
+
+The last remaining piece that can be extracted from `index.js` is Joi configuration.
+
+This can be placed in a module such as:
+
+* `startup/validation.js`, or
+* `startup/api.js`
+
+Since Joi is used for input validation in API layers, either name can be justified. For now, use:
+
+-------------------code----------------------
+startup/validation.js
+-------------------code----------------------
+
+The lecture instructs you to perform this refactoring next.
+
+---
+
