@@ -2042,3 +2042,112 @@ This will continue improving the structure of the project. The solution will be 
 
 ---
 
+*** 13- Extracting the Logging Logic ***
+
+---
+
+# Lecture Notes: Extracting Logging Logic into a Separate Module
+
+## 1. Objective
+
+The goal of this lecture is to refactor `index.js` by moving all logging-related logic—Winston setup, handling of rejected promises, and Express async error handling—into a dedicated module named `logging.js` inside the `startup` folder.
+
+---
+
+## 2. Creating the Logging Module
+
+### Step 1: Add `logging.js`
+
+Inside the `startup` folder, create a new file:
+
+-------------------code----------------------
+startup/logging.js
+-------------------code----------------------
+
+This module will export a function:
+
+-------------------code----------------------
+module.exports = function () {
+  // logging setup goes here
+};
+-------------------code----------------------
+
+---
+
+## 3. Moving Logging Setup from `index.js`
+
+### Step 2: Move Winston Configuration
+
+In `index.js`, identify all code related to:
+
+* Setting up Winston
+* Adding transports (file, MongoDB, console)
+* Handling uncaught exceptions and unhandled promise rejections
+
+Cut that entire block and paste it inside `logging.js` inside the exported function.
+
+### Step 3: Import Required Packages
+
+In `logging.js`, import the necessary modules that were originally imported in `index.js`:
+
+-------------------code----------------------
+const winston = require('winston');
+require('winston-mongodb');
+-------------------code----------------------
+
+These imports should now only exist in `logging.js`.
+
+---
+
+## 4. Handling Async Errors in Express
+
+### Step 4: Import Express Async Errors
+
+This line:
+
+-------------------code----------------------
+require('express-async-errors');
+-------------------code----------------------
+
+should be moved into `logging.js` as well, because it is part of the error-handling setup.
+
+This ensures that all logic related to error logging is encapsulated in one place.
+
+---
+
+## 5. Loading the Logging Module in `index.js`
+
+### Step 5: Call Logging Module Early
+
+Back in `index.js`, at the top of the startup sequence, require and execute the logging module:
+
+-------------------code----------------------
+require('./startup/logging')();
+-------------------code----------------------
+
+This must be done before loading other modules so that any potential errors in later modules will be properly logged and the process will terminate if required.
+
+---
+
+## 6. Result of Refactoring
+
+After moving all the logging-related code:
+
+* `index.js` becomes shorter, cleaner, and easier to maintain.
+* All logic related to logging, error handling, and Winston configurations is centralized in `logging.js`.
+* Startup behavior is more predictable, as errors during initialization are properly logged and handled.
+
+---
+
+## 7. Next Exercise
+
+Move all configuration-related logic from `index.js` into a new module, typically named:
+
+-------------------code----------------------
+startup/config.js
+-------------------code----------------------
+
+This module should handle checking for essential configuration settings during application startup.
+
+---
+
