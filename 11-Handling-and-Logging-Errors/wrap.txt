@@ -1394,3 +1394,80 @@ You’ll only see it after your app writes data to it (for example, when you cre
 ---
 
 
+*** 8- Uncaught Exceptions ***
+---
+
+# Handling Uncaught Exceptions in Node.js (Outside Express)
+
+## 1. Context: Express Error Middleware Limitations
+
+* Express error-handling middleware only catches errors that occur **during the request–response pipeline**.
+* If an error is thrown **outside** Express — for example, during application startup — Express middleware will not catch it.
+* Example: Throwing an error directly in `index.js` (before handling any requests) will **crash the process**, and Winston will **not** log the error.
+
+## 2. Demonstration of the Problem
+
+1. In `index.js`, after configuring Winston, add:
+
+   -------------------code----------------------
+   throw new Error('Something failed during startup');
+   -------------------code----------------------
+2. Run the application using `node index.js`.
+3. Result:
+
+   * The Node process terminates.
+   * The error appears in the console.
+   * Winston does not record anything in the log file.
+4. This means: if deployed to production, failures occurring outside Express cannot be tracked unless you have server console access.
+
+## 3. Introducing Uncaught Exception Handling
+
+Node.js provides a global `process` object which is an instance of **EventEmitter**.
+
+* EventEmitters publish events.
+* You can subscribe to these events using `process.on()`.
+
+There is a special event:
+
+### `uncaughtException`
+
+Triggered whenever an exception is thrown **and not caught** by any `try/catch` block.
+
+## 4. Implementing a Global Uncaught Exception Handler
+
+Add the following at the beginning of your entry file (e.g., `index.js`):
+
+-------------------code----------------------
+process.on('uncaughtException', (exception) => {
+    console.log('We got an uncaught exception');
+    winston.error(exception.message, exception);
+});
+-------------------code----------------------
+
+### What this does:
+
+* Logs a message to the console.
+* Uses Winston to store the exception (message + metadata).
+* **Prevents the process from crashing**, because the error is now caught.
+
+## 5. Verifying It Works
+
+1. Rerun the app with the same intentional startup error.
+2. You should now see:
+
+   * Console: “We got an uncaught exception”
+   * Process does not terminate immediately.
+   * Winston log file includes the error “Something failed during startup”.
+
+## 6. Important Notes
+
+* A Node process crashes **only** if an exception is unhandled.
+* By handling `uncaughtException`, you gain visibility into errors that happen outside Express.
+* This is essential for production environments.
+
+## 7. Next Topic
+
+The next lecture will cover **unhandled promise rejections**, which occur when a Promise is rejected without a `.catch()` handler.
+
+---
+

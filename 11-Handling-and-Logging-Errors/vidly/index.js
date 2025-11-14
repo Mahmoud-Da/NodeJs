@@ -16,6 +16,11 @@ const error = require("./middleware/error");
 const express = require("express");
 const app = express();
 
+process.on("uncaughtException", (exception) => {
+  console.log("We got an uncaught exception");
+  winston.error(exception.message, exception);
+});
+
 winston.add(new winston.transports.Console());
 winston.add(new winston.transports.File({ filename: "logfile.log" }));
 winston.add(
@@ -25,6 +30,8 @@ winston.add(
     collection: "log", // optional: name of log collection
   })
 );
+
+throw new Error("Something failed during startup");
 
 mongoose
   .connect("mongodb://localhost/vidly")
