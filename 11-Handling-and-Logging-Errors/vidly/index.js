@@ -21,6 +21,15 @@ process.on("uncaughtException", (exception) => {
   winston.error(exception.message, exception);
 });
 
+winston.handleExceptions(
+  new winston.transports.File({ filename: "uncaughtExceptions.log" })
+);
+
+process.on("unhandledRejection", (ex) => {
+  winston.error(ex.message, ex);
+  process.exit(1);
+});
+
 winston.add(new winston.transports.Console());
 winston.add(new winston.transports.File({ filename: "logfile.log" }));
 winston.add(
@@ -31,7 +40,9 @@ winston.add(
   })
 );
 
-throw new Error("Something failed during startup");
+const p = Promise.reject(new Error("Failed miserably"));
+
+p.then(() => console.log("Done"));
 
 mongoose
   .connect("mongodb://localhost/vidly")
