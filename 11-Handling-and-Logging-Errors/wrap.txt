@@ -1747,3 +1747,145 @@ This keeps error handling unified and centralized.
   * Organizing the application setup into clean, maintainable components
 
 ---
+
+*** 11- Extracting Routes ***
+---
+
+# Refactoring `index.js`: Separating Concerns and Extracting Routes
+
+## 1. Problem: Lack of Separation of Concerns
+
+The current `index.js` file contains multiple unrelated responsibilities:
+
+* Numerous `require` statements at the top (too many dependencies).
+* Code for handling and logging errors.
+* Application configuration logic.
+* MongoDB connection logic.
+* Route and middleware setup.
+
+These concerns should not be mixed in a single module.
+The `index.js` file should focus only on **orchestrating** the application, not implementing all details.
+
+---
+
+# 2. Goal: Move Route Setup to a Separate Module
+
+To improve structure and maintainability, we will extract all routing and middleware setup code into a separate module.
+
+---
+
+# 3. Creating the `startup` Folder and `routes.js`
+
+1. Create a new folder named `startup`.
+2. Inside it, create a new file called `routes.js`.
+3. Export a function that receives the `app` object:
+
+   -------------------code----------------------
+   module.exports = function(app) {
+       // route setup and middleware go here
+   }
+   -------------------code----------------------
+
+This function will contain:
+
+* All route registration
+* All middleware registration
+* The error middleware
+
+---
+
+# 4. Moving Route Setup from `index.js` to `routes.js`
+
+In `index.js`, locate all code responsible for:
+
+* Loading routers (genres, customers, movies, rentals, users, auth)
+* Applying middleware (express.json, routes)
+* Registering the error middleware
+
+Cut all this code and paste it inside the new function in `routes.js`.
+
+---
+
+# 5. Handling Dependencies
+
+### The `app` object
+
+* `app` should be created **once** in the entire application.
+* Therefore, `routes.js` should **not** create its own Express instance.
+* Instead, `index.js` passes the existing `app`:
+
+-------------------code----------------------
+const app = express();
+require('./startup/routes')(app);
+-------------------code----------------------
+
+### Importing required modules
+
+* The routers (genres, customers, movies, etc.) should be imported inside `routes.js`.
+* Since they are only used there, they no longer belong in `index.js`.
+
+### Importing Express
+
+* `routes.js` needs Express functions like `express.json()`.
+* Add at the top:
+
+  -------------------code----------------------
+  const express = require('express');
+  -------------------code----------------------
+
+---
+
+# 6. Moving the Error Middleware
+
+* Find the error middleware function in `index.js`.
+* Cut and paste it into `routes.js`, because this is the only module that uses it.
+
+---
+
+# 7. Cleaning Up `index.js`
+
+After extracting all routing logic:
+
+* `index.js` becomes shorter and clearer.
+* Unnecessary `require` statements for routers are removed.
+* The module now focuses on high-level application setup.
+
+---
+
+# 8. Updating Router Paths
+
+Because `routes.js` now lives inside the `startup` folder, router imports need updated relative paths:
+
+Change:
+
+-------------------code----------------------
+require('./routes/genres')
+-------------------code----------------------
+
+to:
+
+-------------------code----------------------
+require('../routes/genres')
+-------------------code----------------------
+
+Use multi-cursor editing in VS Code:
+
+* On Mac: Command + D
+* On Windows: Control + D
+
+This allows replacing all path prefixes at once.
+
+---
+
+# 9. Exercise
+
+As homework:
+
+* Return to `index.js`.
+* Move all MongoDB initialization code to a new module in the `startup` folder.
+* Implement the same separation-of-concerns pattern.
+
+The next lecture will show the instructor’s solution.
+
+---
+
