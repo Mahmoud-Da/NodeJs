@@ -1588,3 +1588,134 @@ For optimal productivity during development:
 This allows you to immediately see test failures as soon as you save your code.
 
 ---
+
+*** 15- Exercise- Testing the FizzBuz ***
+
+
+# FizzBuzz Exercise — Organized Lecture Notes
+
+## Overview
+
+We have a function called **fizzbuzz** located in `exercise1.js`. This function implements the classic FizzBuzz logic commonly used in programming interviews.
+
+### Function Behavior
+
+The function takes one input and applies the following rules:
+
+1. **If the input is not a number**
+   Throw an exception.
+
+2. **If divisible by both 3 and 5**
+   Return `"FizzBuzz"`.
+
+3. **If divisible only by 3**
+   Return `"Fizz"`.
+
+4. **If divisible only by 5**
+   Return `"Buzz"`.
+
+5. **Otherwise**
+   Return the input unchanged.
+
+Your task is to write all required unit tests for this function.
+
+---
+
+# Writing Tests
+
+Create a new file in the test folder:
+
+-------------------code----------------------
+exercise1.test.js
+-------------------code----------------------
+
+Import the module:
+
+-------------------code----------------------
+const lib = require('../exercise1');
+-------------------code----------------------
+
+Start with a `describe` block:
+
+-------------------code----------------------
+describe('fizzBuzz', () => {});
+-------------------code----------------------
+
+---
+
+## 1. Testing Exceptions (Invalid Inputs)
+
+The function should throw an exception if the input is not a number.
+
+Important rule from Jest:
+When testing exceptions, the function **must** be wrapped inside another function.
+
+-------------------code----------------------
+it('should throw an exception if input is not a number', () => {
+  expect(() => { lib.fizzBuzz('a'); }).toThrow();
+  expect(() => { lib.fizzBuzz(null); }).toThrow();
+  expect(() => { lib.fizzBuzz(undefined); }).toThrow();
+  expect(() => { lib.fizzBuzz({}); }).toThrow();
+});
+-------------------code----------------------
+
+---
+
+## 2. Input Divisible by Both 3 and 5
+
+-------------------code----------------------
+it('should return FizzBuzz if input is divisible by 3 and 5', () => {
+  const result = lib.fizzBuzz(15);
+  expect(result).toBe('FizzBuzz');
+});
+-------------------code----------------------
+
+---
+
+## 3. Input Divisible Only by 3
+
+-------------------code----------------------
+it('should return Fizz if input is divisible only by 3', () => {
+  const result = lib.fizzBuzz(3);
+  expect(result).toBe('Fizz');
+});
+-------------------code----------------------
+
+---
+
+## 4. Input Divisible Only by 5
+
+-------------------code----------------------
+it('should return Buzz if input is divisible only by 5', () => {
+  const result = lib.fizzBuzz(5);
+  expect(result).toBe('Buzz');
+});
+-------------------code----------------------
+
+---
+
+## 5. Input Not Divisible by 3 or 5
+
+-------------------code----------------------
+it('should return the input if it is not divisible by 3 or 5', () => {
+  const result = lib.fizzBuzz(1);
+  expect(result).toBe(1);
+});
+-------------------code----------------------
+
+---
+
+# Summary
+
+These tests cover:
+
+* All invalid input scenarios
+* All valid branches of the FizzBuzz logic
+* Proper use of Jest exception testing
+* Expected return values for each condition
+
+Running the test file confirms that all conditions are handled correctly, and Jest reports all passing tests.
+
+---
+
+
