@@ -82,3 +82,84 @@ Further benefits will be discussed in the next lecture.
 
 ---
 
+*** 2- Benefits of Automated Testing ***
+---
+
+# Benefits of Automated Testing
+
+## Lecture Notes
+
+### 1. Why Write Code to Test Code?
+
+A common question from developers is:
+**Why write code to test our code when we can just run the application and check the result manually?**
+
+In the previous lecture, we saw that automated tests save time and let you test frequently.
+But there are deeper and more important benefits.
+
+---
+
+## 2. Catching Bugs Before Deployment
+
+The most significant benefit of automated testing is the ability to detect bugs **before** deploying the application.
+
+This leads to:
+
+* Fewer production issues
+* More confidence when releasing features
+* Less stress and fewer emergency fixes after deployment
+
+Many developers have experienced situations where:
+
+* They deploy the app thinking everything works
+* Later receive a call saying a major feature is broken
+* Return to the office expecting a quick fix
+* End up staying late into the night
+
+Automated tests do not eliminate all bugs, but they **significantly reduce** the number of issues that reach production.
+
+---
+
+## 3. Confidence When Refactoring
+
+Refactoring is the process of improving code structure **without** changing its behavior.
+
+Examples:
+
+* Extracting part of a method into a separate private method
+* Renaming a method
+* Reorganizing logic to improve readability and maintainability
+
+Without automated tests:
+
+* Every refactor requires manual testing
+* Manual testing is slow, repetitive, and error-prone
+* As the application grows, developers may forget parts of the system affected by the change
+
+With automated tests:
+
+* You can refactor freely
+* You run the test suite to ensure you did not break existing functionality
+* You maintain cleaner and higher-quality code with confidence
+
+---
+
+## 4. Better Code Quality
+
+Writing tests forces you to:
+
+* Think about how each method behaves
+* Consider different inputs and boundary conditions
+* Handle edge cases
+* Design cleaner, more modular functions
+
+This leads to better overall code quality.
+
+---
+
+## 5. What Comes Next
+
+In the next lecture, the focus will shift to the **different types of automated tests**.
+
+---
+
