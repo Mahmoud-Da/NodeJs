@@ -16,3 +16,15 @@ describe("absolute", () => {
     expect(result).toBe(0);
   });
 });
+
+describe("greet", () => {
+  it("should return the greeting message", () => {
+    const result = lib.greet("Mosh");
+    // bad practice
+    expect(result).toBe("Welcome Mosh");
+    // good practice
+    expect(result).toMatch(/Mosh/);
+    // or
+    expect(result).toContain("Mosh");
+  });
+});

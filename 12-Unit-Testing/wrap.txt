@@ -960,3 +960,117 @@ All tests passed successfully.
 
 Unit tests enable safe refactoring.
 You can freely change the internal implementation of a function, run the tests, and if everything passes, you know the behavior remains correct. This is one of the greatest advantages of having a strong test suite.
+
+*** 10- Testing Strings ***
+---
+
+# Testing the `greet` Function
+
+## 1. Purpose of the `greet` Function
+
+The `greet` function takes a name and returns a greeting message.
+In real applications, similar functions generate email subjects, email bodies, notification content, and so on.
+This example is a simplified version of such functionality.
+
+---
+
+# 2. Writing the First Test
+
+### Create a New `describe` Block
+
+Group all tests related to the `greet` function:
+
+-------------------code----------------------
+describe('greet', () => {
+    it('should return the greeting message', () => {
+        const result = lib.greet('Mosh');
+        expect(result).toBe('Welcome Mosh');
+    });
+});
+-------------------code----------------------
+
+Run the test:
+
+-------------------code----------------------
+npm test
+-------------------code----------------------
+
+All tests pass.
+The test hierarchy now shows:
+
+* absolute
+* greet
+
+---
+
+# 3. The Problem: Test Too Specific
+
+The initial test checks for **exact equality**:
+
+-------------------code----------------------
+expect(result).toBe('Welcome Mosh')
+-------------------code----------------------
+
+This is fragile.
+If the implementation changes even slightly—for example, adding an exclamation mark:
+
+-------------------code----------------------
+return 'Welcome ' + name + '!';
+-------------------code----------------------
+
+The test will fail.
+Running the tests again shows:
+
+Expected: `Welcome Mosh`
+Received: `Welcome Mosh!`
+
+This demonstrates a key principle:
+
+**Tests should not be too specific or too general. They must strike a balanced level of precision.**
+
+---
+
+# 4. Making the Test More General
+
+### Option 1: Use Regular Expressions
+
+Instead of checking the entire string, ensure that the returned message contains the expected name:
+
+-------------------code----------------------
+expect(result).toMatch(/Mosh/);
+-------------------code----------------------
+
+Run again:
+
+-------------------code----------------------
+npm test
+-------------------code----------------------
+
+The test passes whether or not the implementation includes additional characters like punctuation.
+
+### Option 2: Use `toContain`
+
+If regular expressions are unnecessary, use a simpler matcher:
+
+-------------------code----------------------
+expect(result).toContain('Mosh');
+-------------------code----------------------
+
+Run:
+
+-------------------code----------------------
+npm test
+-------------------code----------------------
+
+All tests pass.
+
+---
+
+# 5. Key Takeaway
+
+When testing strings:
+
+* Avoid overly specific equality tests unless the exact string format is critical.
+* Favor matchers like `toMatch` or `toContain` to ensure tests remain stable but still meaningful.
+
+Balanced test precision prevents false failures while still verifying correct behavior.
