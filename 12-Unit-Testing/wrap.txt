@@ -379,3 +379,88 @@ The ideal balance between test types varies by project and team.
 Use your judgment to decide which parts of the application should be covered by which kind of test.
 
 ---
+
+
+*** 5- Tooling ***
+---
+
+# Test Frameworks
+
+## Lecture Notes
+
+---
+
+## 1. Why We Need a Test Framework
+
+To write automated tests, we need a **test framework**.
+A test framework provides two essential components:
+
+### 1.1 Utility Functions
+
+* A library of functions that help us define and structure tests
+* Used to write expectations, assertions, and test suites
+
+### 1.2 Test Runner
+
+* A command-line program that finds and executes tests
+* Provides a report showing how many tests passed or failed
+
+---
+
+## 2. Popular Test Frameworks
+
+There are several well-known frameworks in the JavaScript ecosystem.
+
+### 2.1 Jasmine
+
+* One of the earliest and most popular testing frameworks
+* Includes everything needed for writing tests
+* Does not require external plugins
+
+### 2.2 Mocha
+
+* The most popular testing library on npm
+* Lightweight and flexible
+* By design, lacks certain built-in features found in other frameworks
+* Commonly used with external plugins such as:
+
+  * Chai (assertions)
+  * Sinon (spies, stubs, mocks)
+* Requires checking multiple documentation sources
+* Compatibility issues can occur because plugins evolve independently
+
+### 2.3 Jest
+
+* Created by Facebook
+* Widely used for testing React applications
+* Essentially a wrapper around Jasmine
+* Supports all Jasmine utility functions
+* Includes additional features such as built-in code coverage
+* Provides a complete solution without relying on external libraries
+
+---
+
+## 3. Preferred Framework
+
+The recommended choice in this course is **Jest**, because:
+
+* It includes everything needed out of the box
+* No additional libraries or plugins required
+* Provides consistent documentation and simpler setup
+
+However:
+
+* You are free to use any framework you like
+* Tools and frameworks change over time
+* The key goal is to learn the **fundamentals** of writing high-quality unit tests, which apply regardless of the framework
+
+---
+
+## 4. What Comes Next
+
+In the next lecture, you will:
+
+* Install Jest
+* Write your first unit test
+
+---
