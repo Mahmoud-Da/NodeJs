@@ -2096,3 +2096,107 @@ This approach using `jest.fn()` is **far cleaner, more powerful, and maintainabl
 
 ---
 
+
+*** 19- What to Unit Test ***
+---
+
+# Exercise: Choosing What to Unit Test in the Application
+
+## 1. Overview
+
+In this exercise, we are analyzing the **Vidly project** to determine which parts of the application are good candidates for **unit testing**.
+
+* Focus on functions that have **minimal or no dependencies on external resources**.
+* Avoid testing functions that require **HTTP requests, databases, or file systems** in unit tests. These are better suited for **integration tests**.
+
+---
+
+## 2. Middleware Example
+
+* Open the `middleware/admin.js` file.
+* The middleware function has **two execution paths**.
+* Dependencies: Express `request` and `response` objects.
+
+### Challenge with Unit Testing Middleware
+
+* Unit testing requires **mocking request and response objects**.
+* Example methods to mock in `response`:
+
+  * `status()`
+  * `send()`
+* Creating these mocks can make the unit test **complex, hard to maintain, and "fat"**.
+
+### Recommendation
+
+* For middleware or route handlers, **prefer integration tests** over unit tests.
+* Unit tests are best for **pure functions** without external dependencies.
+
+---
+
+## 3. Route Handlers Example
+
+* Open `routes/customers.js`.
+* Route handlers also depend on `request` and `response`.
+* Unit testing them requires **heavy mocking**.
+* Instead, these should be tested using **integration tests**, which send real HTTP requests and exercise the full stack.
+
+---
+
+## 4. Identifying Good Unit Test Candidates
+
+* Look at the `models` folder.
+* Example: `user.js` module with `generateAuthToken()` function.
+* Characteristics:
+
+  * Minimal dependencies (no database, file, or HTTP request).
+  * Pure function: generates and returns a JSON Web Token.
+* Unit testing this function is **simple and fast**:
+
+  * Call the function.
+  * Verify the token is valid.
+  * Check the payload contains expected properties.
+
+---
+
+## 5. Key Principles
+
+1. **Unit Test Rule of Thumb**:
+
+   * Test functions with **algorithms or logic** that are self-contained.
+   * Avoid external resources.
+
+2. **Avoid Excessive Mocking**:
+
+   * If a function requires a lot of mocks, consider writing an **integration test** instead.
+
+3. **Integration Test Rule**:
+
+   * Use integration tests for:
+
+     * Middleware
+     * Route handlers
+     * Functions that interact with databases, HTTP services, or files
+
+---
+
+## 6. Exercise Instructions
+
+* Write a **unit test** for `generateAuthToken()` in the `user.js` model.
+
+* Steps:
+
+  1. Call the function.
+  2. Verify the result is a valid JSON Web Token.
+  3. Check that the token payload contains expected properties (e.g., user ID).
+
+* Benefits:
+
+  * Simple and fast.
+  * No need for mocking.
+  * Easier than writing integration tests for the full HTTP stack.
+
+---
+
+This lecture emphasizes **choosing the right test type** and demonstrates that **unit tests are ideal for self-contained logic**, while **integration tests are better for functions with external dependencies**.
+
+---
