@@ -1958,3 +1958,141 @@ describe('notifyCustomer', () => {
 * The next lecture introduces these improved techniques (e.g., using `jest.fn()`).
 
 ---
+
+*** 18- Jest Mock Functions ***
+---
+
+# Using Jest Mock Functions for Cleaner Unit Tests
+
+## 1. The Problem
+
+Previously, we manually created mock functions using boolean flags to determine if a method (like `mail.send`) was called.
+
+* This approach works but is **verbose** and less flexible.
+* Jest provides a **better way** using `jest.fn()`.
+
+---
+
+## 2. Creating a Jest Mock Function
+
+### Basic Usage
+
+-------------------code----------------------
+const mockFunction = jest.fn(); // Creates an empty mock function
+-------------------code----------------------
+
+* This function can be called like a regular function.
+* Initially, it has **no implementation**.
+
+### Programming Return Values
+
+-------------------code----------------------
+mockFunction.mockReturnValue(1); // Returns 1 when called
+-------------------code----------------------
+
+### Mocking Promises
+
+-------------------code----------------------
+mockFunction.mockResolvedValue(1); // Returns a promise that resolves to 1
+mockFunction.mockRejectedValue(new Error('fail')); // Returns a promise that rejects with an error
+-------------------code----------------------
+
+* Can simulate **success or failure** in async functions.
+
+---
+
+## 3. Rewriting Tests with Jest Mocks
+
+### Replacing `db.getCustomerSync`
+
+-------------------code----------------------
+db.getCustomerSync = jest.fn().mockReturnValue({ email: 'a@example.com' });
+-------------------code----------------------
+
+* This **replaces three lines** of manual mock code.
+* No need for flags to track calls.
+
+### Replacing `mail.send`
+
+-------------------code----------------------
+mail.send = jest.fn();
+-------------------code----------------------
+
+* Automatically tracks calls to the function.
+* Provides Jest matchers to assert behavior.
+
+---
+
+## 4. Assertions with Jest Mock Functions
+
+### 4.1 Check if the function was called
+
+-------------------code----------------------
+expect(mail.send).toHaveBeenCalled();
+-------------------code----------------------
+
+* Replaces the need for a boolean flag.
+* Cleaner and more readable.
+
+### 4.2 Check the arguments passed
+
+-------------------code----------------------
+expect(mail.send).toHaveBeenCalledWith('a@example.com', expect.stringMatching(/order/));
+-------------------code----------------------
+
+* `toHaveBeenCalledWith` checks all arguments in a call.
+* `expect.stringMatching(/order/)` allows partial string matching.
+* Avoids testing **exact string equality** for dynamic messages.
+
+### 4.3 Accessing arguments manually
+
+-------------------code----------------------
+expect(mail.send.mock.calls[0][0]).toBe('a@example.com');  // First argument of first call
+expect(mail.send.mock.calls[0][1]).toMatch(/order/);       // Second argument of first call
+-------------------code----------------------
+
+* `mail.send.mock.calls` is an array of all calls.
+* Each element is an array of arguments for that call.
+
+---
+
+## 5. Benefits of Using Jest Mock Functions
+
+1. **Cleaner code**: no need for manual flags or boilerplate.
+2. **Better assertions**: built-in matchers like `toHaveBeenCalled` and `toHaveBeenCalledWith`.
+3. **Flexible argument testing**: can match strings, numbers, booleans, regex, or custom matchers.
+4. **Easier organization**: keeps all mocks, test execution, and assertions structured and readable.
+
+---
+
+## 6. Recommended Test Organization
+
+1. **Arrange mocks at the top**:
+
+-------------------code----------------------
+db.getCustomerSync = jest.fn().mockReturnValue({ email: 'a@example.com' });
+mail.send = jest.fn();
+-------------------code----------------------
+
+2. **Call the function under test**:
+
+-------------------code----------------------
+lib.notifyCustomer({ customerId: 1 });
+-------------------code----------------------
+
+3. **Make assertions**:
+
+-------------------code----------------------
+expect(mail.send).toHaveBeenCalled();
+expect(mail.send.mock.calls[0][0]).toBe('a@example.com');
+expect(mail.send.mock.calls[0][1]).toMatch(/order/);
+-------------------code----------------------
+
+* Keep **line breaks** between mocks, execution, and assertions for clarity.
+
+---
+
+This approach using `jest.fn()` is **far cleaner, more powerful, and maintainable** compared to manually creating mock functions.
+
+---
+
