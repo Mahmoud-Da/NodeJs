@@ -1200,3 +1200,148 @@ The next lecture will cover how to test objects.
 
 ---
 
+*** 12- Testing Objects ***
+
+# Testing Objects in Unit Tests
+
+## 1. The Function Being Tested
+
+We are testing a function named `getProduct`:
+
+-------------------code----------------------
+// lib.js
+module.exports.getProduct = function(id) {
+  return { id: id, price: 10 };
+};
+-------------------code----------------------
+
+This function takes a product ID and returns an object containing two properties:
+
+* `id`
+* `price`
+
+---
+
+# 2. Setting Up the Test
+
+Create a new `describe` block in the test file:
+
+-------------------code----------------------
+// lib.test.js
+const lib = require('../lib');
+
+describe('getProduct', () => {
+  it('should return the product with the given id', () => {
+    const result = lib.getProduct(1);
+
+    expect(result).toBe({ id: 1, price: 10 }); // incorrect approach
+  });
+});
+-------------------code----------------------
+
+Running this test using `npm test` will cause it to fail.
+
+-------------------code----------------------
+ Expected value to be:
+      {"id": 1, "price": 10}
+    Received:
+      {"id": 1, "price": 10}
+
+    Difference:
+
+    Compared values have no visual difference. Looks like you wanted to test for 
+    object/array equality with strict `toBe` matcher. You probably need to use `toEqual` instead.
+-------------------code----------------------
+---
+
+# 3. Why the Test Fails with `toBe`
+
+Even though the expected and received objects look identical, the test fails because:
+
+* `toBe` checks whether both objects reference the **same memory location**.
+* The object returned from the function is a different object in memory than the literal object in the test.
+* Therefore, `toBe` reports a mismatch.
+
+---
+
+# 4. Correcting the Test Using `toEqual`
+
+Since we care about object **structure and values**, not memory reference, replace `toBe` with `toEqual`:
+
+-------------------code----------------------
+expect(result).toEqual({ id: 1, price: 10 });
+-------------------code----------------------
+
+Running `npm test` again will now make the test pass.
+
+---
+
+# 5. Alternative Matcher: `toMatchObject`
+
+Sometimes, the returned object may contain more properties than you care about. For example, if the function later returns:
+
+-------------------code----------------------
+return { id: id, price: 10, category: 'a' };
+-------------------code----------------------
+
+The `toEqual` matcher will fail because the extra property is not included in the test.
+
+Use `toMatchObject` instead:
+
+-------------------code----------------------
+expect(result).toMatchObject({ id: 1, price: 10 });
+-------------------code----------------------
+
+Characteristics of `toMatchObject`:
+
+* Only requires that the specified properties exist.
+* Ignores additional properties.
+* Useful when the source object contains many properties.
+
+If you run the test after adding new properties, `toMatchObject` will still pass.
+
+---
+
+# 6. Checking Single Properties: `toHaveProperty`
+
+Another approach is verifying specific properties individually:
+
+-------------------code----------------------
+expect(result).toHaveProperty('id', 1);
+-------------------code----------------------
+
+Notes:
+
+* The type must match exactly.
+* If you change the value to a string, for example:
+
+-------------------code----------------------
+expect(result).toHaveProperty('id', "1");
+-------------------code----------------------
+
+The test will fail because the function returns `id` as a number.
+
+---
+
+# 7. Summary of Matchers
+
+### Too Specific (avoid)
+
+* `toBe`
+* `toEqual` (only when strict full-object match is required)
+
+### Preferred for Flexible Object Testing
+
+* `toMatchObject`
+* `toHaveProperty`
+
+These allow your tests to avoid unnecessary breakage while still validating correctness.
+
+---
+
+# 8. Next Topic
+
+The next lecture will explain how to test exceptions.
+
+---
+
