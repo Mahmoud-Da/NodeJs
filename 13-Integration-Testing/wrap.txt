@@ -1,0 +1,44 @@
+*** 1- Introduction ***
+---
+
+# Integration Testing Overview
+
+## 1. Unit Tests Recap
+
+* Unit tests are simple and quick to write.
+* They execute very fast.
+* Best suited for functions that have zero or minimal dependency on external resources.
+* Useful for testing small, isolated pieces of logic.
+
+## 2. The Need for Integration Tests
+
+* Real-world applications often rely on one or more external resources such as databases, file systems, or network services.
+* Integration tests validate that the application code works correctly together with these external systems.
+* Instead of testing components in isolation, integration tests check them as a whole.
+
+## 3. Working With a Real Database
+
+* Integration tests require a real database instance.
+* The database is populated with test data before running tests.
+* Tests interact with the application exactly as a real client would.
+
+## 4. How Integration Tests Work
+
+1. Prepare test data in the database.
+2. Send an HTTP request to the endpoint being tested.
+3. Make assertions based on either:
+
+   * The HTTP response.
+   * The changes in the database.
+
+### Example
+
+* Sending an HTTP POST request to create a new genre.
+* After the request, the test inspects the database to ensure that the new genre has been created.
+
+## 5. Next Steps
+
+* In the next lecture, you will make a few adjustments to the application code to prepare it for integration testing.
+
+---
+
