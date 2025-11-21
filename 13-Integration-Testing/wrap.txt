@@ -6,7 +6,7 @@
 ## 1. Unit Tests Recap
 
 * Unit tests are simple and quick to write.
-* They execute very fast.
+* They exec very fast.
 * Best suited for functions that have zero or minimal dependency on external resources.
 * Useful for testing small, isolated pieces of logic.
 
@@ -1308,5 +1308,150 @@ For the happy path:
 2. Test that the genre is **returned in the response**.
 
 After running the tests, all should pass successfully.
+
+---
+
+
+*** 12- Writing Clean Tests ***
+---
+
+# Refactoring POST `/api/genres` Tests – Masha’s Technique
+
+In this lecture, we focus on **reducing duplication** and making tests clean, clear, and maintainable.
+
+---
+
+## 1. Observations Before Refactoring
+
+* In the original tests:
+
+  * Each test generates an authentication token.
+  * Each test sends a request body with only small variations (short genre, long genre, or missing token).
+* Much of the code is repeated unnecessarily.
+* Goal: Extract the **common template** and only modify the parameters relevant to the scenario.
+
+---
+
+## 2. Defining the Happy Path
+
+* The **happy path** is a valid request with a valid genre and valid token.
+* All tests can be derived from this template by **changing a single parameter**.
+* Steps:
+
+  1. Cut the request code from the happy path test.
+  2. Add a `// TODO` comment temporarily.
+  3. Define an `exec` function at the top of the test suite:
+
+     -------------------code----------------------
+     let token;
+     let name;
+
+     const exec = async () => {
+       return await request(server)
+         .post("/api/genres")
+         .set("x-auth-token", token)
+         .send({ name });
+     };
+     -------------------code----------------------
+
+---
+
+## 3. Refactoring the Tests
+
+### 3.1 Use `beforeEach` to initialize the happy path
+
+-------------------code----------------------
+beforeEach(() => {
+  token = new User().generateAuthToken();
+  name = "genre1"; // default happy path
+});
+-------------------code----------------------
+
+* Now, before each test, `token` and `name` are valid.
+* Individual tests only modify what is necessary.
+
+---
+
+### 3.2 Test 1: Unauthorized User
+
+-------------------code----------------------
+it("should return 401 if client is not logged in", async () => {
+  token = ""; // simulate no login
+  const res = await exec();
+  expect(res.status).toBe(401);
+});
+-------------------code----------------------
+
+* Only one line of code to simulate this scenario.
+* Matches the test description clearly.
+
+---
+
+### 3.3 Test 2: Genre Too Short
+
+-------------------code----------------------
+it("should return 400 if genre is less than 5 characters", async () => {
+  name = "1234"; // invalid short genre
+  const res = await exec();
+  expect(res.status).toBe(400);
+});
+-------------------code----------------------
+
+* Only the `name` is changed for this scenario.
+* Test code is concise and easy to read.
+
+---
+
+### 3.4 Test 3: Genre Too Long
+
+-------------------code----------------------
+it("should return 400 if genre is more than 50 characters", async () => {
+  name = new Array(52).join("a"); // 51 characters
+  const res = await exec();
+  expect(res.status).toBe(400);
+});
+-------------------code----------------------
+
+* Only the `name` is changed.
+* Test clearly reflects the scenario.
+
+---
+
+### 3.5 Test 4: Genre Saved in Database (Happy Path)
+
+-------------------code----------------------
+it("should save the genre if it is valid", async () => {
+  await exec();
+  const genreInDb = await Genre.find({ name });
+  expect(genreInDb.length).toBe(1);
+});
+-------------------code----------------------
+
+* No need to change `token` or `name` (happy path defaults used).
+
+---
+
+### 3.6 Test 5: Genre Returned in Response (Happy Path)
+
+-------------------code----------------------
+it("should return the genre if it is valid", async () => {
+  const res = await exec();
+  expect(res.body).toHaveProperty("_id");
+  expect(res.body).toHaveProperty("name", name);
+});
+-------------------code----------------------
+
+* Happy path is used directly.
+* Minimal repetition, clear alignment with the test description.
+
+---
+
+## 4. Benefits of This Refactoring
+
+1. **Single source of truth** for the request (`exec` function).
+2. **`beforeEach` initializes happy path values** (`token` and `name`).
+3. **Tests only modify the relevant parameter** for each scenario.
+4. Cleaner, more readable, and easier to maintain.
+5. Easy to add new scenarios in the future.
 
 ---
