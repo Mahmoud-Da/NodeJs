@@ -1594,3 +1594,147 @@ afterEach(async () => {
 * To test that the `req.user` property is populated correctly by the middleware, we need a **unit test**, since SuperTest does not expose the request object.
 
 ---
+
+*** 14- Unit Testing the Auth Middleware ***
+---
+
+# Unit Testing Authorization Middleware
+
+## 1. Why Unit Tests Are Needed
+
+* Integration tests cannot always cover all specific functionalities.
+* Every application benefits from **both unit and integration tests**, which complement each other.
+* Choose the approach based on what you want to verify:
+
+  * Unit tests → isolated behavior
+  * Integration tests → multiple components working together
+* The goal is to **verify the behavior** of your application.
+
+---
+
+## 2. Test Goal
+
+* Test that **`request.user` is populated** with the payload of a **valid JSON Web Token**.
+* This is a **unit test**, because we need to verify middleware logic in isolation.
+
+---
+
+## 3. Test File Structure
+
+* Folder: `tests/unit/middleware/`
+* File: `auth.test.js`
+
+---
+
+## 4. Setting Up the Test
+
+1. **Import dependencies:**
+
+-------------------code----------------------
+const { User } = require("../../../models/user");
+const auth = require("../../../middleware/auth");
+const mongoose = require("mongoose");
+-------------------code----------------------
+
+2. **Describe block:**
+
+-------------------code----------------------
+describe("Auth Middleware", () => {
+  it("should populate request.user with the payload of a valid JSON Web Token", () => {
+    // Test logic here
+  });
+});
+-------------------code----------------------
+
+---
+
+## 5. Mocking Request, Response, and Next
+
+* Create a **mock request object** with a `header` method:
+
+-------------------code----------------------
+const userPayload = {
+  _id: mongoose.Types.ObjectId().toHexString(),
+  isAdmin: true
+};
+
+const token = new User(userPayload).generateAuthToken();
+
+const req = {
+  header: jest.fn().mockReturnValue(token)
+};
+-------------------code----------------------
+
+* Mock `response` object (not used in this path):
+
+-------------------code----------------------
+const res = {};
+-------------------code----------------------
+
+* Mock `next` function:
+
+-------------------code----------------------
+const next = jest.fn();
+-------------------code----------------------
+
+---
+
+## 6. Calling the Middleware
+
+-------------------code----------------------
+auth(req, res, next);
+-------------------code----------------------
+
+---
+
+## 7. Assertions
+
+* Check that `request.user` is populated correctly:
+
+-------------------code----------------------
+expect(req.user).toMatchObject(userPayload);
+-------------------code----------------------
+
+* This ensures that the decoded JWT payload is correctly assigned to `req.user`.
+
+---
+
+## 8. Full Test Code
+
+-------------------code----------------------
+const { User } = require("../../../models/user");
+const auth = require("../../../middleware/auth");
+const mongoose = require("mongoose");
+
+describe("Auth Middleware", () => {
+  it("should populate request.user with the payload of a valid JSON Web Token", () => {
+    const userPayload = {
+      _id: mongoose.Types.ObjectId().toHexString(),
+      isAdmin: true
+    };
+
+    const token = new User(userPayload).generateAuthToken();
+
+    const req = {
+      header: jest.fn().mockReturnValue(token)
+    };
+    const res = {};
+    const next = jest.fn();
+
+    auth(req, res, next);
+
+    expect(req.user).toMatchObject(userPayload);
+  });
+});
+-------------------code----------------------
+
+---
+
+## 9. Notes
+
+* JWT payload `_id` is stored as a **string**, even if the original user object had an ObjectId.
+* `toHexString()` is used to match the string format.
+* This is a **unit test**, so no server or database interaction is required.
+
+---
+
