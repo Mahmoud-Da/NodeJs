@@ -561,3 +561,103 @@ Write two integration tests for this endpoint:
 The solution will appear in the next lecture.
 
 ---
+
+
+*** 6- Testing Routes with Parameters ***
+---
+
+## Integration Test: GET /api/genres/:id
+
+### 1. Goal of the Test
+
+Create a new test suite to verify all tests for the endpoint:
+
+-------------------code----------------------
+GET /api/genres/:id
+-------------------code----------------------
+
+The first test checks that the endpoint returns a genre when provided a valid ID.
+
+---
+
+## 2. Preparing the Database
+
+For this test, only a single genre is needed. You do not need to insert multiple documents.
+
+### Steps:
+
+1. Create a new `Genre` instance:
+
+-------------------code----------------------
+const genre = new Genre({ name: "genre1" });
+-------------------code----------------------
+
+2. Save it to the database using:
+
+-------------------code----------------------
+await genre.save();
+-------------------code----------------------
+
+Make the test function `async` since `save()` returns a promise.
+
+---
+
+## 3. Calling the Endpoint
+
+Make a GET request to the endpoint using supertest:
+
+-------------------code----------------------
+const res = await request(server)
+  .get("/api/genres/" + genre._id);
+-------------------code----------------------
+
+Store the response in a variable for later assertions.
+
+---
+
+## 4. Writing Assertions
+
+### Status Code
+
+Ensure the endpoint returns HTTP status 200:
+
+-------------------code----------------------
+expect(res.status).toBe(200);
+-------------------code----------------------
+
+### Response Body
+
+Initially, you might try:
+
+-------------------code----------------------
+expect(res.body).toMatchObject(genre);
+-------------------code----------------------
+
+But this fails because:
+
+* Mongoose stores `_id` as an **ObjectId**.
+* When retrieved from the database, `_id` becomes a **string**.
+* Therefore, comparing the entire object directly will cause a mismatch.
+
+### Correct Approach
+
+Assert only the relevant properties manually:
+
+-------------------code----------------------
+expect(res.body).toHaveProperty("name", genre.name);
+-------------------code----------------------
+
+---
+
+## 5. Running the Test
+
+After updating the expectation, run the test again.
+All tests should now pass.
+
+---
+
+## 6. Next Lecture
+
+The next lecture will cover writing the second integration test for this endpoint.
+
+---
