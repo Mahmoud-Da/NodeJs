@@ -1455,3 +1455,142 @@ it("should return the genre if it is valid", async () => {
 5. Easy to add new scenarios in the future.
 
 ---
+
+
+
+*** 13- Testing the Auth Middleware ***
+
+# Testing Authorization Middleware
+
+In this lecture, we focus on testing the **authorization middleware** independently from route handlers.
+
+---
+
+## 1. Why Test Middleware Separately
+
+* Currently, we have a test for unauthorized access in the genres test suite (`401` if no token).
+
+* However, the middleware has multiple execution paths:
+
+  1. No token provided → `401`
+  2. Invalid token provided → `400`
+  3. Valid token → proceed with request
+
+* Middleware is used across many endpoints (create, update, delete genres, etc.).
+
+* Testing it separately avoids **repeating the same logic** in multiple endpoint tests.
+
+---
+
+## 2. Setting Up the Test File
+
+* Create a new test file in `integration` folder: `auth.test.js`.
+* Import dependencies:
+
+-------------------code----------------------
+const request = require("supertest");
+const { User } = require("../../models/user");
+const { Genre } = require("../../models/genre");
+let server;
+-------------------code----------------------
+
+* Use `beforeEach` and `afterEach` to start and stop the server and clean up:
+
+-------------------code----------------------
+beforeEach(() => {
+  server = require("../../index");
+});
+
+afterEach(async () => {
+  await Genre.deleteMany({});
+  await server.close();
+});
+-------------------code----------------------
+
+---
+
+## 3. Masha’s Technique for Clean Tests
+
+* Define the **happy path** in a function called `exec`.
+* This function sends a POST request to an endpoint requiring authorization (`/api/genres`) with a valid object:
+
+-------------------code----------------------
+let token;
+let name;
+
+const exec = () => {
+  return request(server)
+    .post("/api/genres")
+    .set("x-auth-token", token)
+    .send({ name });
+};
+-------------------code----------------------
+
+* `beforeEach` initializes the happy path values:
+
+-------------------code----------------------
+beforeEach(() => {
+  const user = new User();
+  token = user.generateAuthToken();
+  name = "genre1";
+});
+-------------------code----------------------
+
+* Tests only modify **one parameter** to simulate each scenario.
+
+---
+
+## 4. Test Cases
+
+### 4.1 No Token Provided
+
+-------------------code----------------------
+it("should return 401 if no token is provided", async () => {
+  token = ""; // simulate missing token
+  const res = await exec();
+  expect(res.status).toBe(401);
+});
+-------------------code----------------------
+
+### 4.2 Invalid Token Provided
+
+-------------------code----------------------
+it("should return 400 if token is invalid", async () => {
+  token = "a"; // invalid JWT
+  const res = await exec();
+  expect(res.status).toBe(400);
+});
+-------------------code----------------------
+
+### 4.3 Valid Token (Happy Path)
+
+-------------------code----------------------
+it("should return 200 if token is valid", async () => {
+  const res = await exec();
+  expect(res.status).toBe(200);
+});
+-------------------code----------------------
+
+* **Important:** After the test, clean up the database to prevent interference with other tests:
+
+-------------------code----------------------
+afterEach(async () => {
+  await Genre.deleteMany({});
+});
+-------------------code----------------------
+
+---
+
+## 5. Notes
+
+* Using this approach, tests are concise, readable, and focused.
+* We **don’t need to repeat token generation or request sending** in each test.
+* Happy path defines the default valid request; each test only changes what it needs to.
+
+---
+
+## 6. Next Step
+
+* To test that the `req.user` property is populated correctly by the middleware, we need a **unit test**, since SuperTest does not expose the request object.
+
+---
