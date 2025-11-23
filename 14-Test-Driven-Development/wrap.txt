@@ -69,3 +69,79 @@ New requirements start with new failing tests.
 * When TDD becomes impractical, switching to the code-first approach is reasonable.
 
 ---
+
+*** 2- Implementing the Returns ***
+---
+
+### Implementing a New Feature with Test-Driven Development
+
+**Goal:** Add the ability to return a movie.
+
+---
+
+### 1. Rental Model Overview
+
+The `Rental` model has the following properties:
+
+* `customer`
+* `movie`
+* `dateOut`
+* `dateReturned`
+* `rentalFee`
+
+The last two properties (`dateReturned` and `rentalFee`) are initially undefined.
+When a customer returns a movie, the system must:
+
+1. Set the return date.
+2. Calculate the rental fee.
+
+---
+
+### 2. API Design Considerations
+
+#### Existing behavior
+
+The current `/api/rentals` endpoint supports only creating a new rental through a POST request.
+
+#### Incorrect approach
+
+One idea might be to add an update route to modify an existing rental.
+However, this approach is flawed:
+
+* The client should **not** set `dateReturned` or `rentalFee`.
+  If allowed, a client could send incorrect or manipulated values, such as a rental fee of zero.
+* The client should also not modify `dateOut`, the `customer`, or other protected fields.
+
+These values must be calculated and set **only** on the server.
+
+---
+
+### 3. Correct API Approach
+
+Create a new endpoint dedicated to processing movie returns.
+
+**Endpoint:**
+`POST /api/returns`
+
+**Request Body:**
+
+* `customerId`
+* `movieId`
+
+**Server Responsibilities:**
+
+1. Look up the rental associated with the given `customerId` and `movieId`.
+2. Set the `dateReturned` to the current date/time.
+3. Calculate the `rentalFee`.
+4. Save the updated rental and return a response.
+
+This endpoint becomes the contract exposed to clients for returning movies.
+
+---
+
+### 4. Preparing for Test-Driven Development
+
+Now that the endpoint design and behavior are defined, we can begin writing test cases.
+The tests will specify how this endpoint should behave before writing the actual implementation.
+
+---
