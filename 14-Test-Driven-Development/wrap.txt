@@ -145,3 +145,79 @@ Now that the endpoint design and behavior are defined, we can begin writing test
 The tests will specify how this endpoint should behave before writing the actual implementation.
 
 ---
+
+*** 3- Test Cases ***
+
+---
+
+### Brainstorming Test Cases for the Returns Endpoint
+
+Before writing the implementation, we first identify all the test cases for the `POST /api/returns` endpoint.
+This list may evolve as the feature becomes clearer.
+
+---
+
+## 1. Negative Test Cases
+
+These tests ensure the endpoint correctly handles invalid or incomplete requests.
+
+### a. Authentication
+
+* **Return 401** if the client is not logged in.
+  Only authenticated users should be able to call this endpoint.
+
+### b. Missing Input
+
+* **Return 400** if `customerId` is not provided.
+* **Return 400** if `movieId` is not provided.
+
+### c. Rental Not Found
+
+* **Return 404** if there is no rental matching the provided `customerId` and `movieId`.
+
+### d. Rental Already Processed
+
+* **Return 400** if the rental exists but has already been returned
+  (meaning `dateReturned` is already set).
+
+---
+
+## 2. Positive Test Cases
+
+These tests cover correct behavior when the request is valid.
+
+### a. Valid Request
+
+* **Return 200** for a successful return operation.
+
+### b. Set Return Date
+
+* The endpoint should set `dateReturned` to the current date and time.
+
+### c. Calculate Rental Fee
+
+* The rental fee should be computed based on the rental duration and movie daily rental rate.
+
+### d. Update Movie Inventory
+
+* The movie’s stock count should be increased by one.
+
+### e. Response Body
+
+* The endpoint should return the updated rental object, including:
+
+  * `dateOut`
+  * `dateReturned`
+  * `rentalFee`
+  * `customer`
+  * `movie`
+  * Any other relevant properties
+
+---
+
+### Summary
+
+These test cases define how the `/api/returns` endpoint should behave under different conditions.
+In the next steps, each test will be implemented using the TDD cycle.
+
+---
