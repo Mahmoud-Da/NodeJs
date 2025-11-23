@@ -347,3 +347,155 @@ Once corrected:
 The environment for the returns endpoint tests is now correctly set up.
 In the next step, the first real test case will be implemented.
 
+
+*** 5- Testing the Authorization ***
+---
+
+# Implementing the First Test Case (Unauthorized Client)
+
+## Introduction
+
+We are now ready to implement the first test case for the `/api/returns` endpoint.
+The goal is to enforce that **only authenticated users** can call this endpoint. If the client is not logged in, the server should return **401 Unauthorized**.
+
+This first example demonstrates the TDD workflow. For following test cases, you should actively attempt the exercise before watching the solution.
+
+---
+
+# 1. Writing the First Test Case
+
+### Test Description
+
+* Test name:
+  **"should return 401 if client is not logged in"**
+* Purpose:
+  Ensure the endpoint rejects unauthenticated users.
+
+### Steps
+
+1. Modify the test description.
+2. Remove temporary test code.
+3. Import `supertest` using `const request = require("supertest");`
+4. Use `request(server).post("/api/returns")` to call the endpoint.
+5. Provide a valid request body:
+
+   * `customerId`
+   * `movieId`
+6. Await the response.
+7. Expect the status code to be `401`.
+
+Using shorthand object syntax keeps the body clean and concise.
+
+---
+
+# 2. Running the Test for the First Time
+
+Since the endpoint does not exist yet:
+
+* Express returns **404 Not Found**.
+* This causes the test to fail.
+* This is expected.
+
+Following TDD, we now write the simplest production code that makes this test pass.
+
+---
+
+# 3. Implementing the Endpoint
+
+### Step 1: Create the Route
+
+Inside `routes/`, create a new file:
+
+```
+returns.js
+```
+
+Load Express, create a router, and define a POST route. Start by copying the basic structure from the genres route file.
+
+### Step 2: Export the Router
+
+Use:
+
+```
+module.exports = router;
+```
+
+### Step 3: Register the Route in the Application
+
+Open the `startup/routes.js` file and:
+
+* Require the new returns module.
+* Add:
+
+  ```
+  app.use("/api/returns", returns);
+  ```
+
+This connects the new endpoint to the application.
+
+---
+
+# 4. Minimal Production Code to Pass the Test
+
+With TDD, the goal is to write **the simplest possible code** that makes the test pass.
+
+Inside `returns.js`, modify the route handler to:
+
+```
+res.status(401).send();
+```
+
+There is no need yet to handle authentication properly.
+TDD will force us to improve this later when other tests fail.
+
+---
+
+# 5. Fixing the "Address in Use" Error
+
+When running tests, an error occurs:
+
+**"Listen EADDRINUSE: address already in use"**
+
+Cause:
+
+* The server is not fully closed between tests.
+* `server.close()` returns a promise.
+
+Solution:
+
+* Add `await` before `server.close()` in `afterEach` inside:
+
+  * `genres.test.js`
+  * `returns.test.js`
+  * Any test suite using the server
+
+This ensures the port is properly released before starting the next test.
+
+---
+
+# 6. Final Result
+
+After applying all fixes:
+
+* All tests pass.
+* The first TDD cycle is complete.
+* We built the simplest possible implementation.
+
+---
+
+# 7. Exercise (For You)
+
+The next test case to implement:
+
+**Return 400 if customerId is not provided**
+
+Instructions:
+
+1. Write the failing test.
+2. Write the minimal production code to make both tests pass.
+3. Only write the amount of logic needed for these two tests.
+
+You will see the solution in the next lecture.
+
+---
+
