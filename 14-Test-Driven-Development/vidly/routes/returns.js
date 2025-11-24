@@ -15,6 +15,9 @@ router.post("/", async (req, res) => {
 
   if (!rental) return res.status(404).send("Rental not found");
 
+  if (rental.dateReturned)
+    return res.status(400).send("Rental is already processed");
+
   res.status(401).send();
 });
 
