@@ -154,3 +154,98 @@ Steps inside `prod.js`:
 * The application is now prepared for deployment.
 
 Next, the lecture moves on to deployment using Heroku.
+
+
+*** 3- Getting Started with Heroku ***
+---
+
+## Deploying the Vidly Application to Heroku
+
+### Overview
+
+To deploy a Node application to Heroku, you must complete two initial setup steps:
+
+1. Create a Heroku account
+2. Install the Heroku CLI
+
+---
+
+## 1. Creating a Heroku Account
+
+* Go to the Heroku website.
+* Registration is simple, free, and takes only a few seconds.
+
+---
+
+## 2. Installing the Heroku CLI
+
+### How to Install
+
+* Search for "Heroku CLI" in your browser.
+* Open the first link.
+* Download the installer for your operating system.
+
+### Example Installation Methods
+
+* macOS: Can install easily using Homebrew.
+* Windows and Linux: Use the platform-specific installer provided on the site.
+
+---
+
+## 3. Verifying Installation
+
+After installation, open the terminal and run:
+
+-------------------code----------------------
+heroku -v
+-------------------code----------------------
+
+* This prints the installed CLI version.
+* Even if an update is available, the commands shown in the lecture work with different versions.
+
+---
+
+## 4. Logging into Heroku
+
+Use the following command:
+
+-------------------code----------------------
+heroku login
+-------------------code----------------------
+
+* Enter the email and password used for your Heroku account.
+* Successful login will display a confirmation message.
+
+---
+
+## 5. Handling Login Issues (Proxy Settings)
+
+If login fails due to a firewall or proxy:
+
+### Set the Proxy Environment Variable
+
+For macOS or Linux:
+
+-------------------code----------------------
+export HTTP_PROXY=http://proxy.server.com:port
+-------------------code----------------------
+
+For Windows:
+
+-------------------code----------------------
+set HTTP_PROXY=http://proxy.server.com:port
+-------------------code----------------------
+
+After setting the proxy variable, run `heroku login` again.
+
+---
+
+## Summary
+
+* Create a Heroku account.
+* Install and verify the Heroku CLI.
+* Log in using your Heroku credentials.
+* If behind a firewall, configure proxy settings.
+* After these steps, the application will be ready for deployment preparation.
+
+Next steps involve preparing the Vidly application for deployment to Heroku.
