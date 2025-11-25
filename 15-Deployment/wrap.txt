@@ -102,7 +102,7 @@ Before deploying the application, certain production-ready middleware should be 
 
 ### File Setup
 
-* Create a new file: `startup/prod.js`
+* Create a new file: `startup/prd.js`
 * This file will contain all middleware used specifically for the production environment.
 
 ### Module Implementation
@@ -149,7 +149,7 @@ Steps inside `prod.js`:
 ## Summary
 
 * Installed security and performance-related middleware.
-* Organized production-specific configuration inside `startup/prod.js`.
+* Organized production-specific configuration inside `startup/prd.js`.
 * Registered the production middleware in the main entry module.
 * The application is now prepared for deployment.
 
@@ -249,3 +249,99 @@ After setting the proxy variable, run `heroku login` again.
 * After these steps, the application will be ready for deployment preparation.
 
 Next steps involve preparing the Vidly application for deployment to Heroku.
+
+
+*** 4- Preparing the App for Heroku ***
+
+---
+
+## Preparing the Application for Deployment to Heroku
+
+To deploy a Node application to Heroku, a few key updates must be made in `package.json`.
+
+---
+
+## 1. Define the Start Script
+
+### Why This Is Needed
+
+* Heroku starts applications by running `npm start`.
+* If no `start` script is defined in `package.json`, Heroku will not know how to launch the app.
+
+### Action
+
+In `package.json`, under the `scripts` section, add:
+
+-------------------code----------------------
+"start": "node index.js"
+-------------------code----------------------
+
+Notes:
+
+* Use `node`, not `nodemon`.
+* `nodemon` is for development only; it watches file changes and restarts automatically.
+* Production should always use `node`.
+
+### Test Locally
+
+Run:
+
+-------------------code----------------------
+npm start
+-------------------code----------------------
+
+You should see confirmation that the application starts and listens on port 3000.
+
+---
+
+## 2. Specify the Node Version (Engines Section)
+
+### Why This Is Needed
+
+* Heroku uses this information to match your Node runtime environment.
+* Ensures your application runs with the correct version of Node.
+
+### Action
+
+1. Check your local Node version:
+
+   -------------------code----------------------
+   node -v
+   -------------------code----------------------
+2. Add the `engines` section in `package.json`:
+
+-------------------code----------------------
+"engines": {
+  "node": "your_version_here"
+}
+-------------------code----------------------
+
+Example:
+
+-------------------code----------------------
+"node": "8.9.1"
+-------------------code----------------------
+
+Use your actual version.
+
+---
+
+## Summary
+
+To make the application ready for Heroku deployment:
+
+1. Add a `start` script to run `node index.js` in production.
+2. Add an `engines` section to specify the Node version.
+
+With these changes, the application is fully prepared for deployment to Heroku.
+
+PS: when we have error to let the nodemon to stop restarts during development
+
+Create a nodemon.json file:
+-------------------code----------------------
+{
+  "ignore": ["*.log"]
+}
+-------------------code----------------------
+
+This prevents nodemon from restarting when log files change.
