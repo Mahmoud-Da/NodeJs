@@ -71,3 +71,86 @@ You build a Docker image of your application and deploy that image to any server
 This section focuses on deploying Node applications to **Heroku**.
 
 ---
+
+*** 2- Preparing the App for Production ***
+---
+
+## Preparing a Node Application for Production
+
+### Purpose
+
+Before deploying the application, certain production-ready middleware should be added to improve security and performance.
+
+---
+
+## Required Production Packages
+
+### 1. Helmet
+
+* Installed using: `npm install helmet`
+* Purpose: Provides security by protecting the application from well-known web vulnerabilities.
+* Previously introduced in the "Express Advanced Topics" section.
+
+### 2. Compression
+
+* Installed using: `npm install compression`
+* Purpose: Compresses HTTP responses to reduce bandwidth and improve performance.
+
+---
+
+## Creating the Production Startup Module
+
+### File Setup
+
+* Create a new file: `startup/prod.js`
+* This file will contain all middleware used specifically for the production environment.
+
+### Module Implementation
+
+Steps inside `prod.js`:
+
+1. Import the required packages:
+
+   -------------------code----------------------
+   const helmet = require('helmet');
+   const compression = require('compression');
+   -------------------code----------------------
+
+2. Export a function that takes the Express `app` object:
+
+   -------------------code----------------------
+   module.exports = function(app) {
+       app.use(helmet());
+       app.use(compression());
+   };
+   -------------------code----------------------
+
+3. Both `helmet` and `compression` are functions, so they must be called before passing to `app.use`.
+
+---
+
+## Registering the Production Module
+
+### Modifying `index.js`
+
+* Import the production startup module:
+* Call the function and pass in the Express application object:
+
+  -------------------code----------------------
+  require("./startup/prod")(app);
+  -------------------code----------------------
+
+### Conditional Loading (Optional)
+
+* It is possible to load this module only when `NODE_ENV` is set to `production`, but for this course it is not essential.
+
+---
+
+## Summary
+
+* Installed security and performance-related middleware.
+* Organized production-specific configuration inside `startup/prod.js`.
+* Registered the production middleware in the main entry module.
+* The application is now prepared for deployment.
+
+Next, the lecture moves on to deployment using Heroku.
