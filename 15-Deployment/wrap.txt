@@ -1,0 +1,73 @@
+*** 1- Introduction ***
+---
+
+## Deploying Node Applications
+
+### Overview
+
+There are two primary options for deploying Node applications:
+
+1. Using a Platform-as-a-Service (PaaS) provider
+2. Using Docker
+
+---
+
+## 1. Platform-as-a-Service (PaaS)
+
+### Definition
+
+A PaaS provider handles most of the infrastructure tasks for you.
+
+### When to Use
+
+Choose a PaaS if you do not want to manage:
+
+* Servers
+* Load balancers
+* Reverse proxies
+* Application restarts after crashes
+
+### Common Providers
+
+* Heroku
+* Google Cloud Platform
+* AWS
+* Azure
+
+Different developers prefer different providers, but Heroku is used in this course because:
+
+* It is easy to start with
+* It has strong documentation
+* It provides a comprehensive set of features
+
+### Summary
+
+Use a PaaS if you prefer simplicity and do not want to deal with infrastructure details.
+
+---
+
+## 2. Docker Deployment
+
+### Definition
+
+Docker allows you to package your application into an image.
+
+### When to Use
+
+Use Docker if you:
+
+* Want full control over your deployment
+* Want to deploy to your own web servers
+* Need consistent environments across machines
+
+### How It Works
+
+You build a Docker image of your application and deploy that image to any server you choose.
+
+---
+
+## Focus of This Section
+
+This section focuses on deploying Node applications to **Heroku**.
+
+---
