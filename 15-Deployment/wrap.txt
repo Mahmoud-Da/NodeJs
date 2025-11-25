@@ -424,3 +424,95 @@ git commit -m "First commit"
 ### Next Steps
 
 * In the next lecture, you will learn how to use the **Heroku CLI** to deploy the application.
+
+*** 6- Deploying to Heroku ***
+---
+
+## Deploying the Application to Heroku
+
+Now that the source code is in a Git repository, we can deploy it to Heroku using the Heroku CLI.
+
+---
+
+### 1. Create a Heroku Application
+
+Run:
+
+-------------------code----------------------
+heroku create
+-------------------code----------------------
+
+* This command does two things:
+
+  1. Creates a new application on Heroku.
+  2. Creates a Git remote called `heroku` in your local repository.
+
+* You can optionally provide a name for the app:
+
+-------------------code----------------------
+heroku create vidly
+-------------------code----------------------
+
+* The name must be unique. If the name is taken, Heroku will assign a random name.
+* After creation, Heroku provides:
+
+  * The URL of your application: `https://your-app-name.herokuapp.com`
+  * The Git repository URL: `git@heroku.com:your-app-name.git`
+
+---
+
+### 2. Verify the Git Remote
+
+Run:
+
+-------------------code----------------------
+git remote -v
+-------------------code----------------------
+
+* You should see the `heroku` remote pointing to your Heroku repository.
+
+---
+
+### 3. Deploy the Application
+
+Run:
+
+-------------------code----------------------
+git push heroku master
+-------------------code----------------------
+
+* **git push**: Pushes changes from the local repository.
+* **heroku**: The remote repository you want to push to.
+* **master**: The branch containing the latest code (default in Git).
+
+Heroku will then:
+
+1. Install the Node engine version specified in `package.json`.
+2. Install dependencies (`node_modules`).
+3. Deploy the application.
+
+---
+
+### 4. Test the Application
+
+* Copy the Heroku app URL.
+* Open Postman or a browser and send a request to your API endpoint, for example:
+
+-------------------code----------------------
+https://your-app-name.herokuapp.com/api/genres
+-------------------code----------------------
+
+* You may sometimes see a **503 Service Unavailable** error.
+
+  * This is common and usually related to configuration or startup issues.
+  * In the next lecture, you will learn how to **check logs on Heroku** to diagnose and fix problems.
+
+---
+
+### Notes
+
+* Every time you make changes to your application:
+
+  1. Commit the changes in your local Git repository.
+  2. Push them to Heroku using `git push heroku master`.
+* Heroku automatically redeploys the updated code when pushed.
