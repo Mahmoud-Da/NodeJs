@@ -1057,3 +1057,108 @@ Where:
 2. Run the test, confirm that it fails.
 3. Implement production code to make the test pass.
 
+*** 12- Testing the RentalFee ***
+
+---
+
+# Test-Driven Development Lecture Notes
+
+### Setting the Rental Fee Using Moment and Preparing the Next Exercise
+
+## 1. Duplicating the Test
+
+* Create a new test titled:
+  **"it should set the rental fee if input is valid"**.
+
+## 2. The Problem with Default `dateOut`
+
+* When the rental is first saved in `beforeEach`, Mongoose assigns `dateOut` as the current timestamp.
+* For this test, you must simulate a situation where the movie has been out for at least one day.
+* Setting it to a few seconds ago is not sufficient.
+
+## 3. Modifying `dateOut`
+
+* Before calling the execution function, update the rental document manually so that `dateOut` is in the past.
+* The easiest way to work with dates is using **Moment.js**.
+
+### Steps:
+
+1. Install `moment`:
+
+   * It can be installed as a development dependency or a production dependency.
+   * In this context, it is installed as a production dependency because the production code will also use it.
+2. Import moment at the top of the test file:
+
+   -------------------code----------------------
+   const moment = require('moment');
+   -------------------code----------------------
+3. In the test:
+
+   * Call `moment()` to get the current datetime.
+   * Call `.add(-7, 'days')` to shift the time seven days back.
+   * Convert it to a JavaScript Date using `.toDate()`.
+   * Assign it to `rental.dateOut`, then save and await:
+
+     -------------------code----------------------
+     rental.dateOut = moment().add(-7, 'days').toDate();
+     await rental.save();
+     -------------------code----------------------
+
+## 4. Setting the Daily Rental Rate
+
+* Set `movie.dailyRentalRate = 2` and save it.
+* This ensures the rental fee calculation has realistic values.
+
+## 5. Execute the Request
+
+* Call `exec()` to simulate returning the movie.
+
+## 6. Reload Rental From Database
+
+* Always reload the rental record using:
+
+  -------------------code----------------------
+  const rentalInDb = await Rental.findById(rental._id);
+  -------------------code----------------------
+
+## 7. Assertion
+
+* You can start with a generic assertion like:
+
+  -------------------code----------------------
+  expect(rentalInDb.rentalFee).toBeDefined();
+  -------------------code----------------------
+* Or make it specific:
+
+  * Since the movie was out for seven days and the daily rate is two:
+
+  -------------------code----------------------
+  expect(rentalInDb.rentalFee).toBe(14);
+  -------------------code----------------------
+
+## 8. Writing Production Code
+
+* In the return route handler:
+
+  1. Import moment:
+
+     -------------------code----------------------
+     const moment = require('moment');
+     -------------------code----------------------
+  2. After setting `dateReturned`, calculate rental days:
+
+     -------------------code----------------------
+     const rentalDays = moment().diff(rental.dateOut, 'days');
+     -------------------code----------------------
+  3. Set rental fee:
+
+     -------------------code----------------------
+     rental.rentalFee = rentalDays * rental.movie.dailyRentalRate;
+     -------------------code----------------------
+
+## 9. Verify
+
+* After saving, run tests again.
+* All tests should pass.
+
+
