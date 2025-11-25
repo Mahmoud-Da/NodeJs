@@ -676,3 +676,147 @@ MongoNetworkError: failed to connect to server
 
 * Cause: The connection string points to `localhost`, but Heroku does not have a local MongoDB instance by default.
 * Resolution: Connect to a cloud-hosted MongoDB service. This will be covered in the next lecture.
+
+
+*** 9- MongoDB in the Cloud ***
+---
+
+## Creating a MongoDB Database in the Cloud and Connecting It to Heroku
+---
+
+### 1. Using Add-ons in Heroku
+
+* Go to your application dashboard → **Resources** tab → **Add-ons**.
+* Click **Find more add-ons**.
+* Categories include: data stores, monitoring, logging, email/SMS, caching, metrics, analytics, etc.
+* Example add-on: **mLab** for MongoDB.
+
+  * Free tier available, but installing through Heroku may require a credit card.
+  * Alternative: create a free account directly on [mlab.com](https://mlab.com).
+
+---
+
+### 2. Creating a Cloud MongoDB Database
+
+1. Log in to mLab and click **Create New Deployment**.
+2. Choose a cloud provider: AWS, Google Cloud, or Azure.
+3. Select **Sandbox plan** (completely free).
+4. Select region (e.g., California for AWS).
+5. Name your database (e.g., `vidly`).
+6. Submit and the database is created.
+
+---
+
+### 3. Creating a Database User
+
+* Go to **Users** tab → **Create User**.
+* Example:
+
+-------------------code----------------------
+Username: vidly_user
+Password: 1234
+-------------------code----------------------
+
+* Note: Password used here is only for demo purposes.
+
+---
+
+### 4. Configuring the Connection String
+
+* On the database page, copy the MongoDB connection string.
+* Modify it with your username and password.
+* **Do not store credentials in source code**. Use environment variables instead.
+
+---
+
+### 5. Setting Environment Variables on Heroku
+
+1. Open **Custom Environment Variables** in Heroku dashboard.
+2. Add a key-value pair:
+
+-------------------code----------------------
+Key: VIDLY_DB
+Value: <MongoDB connection string>
+-------------------code----------------------
+
+* Alternatively, using CLI:
+
+-------------------code----------------------
+heroku config:set VIDLY_DB="mongodb://vidly_user:1234@<host>/<database>"
+-------------------code----------------------
+
+* This ensures the application can access the database in production.
+
+---
+
+### 6. Updating Application Code
+
+* Modify `config/default.json` to use the environment variable `VIDLY_DB` for production.
+* Stage and commit the changes:
+
+-------------------code----------------------
+git add .
+git commit -m "Add support for connection string via environment variable"
+-------------------code----------------------
+
+* Push to Heroku:
+
+-------------------code----------------------
+git push heroku master
+-------------------code----------------------
+
+---
+
+### 7. Testing the Application
+
+1. Check Heroku logs:
+
+-------------------code----------------------
+heroku logs --tail
+-------------------code----------------------
+
+* Confirm the app connects to MongoDB and listens on the dynamically assigned port.
+
+2. Test API in Postman:
+
+* GET request to `/api/genres` should return an empty array (new database).
+
+3. Creating a new user:
+
+* POST request to `/api/users` with JSON body:
+
+-------------------code----------------------
+{
+  "name": "Mosh Hamidani",
+  "email": "programmingwithmosh@gmail.com",
+  "password": "12345"
+}
+-------------------code----------------------
+
+* Copy the authentication token from the response.
+
+4. Adding a new genre:
+
+* POST request to `/api/genres` with body:
+
+-------------------code----------------------
+{
+  "name": "Thriller"
+}
+-------------------code----------------------
+
+* Include the token in header `x-auth-token`.
+* Response shows the new genre stored in MongoDB.
+
+---
+
+### Summary
+
+* Created a cloud MongoDB database using mLab.
+* Set up a database user and connection string as environment variables.
+* Updated source code to use environment variables for production.
+* Deployed updated application to Heroku.
+* Successfully tested creating users and genres via API.
+
+---
+
