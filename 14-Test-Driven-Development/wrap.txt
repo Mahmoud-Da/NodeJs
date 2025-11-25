@@ -1639,3 +1639,102 @@ router.post(
 * Code is now cleaner, more reusable, and easier to maintain.
 
 ---
+
+*** 17- Refactoring the Domain Logic ***
+### Refactoring the Returns Route Handler
+
+#### Problem
+
+* The current route handler is **too busy**:
+
+  * Calculates the rental fee.
+  * Sets the return date.
+  * Updates movie stock.
+* This mixes **business logic** with **route handling**, making the code harder to maintain.
+
+---
+
+### Applying the Information Expert Principle
+
+* **Principle:** Let the object that has the information also be responsible for the logic.
+* Example:
+
+  * User class generates an authentication token because it has all necessary data.
+* Similarly:
+
+  * Rental object knows its `dateOut` and `movie` details.
+  * Therefore, the rental should be responsible for:
+
+    * Setting the return date.
+    * Calculating the rental fee.
+
+---
+
+### Creating an Instance Method on Rental
+
+1. **Add a `return` method** on the rental schema:
+
+   -------------------code----------------------
+   rentalSchema.methods.return = function() {
+       this.dateReturned = new Date();
+
+       // Calculate rental fee
+       const rentalDays = moment().diff(this.dateOut, "days");
+       this.rentalFee = rentalDays * this.movie.dailyRentalRate;
+   };
+   -------------------code----------------------
+
+2. **Key Points:**
+
+   * Use **`methods`**, not `statics`, because this is an **instance method**.
+   * No parameters are needed; the method works with the rental object itself.
+   * Separates **setting return date** and **calculating fee** into logically grouped lines.
+
+---
+
+### Updating the Returns Route Handler
+
+* Replace the old logic with a simple call to the new method:
+
+  -------------------code----------------------
+  const rental = await Rental.lookup(req.body.customerId, req.body.movieId);
+  if (!rental) return res.status(404).send("Rental not found");
+  if (rental.dateReturned) return res.status(400).send("Rental already processed");
+
+  rental.return();
+  await rental.save();
+  -------------------code----------------------
+
+* Advantages:
+
+  * Cleaner route handler.
+  * All rental-related logic is encapsulated in the rental object.
+  * Improves readability and maintainability.
+
+---
+
+### Handling Dependencies
+
+* **Moment.js** is now only needed in the rental model:
+
+  -------------------code----------------------
+  const moment = require("moment");
+  -------------------code----------------------
+
+* No need to set `res.status(200)` explicitly; Express sets this by default for successful requests.
+
+---
+
+### Result
+
+* After moving logic to the rental instance method and importing `moment` in the rental model:
+
+  * All tests pass.
+  * Route handler is simplified.
+  * Business logic is encapsulated in the object that has the relevant information.
+
+---
+
+This refactoring follows **object-oriented best practices**, reduces code duplication, and leverages your automated tests to ensure no regressions occur.
+
+---
