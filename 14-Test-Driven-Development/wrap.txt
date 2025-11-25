@@ -1379,3 +1379,136 @@ After switching to property existence checks and returning the rental object, al
 
 ---
 
+
+*** 15- Refactoring the Validation Logic ***
+---
+
+# Lecture Notes: Refactoring Validation Using Joi and Middleware
+
+## 1. The Value of Test-Driven Development (TDD)
+
+* Our `/api/returns` route handler is fully covered by tests.
+* Full test coverage allows us to:
+
+  * Refactor the function confidently.
+  * Improve the implementation.
+  * Ensure nothing breaks (all tests must pass after refactoring).
+
+---
+
+## 2. Refactoring Input Validation with Joi
+
+### Original Implementation
+
+* Validation was done manually using `if` statements:
+
+-------------------code----------------------
+if (!req.body.customerId) return res.status(400).send("Customer ID not provided");
+if (!req.body.movieId) return res.status(400).send("Movie ID not provided");
+-------------------code----------------------
+
+### Refactored Approach
+
+* Use Joi for validation (consistent with genre validation).
+
+* Steps:
+
+  1. Copy the `validate` function from the `genre` module into `returns.js`.
+  2. Rename the function to `validateReturn`.
+  3. Rename the parameter to `request`.
+  4. Define the expected properties:
+
+     * `customerId`: required, ObjectId
+     * `movieId`: required, ObjectId
+  5. Update the route handler to use:
+
+     -------------------code----------------------
+     const { error } = validateReturn(req.body);
+     if (error) return res.status(400).send(error.details[0].message);
+     -------------------code----------------------
+  6. Import Joi at the top:
+
+     -------------------code----------------------
+     const Joi = require("joi");
+     -------------------code----------------------
+
+* **Result:** Tests continue to pass; validation is now standardized.
+
+---
+
+## 3. Creating a Reusable Validation Middleware
+
+### Motivation
+
+* Validation logic (`validateReturn`) is repeated in many route handlers.
+* We can move it into a **middleware function**, similar to authentication.
+
+### Implementation Steps
+
+1. Create a `validate.js` middleware file:
+
+-------------------code----------------------
+function validate(validator) {
+  return (req, res, next) => {
+    const { error } = validator(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+    next();
+  };
+}
+
+module.exports = validate;
+-------------------code----------------------
+
+2. Update `/api/returns` route to use middleware:
+
+-------------------code----------------------
+const validate = require("../middleware/validate");
+const { validateReturn } = require("../models/return");
+
+router.post(
+  "/",
+  [auth, validate(validateReturn)],
+  async (req, res) => {
+    // route handler logic
+  }
+);
+-------------------code----------------------
+
+### Key Points
+
+* `validate` is **dynamic**: accepts any Joi validator function.
+* Returns a standard Express middleware function (`req, res, next`).
+* Improves code reuse and reduces repetition across routes.
+
+---
+
+## 4. Benefits of Refactoring
+
+* Tests ensure safety: all 37 tests pass after changes.
+* Cleaner, modular code.
+* Easier to extend validation for other route handlers:
+
+  * Simply pass the appropriate Joi validator function.
+* Makes route handlers shorter and more readable.
+
+---
+
+## 5. Next Steps
+
+* Move `validateReturn` function to `returns` module if not already done.
+* Use `validate` middleware in other route handlers (e.g., genre, movie).
+* Always write tests before refactoring existing handlers:
+
+  * At minimum, test validation logic.
+
+---
+
+### Summary
+
+* Refactored manual validation to **Joi-based validation**.
+* Encapsulated validation in a **reusable middleware**.
+* Leveraged **TDD** to refactor confidently.
+* All tests pass, ensuring the application remains stable.
+* Next lecture will continue cleaning up and improving the route handler.
+
+---
