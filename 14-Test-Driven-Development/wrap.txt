@@ -856,3 +856,60 @@ if (!rental) return res.status(404).send("Rental not found");
 
 ---
 
+*** 9- Testing if Rental Processed  ***
+---
+
+### Lecture Topic: TDD – Handling Return Already Processed Scenario
+
+**1. Objective:**
+
+* Test case: Return **400** if a return is already processed.
+
+**2. Steps to Simulate the Test Case:**
+
+1. Duplicate the previous test.
+2. Retrieve the rental object.
+3. Set the `dateReturned` field to the current date and time.
+4. Save the rental object (use `await`).
+5. Sign the request.
+6. Assert that the response status is **400**.
+
+**3. Observations in Terminal:**
+
+* Initial failing test returned **401** (expected as user not authenticated).
+* After adding rental check logic, test passes with **400**.
+
+**4. Implementation Logic in Route Handler:**
+
+* Check if the rental object exists.
+* If `rental.dateReturned` is already set:
+-------------------code----------------------
+if (rental.dateReturned)
+    return res.status(400).send("Rental is already processed");
+-------------------code----------------------
+
+  * Return `res.status(400).send("Return already processed")`.
+* Save changes.
+
+**5. TDD Best Practices Demonstrated:**
+
+* Keep tests clean and focused (3–4 lines per test).
+* Refactor code efficiently.
+* Change **one parameter per test** to simulate a single test case.
+* Follow **step-by-step approach**: write test → make it pass → move to next test.
+-------------------code----------------------
+it("should return 400 if a return is already processed", async () => {
+    rental.dateReturned = new Date();
+    await rental.save();
+
+    const res = await exec();
+
+    expect(res.status).toBe(400);
+  });
+-------------------code----------------------
+
+**6. Next Exercise:**
+
+* Implement the test case for **Return 200** when a valid request is received.
+
+---
