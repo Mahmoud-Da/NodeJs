@@ -2200,3 +2200,148 @@ In this exercise, we are analyzing the **Vidly project** to determine which part
 This lecture emphasizes **choosing the right test type** and demonstrates that **unit tests are ideal for self-contained logic**, while **integration tests are better for functions with external dependencies**.
 
 ---
+
+*** 20- Exercise ***
+---
+
+# Unit Testing `generateAuthToken` in Vidly Project
+
+## 1. Installing Jest
+
+* Install Jest as a dev dependency:
+
+  -------------------code----------------------
+  npm install jest --save-dev
+  -------------------code----------------------
+* Update `package.json` test script to use Jest in watch mode:
+
+  -------------------code----------------------
+  "scripts": {
+    "test": "jest --watchAll"
+  }
+  -------------------code----------------------
+
+---
+
+## 2. Project Structure for Unit Tests
+
+* Create a **separate folder for tests** (good practice to separate unit and integration tests).
+* Folder structure:
+
+  -------------------code----------------------
+  tests/
+    unit/
+      models/
+        user.test.js
+  -------------------code----------------------
+* Use the `describe` function to create a **test suite**, which is a container for multiple tests.
+
+---
+
+## 3. Writing the Test
+
+### Step 1: Import Required Modules
+
+* Import the `User` class using destructuring, as the module exports an object:
+
+  -------------------code----------------------
+  const { User } = require('../../../models/user');
+  -------------------code----------------------
+* Import JWT library:
+
+  -------------------code----------------------
+  const jwt = require('jsonwebtoken');
+  -------------------code----------------------
+* Import config module to access JWT private key:
+
+  -------------------code----------------------
+  const config = require('config');
+  -------------------code----------------------
+
+### Step 2: Create User Object
+
+* Create a new user:
+
+  -------------------code----------------------
+  const payload = { _id: new mongoose.Types.ObjectId(), isAdmin: true };
+  const user = new User(payload);
+  -------------------code----------------------
+* Store `_id` as a **MongoDB ObjectId**, since JWT will convert it to a string in the payload.
+
+### Step 3: Generate Auth Token
+
+* Call the method:
+
+  -------------------code----------------------
+  const token = user.generateAuthToken();
+  -------------------code----------------------
+
+### Step 4: Verify Token
+
+* Decode and verify JWT:
+
+  -------------------code----------------------
+  const decoded = jwt.verify(token, config.get('jwtPrivateKey'));
+  -------------------code----------------------
+* Assertion: verify that decoded token matches expected payload:
+
+  -------------------code----------------------
+  expect(decoded).toMatchObject({
+    _id: payload._id.toHexString(),
+    isAdmin: true
+  });
+  -------------------code----------------------
+
+---
+
+## 4. Handling ObjectId Conversion
+
+* The `_id` in JWT payload is a **string**, but in the `User` object it is an ObjectId.
+* Use `.toHexString()` on the ObjectId when asserting equality.
+
+---
+
+## 5. Test Configuration
+
+* Jest uses a **node environment**.
+* Add a `test.json` file in the `config` folder, copy default config, and set `jwtPrivateKey`.
+* This ensures tests do not require environment variables on different machines.
+
+---
+
+## 6. Final Test File Example
+
+-------------------code----------------------
+const mongoose = require('mongoose');
+const { User } = require('../../../models/user');
+const jwt = require('jsonwebtoken');
+const config = require('config');
+
+describe('User.generateAuthToken', () => {
+  it('should return a valid JWT with correct payload', () => {
+    const payload = { _id: new mongoose.Types.ObjectId(), isAdmin: true };
+    const user = new User(payload);
+
+    const token = user.generateAuthToken();
+    const decoded = jwt.verify(token, config.get('jwtPrivateKey'));
+
+    expect(decoded).toMatchObject({
+      _id: payload._id.toHexString(),
+      isAdmin: true
+    });
+  });
+});
+-------------------code----------------------
+
+---
+
+## 7. Key Points
+
+1. **Separate unit and integration tests** for maintainability and speed.
+2. Use **MongoDB ObjectId** for user `_id` when generating JWT.
+3. JWT library converts ObjectId to string—always convert `.toHexString()` when asserting.
+4. Store test-specific config in `config/test.json`.
+5. Assertions use `toMatchObject` to match relevant fields in JWT payload.
+
+---
+
