@@ -120,3 +120,24 @@ describe("notifyCustomer", () => {
     expect(mailSent).toBe(true);
   });
 });
+
+// using Jest Mock functions
+describe("notifyCustomer", () => {
+  it("should send an email to the customer", () => {
+    // Arrange: mock db.getCustomerSync
+    db.getCustomerSync = jest.fn().mockReturnValue({
+      email: "a@example.com",
+    });
+
+    mail.send = jest.fn();
+
+    const order = { customerId: 1 };
+    lib.notifyCustomer(order);
+
+    expect(mail.send).toHaveBeenCalled();
+
+    // Assert: check arguments passed to mail.send
+    expect(mail.send.mock.calls[0][0]).toBe("a@example.com"); // first argument
+    expect(mail.send.mock.calls[0][1]).toMatch(/order/); // second argument contains 'order'
+  });
+});
