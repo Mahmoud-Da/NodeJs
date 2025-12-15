@@ -392,3 +392,172 @@ describe("/api/genres", () => {
 
 ---
 
+*** 5- Populating the Test Db ***
+---
+
+# Improving the Integration Test by Populating and Cleaning the Database
+
+## 1. Purpose of Improving the Test
+
+The earlier test only checked the HTTP status code.
+To make the test meaningful, we need to:
+
+1. Insert known genre documents into the test database.
+2. Call the `/api/genres` endpoint.
+3. Assert that the returned genres are exactly the ones stored.
+
+This validates the full application stack including:
+
+* Express routing
+* Validation middleware
+* MongoDB operations
+
+---
+
+# 2. Loading the Genre Model
+
+At the top of the test file, import the Genre model:
+
+-------------------code----------------------
+const { Genre } = require('../../models/genre');
+-------------------code----------------------
+
+Notes:
+
+* Use object destructuring because the module exports `{ Genre, validate }`.
+* Move up two directories from the integration folder.
+
+---
+
+# 3. Populating the Database in the Test
+
+Inside the test, insert sample documents:
+
+-------------------code----------------------
+await Genre.collection.insertMany([
+  { name: 'genre1' },
+  { name: 'genre2' }
+]);
+-------------------code----------------------
+
+Important notes:
+
+* Use real names like `genre1` and `genre2` because short values like `a` or `b` will fail validation.
+* `insertMany` returns a promise, so you must use `await`.
+
+---
+
+# 4. Adding Assertions
+
+### Basic count check
+
+-------------------code----------------------
+expect(res.body.length).toBe(2);
+-------------------code----------------------
+
+However, this only checks the array length.
+It does not validate the content, so even `[1,2]` would pass.
+
+---
+
+# 5. Cleaning the Database After Each Test
+
+### The Problem
+
+Each test run adds two more documents to the test database.
+Running tests multiple times leads to duplicates:
+
+* First run: 2 documents
+* Second run: 4 documents
+* Third run: 6 documents
+* etc.
+
+This breaks repeatability.
+
+### The Solution
+
+Always clean the collection after each test using:
+
+-------------------code----------------------
+await Genre.deleteMany({});
+-------------------code----------------------
+
+Place this cleanup inside `afterEach`, not inside the test itself, so it always runs even if assertions fail.
+
+Also mark `afterEach` as `async`.
+
+---
+
+# 6. Updating afterEach
+
+-------------------code----------------------
+afterEach(async () => {
+  await Genre.deleteMany({});
+  await server.close();
+});
+-------------------code----------------------
+
+This ensures:
+
+* The server shuts down cleanly.
+* The database is reset.
+* Tests remain isolated.
+
+---
+
+# 7. Ensuring Tests Are Repeatable
+
+Before re-running, verify your test database contains no stale documents.
+If needed, manually delete the `genres` collection in MongoDB Compass.
+
+---
+
+# 8. Improving the Assertions to Check Actual Data
+
+A stronger test ensures the response contains the exact inserted genres.
+
+Use the `Array.prototype.some` method:
+
+-------------------code----------------------
+expect(res.body.some(g => g.name === 'genre1')).toBeTruthy();
+expect(res.body.some(g => g.name === 'genre2')).toBeTruthy();
+-------------------code----------------------
+
+This verifies:
+
+* The returned list contains a genre named `genre1`.
+* The list also contains a genre named `genre2`.
+
+---
+
+# 9. Final Test Behavior
+
+After running:
+
+* The test inserts two genres.
+* Calls the `/api/genres` endpoint.
+* Confirms the response includes both genres.
+* Cleans the database.
+* Repeats cleanly every time.
+
+Tests must always run in isolation and must never depend on state left behind from previous runs.
+
+---
+
+# 10. Exercise Given in the Lecture
+
+In `routes/genres.js`, there is a route to get a single genre by ID.
+This route has two execution paths:
+
+1. If the ID does not match any document, return status **404**.
+2. If the document exists, return status **200** with the genre.
+
+**Exercise:**
+Write two integration tests for this endpoint:
+
+1. A test that ensures a non-existing genre ID returns **404**.
+2. A test that ensures a valid genre ID returns the correct genre object.
+
+The solution will appear in the next lecture.
+
+---
