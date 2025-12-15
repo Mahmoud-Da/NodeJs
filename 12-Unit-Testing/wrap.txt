@@ -1,0 +1,84 @@
+*** 1- What is Automated Testing ***
+# Automated Testing
+
+## Lecture Notes
+
+### 1. Common Questions About Automated Testing
+
+Developers often ask:
+
+* What is automated testing?
+* Is it a replacement for manual testing?
+* Do I really need it?
+* How should I do it?
+* Should I use test-driven development (TDD) or write application code first?
+* What exactly should I test?
+
+These questions form the foundation of this course, and each will be answered step by step.
+
+---
+
+## 2. What Is Automated Testing?
+
+Automated testing is the practice of writing code that tests our application code and running those tests automatically.
+
+In any project, your source code will consist of:
+
+* **Application (production) code**
+* **Test code**
+
+---
+
+## 3. Manual Testing vs Automated Testing
+
+### Manual Testing Workflow
+
+To test a function manually:
+
+1. Launch the application in the browser.
+2. Possibly log in.
+3. Navigate to the page where the function is used.
+4. Fill a form and submit it.
+5. Observe the output on screen.
+6. Repeat all steps for every different input you want to test.
+
+This approach:
+
+* Is slow and repetitive.
+* Takes several minutes per test.
+* Becomes impossible to scale as your application grows.
+* Must be repeated for dozens or hundreds of functions.
+
+### Automated Testing Workflow
+
+With automated testing:
+
+* You directly call the function in code.
+* You pass various inputs programmatically.
+* You verify (assert) the returned outputs.
+* You can run all tests automatically whenever:
+
+  * You change your code.
+  * You commit to source control.
+  * You deploy your application.
+
+This approach:
+
+* Tests all execution paths in less than a second.
+* Supports hundreds or thousands of tests.
+* Takes only a few seconds to run the entire test suite.
+
+---
+
+## 4. Why Automated Testing Matters
+
+Automated testing:
+
+* Saves enormous time.
+* Improves reliability.
+* Ensures you do not break existing features when adding new ones.
+
+Further benefits will be discussed in the next lecture.
+
+---
+
