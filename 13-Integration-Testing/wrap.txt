@@ -1864,3 +1864,71 @@ coverage/
 
 ---
 
+*** 16- Exercise ***
+---
+
+# Exercise: Completing Route Tests in the Genre Module
+
+## Objective
+
+* Finish testing the remaining routes in the **Genre module**:
+
+  1. **PUT** route (update a genre)
+  2. **DELETE** route (remove a genre)
+
+* These routes are similar to the ones already tested (`GET` and `POST`), so the techniques used previously apply here as well.
+
+---
+
+## PUT Route Testing
+
+* **Purpose:** Update a genre by its ID.
+
+* **Execution paths to test:**
+
+  1. **Invalid ID** → should return `404`.
+  2. **Valid ID, invalid payload** → should return `400`.
+  3. **Valid ID, valid payload, authorized user** → should update the genre and return the updated genre.
+  4. **Unauthorized access** → should return `401`.
+
+* **Steps:**
+
+  * Generate a valid authentication token if required.
+  * Use `supertest` to send a PUT request with the genre ID.
+  * Validate response status and response body.
+  * Check database to ensure changes were applied.
+
+---
+
+## DELETE Route Testing
+
+* **Purpose:** Delete a genre by its ID.
+
+* **Execution paths to test:**
+
+  1. **Invalid ID** → should return `404`.
+  2. **Valid ID, authorized user** → should remove the genre and return the deleted genre.
+  3. **Unauthorized access** → should return `401`.
+  4. **Valid ID, user not admin** (if admin is required) → should return `403`.
+
+* **Steps:**
+
+  * Generate a valid authentication token (admin if required).
+  * Use `supertest` to send a DELETE request with the genre ID.
+  * Validate response status and response body.
+  * Check the database to confirm the genre was removed.
+
+---
+
+## Notes
+
+* You can reuse patterns from previous tests:
+
+  * **`beforeEach`** for setting up tokens and test data.
+  * **`afterEach`** for cleaning up the database.
+  * **`execute()` helper** to handle the request and return response for cleaner tests.
+* Ensure all **execution paths** are tested for each route.
+* Reference the provided solution file if needed.
+
+---
+
