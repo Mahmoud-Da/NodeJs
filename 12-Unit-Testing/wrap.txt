@@ -1074,3 +1074,129 @@ When testing strings:
 * Favor matchers like `toMatch` or `toContain` to ensure tests remain stable but still meaningful.
 
 Balanced test precision prevents false failures while still verifying correct behavior.
+
+*** 11- Testing Arrays ***
+
+# Testing Arrays in Unit Tests
+
+## 1. Overview
+
+Some functions return arrays, and in this lecture the focus is on how to properly test such functions.
+The example function is `getCurrencies`, which returns an array of three currency strings.
+
+---
+
+# 2. Setting Up the Test
+
+In the test file:
+
+* Add a new `describe` block for `getCurrencies`.
+* Only one test is needed because there is a single execution path.
+* The test description: **"should return supported currencies"**.
+* Inside the test:
+
+  * Call `lib.getCurrencies()`
+  * Store the result
+  * Write assertions
+
+---
+
+# 3. Principles: Not Too General, Not Too Specific
+
+## A. Tests That Are Too General (Bad Practice)
+
+1. **Expecting result to be defined**
+
+   * Example: `expect(result).toBeDefined()`
+   * Problem: If the function returns a number instead of an array due to a bug, this test still passes.
+
+2. **Expecting result not to be null**
+
+   * Example: `expect(result).not.toBeNull()`
+   * Problem: This does not ensure the presence of specific currencies.
+
+General tests do not validate output correctness.
+
+---
+
+## B. Tests That Are Too Specific (Bad Practice)
+
+### 1. Checking Exact Element Order
+
+Example:
+
+* `expect(result[0]).toBe('USD')`
+* `expect(result[1]).toBe('AUD')`
+* `expect(result[2]).toBe('EUR')`
+
+Problem:
+
+* This tightly couples the test to the array order.
+* If the sorting changes, tests break unnecessarily.
+
+### 2. Checking Exact Length
+
+Example:
+
+* `expect(result.length).toBe(3)`
+
+Problem:
+
+* If a new currency is added in the future, the test breaks even though the function still behaves correctly.
+
+---
+
+# 4. Proper Way To Test Arrays
+
+## A. Correct (But Not Ideal) Approach
+
+Check for existence of elements regardless of order:
+
+* `expect(result).toContain('USD')`
+* `expect(result).toContain('AUD')`
+* `expect(result).toContain('EUR')`
+
+This avoids relying on array position.
+
+---
+
+## B. Ideal Approach (Cleaner and Recommended)
+
+Use `expect.arrayContaining()`:
+
+-------------------code----------------------
+expect(result).toEqual(expect.arrayContaining([
+  'EUR',
+  'USD',
+  'AUD'
+]));
+-------------------code----------------------
+
+Notes:
+
+* Order does not matter.
+* You can specify only the elements you care about.
+* The result may contain more items and the test still passes.
+
+---
+
+# 5. Running the Test
+
+* Restore the original array in `lib.js`
+* Run tests: `npm test`
+* All tests should pass
+
+---
+
+# 6. Documentation Reference
+
+For matchers like `arrayContaining`, refer to Jest API documentation under `expect`.
+
+---
+
+# Next Topic
+
+The next lecture will cover how to test objects.
+
+---
+
