@@ -42,3 +42,68 @@
 
 ---
 
+*** 2- Preparing the App ***
+---
+
+# Preparing the Application for Integration Testing
+
+## 1. Required Adjustments Before Writing Integration Tests
+
+Before starting integration tests for the Vidly application, several updates are needed to ensure the environment works correctly.
+
+---
+
+## 2. Fixing the Index Module
+
+* Open `index.js`.
+* A previous refactor introduced an issue: on line 5, the logging module was required but not invoked.
+* Ensure that the required logging module is actually called as a function.
+* Without calling it, logging will not work properly.
+
+---
+
+## 3. Updating the NPM Test Script
+
+* Open `package.json`.
+* Modify the test script to include the `--verbose` flag.
+* The verbose flag causes Jest to print additional diagnostic information in the console.
+* This extra output is useful for troubleshooting when tests fail or behave unexpectedly.
+
+---
+
+## 4. Adjusting the Logging Module
+
+* Open the logging module used for Winston integrations.
+
+* Previously, MongoDB was configured as a transport for Winston, using `winston-mongodb`.
+
+* This module currently causes the test runner to freeze when running integration tests in the terminal.
+
+* The issue may depend on the specific version or environment and may not occur on all machines.
+
+* To avoid blocking integration tests:
+
+  1. Temporarily comment out the MongoDB logging configuration.
+  2. Comment out the lines that add MongoDB as a Winston transport (around line 14 in the logging module).
+
+* This allows focus on integration tests without interference from the Winston MongoDB plugin.
+
+* The configuration can be restored later once the issue is resolved.
+
+---
+
+## 5. Summary of Required Changes
+
+1. **index.js**:
+
+   * Add parentheses to invoke the logging module function on line 5.
+
+2. **package.json**:
+
+   * Add the `--verbose` flag to the test command.
+
+3. **logging module**:
+
+   * Temporarily disable the Winston MongoDB plugin by commenting out its configuration and transport setup.
+
+---
