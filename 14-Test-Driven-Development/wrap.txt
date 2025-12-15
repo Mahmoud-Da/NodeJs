@@ -1268,3 +1268,114 @@ await Movie.update(
 
 **Implement the last test case:**
 When a return is processed successfully, the API should return the rental object in the body of the response.
+
+*** 14- Testing the Response ***
+---
+
+# Notes: Returning the Rental Object in the Response
+
+## 1. Goal of the Final Test Case
+
+We want to verify that when the input is valid, the route handler returns the complete rental object in the response body.
+
+### Test Title
+
+* **"should return the rental if input is valid"**
+
+## 2. Initial Attempt: Matching the Entire Object
+
+In the test, we attempted to assert:
+
+* `expect(res.body).toMatchObject(updatedRental)`
+  where `updatedRental` is the rental retrieved from the database after being updated.
+
+Steps in the test:
+
+1. Execute the request.
+2. Retrieve the rental from the database using:
+
+   -------------------code----------------------
+   const rentalInDb = await Rental.findById(rental._id);
+   -------------------code----------------------
+3. Try to assert full object equality.
+
+## 3. Reason the Test Fails
+
+Mongoose stores `dateOut` and `dateReturned` as JavaScript `Date` objects.
+
+However, when the response is sent as JSON:
+
+* Dates are converted to ISO strings.
+
+Therefore:
+
+* `rentalInDb.dateReturned` is a Date object.
+* `res.body.dateReturned` is a string.
+
+Directly matching objects fails because the types differ.
+
+## 4. Improving the Test: Checking for the Existence of Properties
+
+Instead of matching the entire object, check that required properties exist.
+
+We focus on validating the presence of the following fields:
+
+* `dateOut`
+* `dateReturned`
+* `rentalFee`
+* `customer`
+* `movie`
+
+Initial approach:
+
+-------------------code----------------------
+expect(res.body).toHaveProperty("dateOut");
+expect(res.body).toHaveProperty("dateReturned");
+expect(res.body).toHaveProperty("rentalFee");
+expect(res.body).toHaveProperty("customer");
+expect(res.body).toHaveProperty("movie");
+-------------------code----------------------
+
+This works but is repetitive.
+
+## 5. Cleaner Approach: Using `Object.keys` and `arrayContaining`
+
+A more concise version:
+
+-------------------code----------------------
+expect(Object.keys(res.body)).toEqual(
+  expect.arrayContaining([
+    "dateOut",
+    "dateReturned",
+    "rentalFee",
+    "customer",
+    "movie"
+  ])
+);
+-------------------code----------------------
+
+### Explanation:
+
+* `Object.keys(res.body)` extracts all property names from the returned rental object.
+* `expect.arrayContaining([...])` checks that these required properties exist, without requiring an exact match of all properties or their order.
+
+This makes the test:
+
+* More maintainable
+* Less brittle
+* Focused on validating structure, not internal serialization formats
+
+## 6. Updating the Route Handler
+
+To make the test pass, modify the final line of the route handler to return the rental object instead of an empty response:
+
+-------------------code----------------------
+return res.status(200).send(rental);
+-------------------code----------------------
+
+## 7. Final Result
+
+After switching to property existence checks and returning the rental object, all tests pass successfully.
+
+---
+
