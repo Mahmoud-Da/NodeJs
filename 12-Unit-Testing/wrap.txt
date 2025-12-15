@@ -285,3 +285,97 @@ These tools:
 
 ---
 
+*** 4- Test Pyramid ***
+# The Test Pyramid and What Tests You Should Write
+
+## Lecture Notes
+
+---
+
+## 1. Types of Tests You Should Write
+
+You have learned about three types of automated tests:
+
+* Unit tests
+* Integration tests
+* End-to-end tests
+
+In real applications, you should write **all three**.
+The question is how many of each, and for which scenarios.
+This is where the **test pyramid** comes in.
+
+---
+
+## 2. The Test Pyramid
+
+The test pyramid is a guideline that recommends the following structure:
+
+### Base: Unit Tests
+
+* The largest portion of your tests
+* Fast, cheap, and easy to write
+* Provide quick feedback
+* Ideal for testing logic, conditions, loops, and pure functions
+* Should cover most edge cases
+* Although they do not give high confidence in the full system, they are the foundation of your testing strategy
+
+### Middle: Integration Tests
+
+* A smaller portion than unit tests
+* Test the interaction between application code and external dependencies
+* Provide many of the benefits of end-to-end tests
+* Without the complexity and slowness of testing through the UI
+* Useful when your application reads from or writes to external systems
+
+### Top: End-to-End Tests
+
+* The smallest portion of your tests
+* Used only for the key user flows
+* Should test happy paths, not edge cases
+* Slow and brittle, so use them sparingly
+
+---
+
+## 3. The Pyramid Is a Guideline, Not a Rule
+
+The exact ratio of unit, integration, and end-to-end tests depends on:
+
+* The nature of your project
+* The complexity of your business logic
+* The amount of interaction with external systems
+
+Examples:
+
+* Applications with complex logic should rely heavily on unit tests
+* Applications focused mostly on reading and writing data may require more integration tests
+
+---
+
+## 4. Summary of Recommendations
+
+The test pyramid suggests three main practices:
+
+### 1. Favor Unit Tests
+
+* Fast, cheap, precise
+* Provide rapid feedback
+* Easy to maintain
+
+### 2. Use Integration Tests to Fill Gaps
+
+* Verify interactions with external systems
+* Cover areas unit tests cannot reach
+
+### 3. Use End-to-End Tests Sparingly
+
+* Only for major user flows
+* Avoid covering edge cases with E2E tests due to slowness and fragility
+
+---
+
+## Final Note
+
+The ideal balance between test types varies by project and team.
+Use your judgment to decide which parts of the application should be covered by which kind of test.
+
+---
