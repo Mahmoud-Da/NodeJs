@@ -576,3 +576,192 @@ if (!req.body.movieId)
 All tests pass successfully.
 
 ---
+
+*** 7- Refactoring Tests ***
+---
+
+# Lecture Notes: Refactoring Tests in TDD
+
+## 1. Importance of Tests
+
+* Tests are **first-class citizens** in your codebase.
+* They are **as important as production code**.
+* Always **refactor tests** to make them cleaner and reduce duplication.
+
+---
+
+## 2. Problem with Current Tests
+
+* Several lines are repeated in multiple tests:
+
+  * Generating authentication tokens.
+  * Sending requests with `supertest`.
+* This duplication makes tests harder to maintain.
+
+---
+
+## 3. Refactoring Strategy: Masha’s Technique
+
+1. Define the **happy path** for a request.
+2. For each test, **change only one parameter** to simulate an edge case.
+3. Use a helper function (`exec`) to encapsulate request logic:
+
+   * Sends the request.
+   * Accepts parameters like `customerId`, `movieId`, and `token`.
+   * Returns the response.
+
+---
+
+## 4. Implementing the Happy Path
+
+* At the top of the test suite, define the `exec` function:
+
+-------------------code----------------------
+let token;
+let customerId;
+let movieId;
+
+const exec = () => {
+  return request(server)
+    .post("/api/returns")
+    .set("x-auth-token", token)
+    .send({ customerId, movieId });
+};
+-------------------code----------------------
+
+* `beforeEach` sets **valid values** for happy path:
+
+-------------------code----------------------
+beforeEach(async () => {
+  server = require("../../index");
+
+  customerId = mongoose.Types.ObjectId();
+  movieId = mongoose.Types.ObjectId();
+
+  token = new User().generateAuthToken();
+
+  rental = new Rental({
+    customer: { _id: customerId, name: "12345", phone: "12345" },
+    movie: { _id: movieId, title: "12345", dailyRentalRate: 2 },
+  });
+  await rental.save();
+});
+-------------------code----------------------
+
+---
+
+## 5. Updating Tests
+
+* Replace repeated request logic with calls to `exec()`:
+
+  * **Authorization test:** remove token
+  * **Missing customer ID test:** set `customerId = ""` or delete from payload
+  * **Missing movie ID test:** set `movieId = ""` or delete from payload
+
+### Example:
+
+-------------------code----------------------
+it("should return 401 if client is not logged in", async () => {
+  token = "";
+  const res = await exec();
+  expect(res.status).toBe(401);
+});
+
+it("should return 400 if customer ID is not provided", async () => {
+  customerId = "";
+  const res = await exec();
+  expect(res.status).toBe(400);
+});
+
+it("should return 400 if movie ID is not provided", async () => {
+  movieId = "";
+  const res = await exec();
+  expect(res.status).toBe(400);
+});
+-------------------code----------------------
+
+* Optional approach: define a `payload` object and modify it per test:
+
+-------------------code----------------------
+let payload = { customerId, movieId };
+delete payload.customerId; // For missing customer ID test
+-------------------code----------------------
+
+---
+
+## 6. Next Steps
+
+* Implement further tests such as:
+
+  * **Return 404** if no rental is found for the given customer and movie combination.
+* This approach keeps tests **DRY**, readable, and easier to maintain.
+
+---
+
+# Refactored Test Code
+
+-------------------code----------------------
+const request = require("supertest");
+const mongoose = require("mongoose");
+const { Rental } = require("../../models/rental");
+const { User } = require("../../models/user");
+
+let server;
+let rental;
+let customerId;
+let movieId;
+let token;
+
+describe("/api/returns", () => {
+  const exec = () => {
+    return request(server)
+      .post("/api/returns")
+      .set("x-auth-token", token)
+      .send({ customerId, movieId });
+  };
+
+  beforeEach(async () => {
+    server = require("../../index");
+
+    customerId = mongoose.Types.ObjectId();
+    movieId = mongoose.Types.ObjectId();
+
+    token = new User().generateAuthToken();
+
+    rental = new Rental({
+      customer: { _id: customerId, name: "12345", phone: "12345" },
+      movie: { _id: movieId, title: "12345", dailyRentalRate: 2 },
+    });
+
+    await rental.save();
+  });
+
+  afterEach(async () => {
+    await server.close();
+    await Rental.deleteMany({});
+  });
+
+  it("should return 401 if client is not logged in", async () => {
+    token = "";
+    const res = await exec();
+    expect(res.status).toBe(401);
+  });
+
+  it("should return 400 if customer ID is not provided", async () => {
+    customerId = "";
+    const res = await exec();
+    expect(res.status).toBe(400);
+  });
+
+  it("should return 400 if movie ID is not provided", async () => {
+    movieId = "";
+    const res = await exec();
+    expect(res.status).toBe(400);
+  });
+
+  // Next exercise: implement test for 404 if no rental found
+});
+-------------------code----------------------
+
+---
+
