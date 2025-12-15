@@ -1345,3 +1345,157 @@ The next lecture will explain how to test exceptions.
 
 ---
 
+*** 13- Testing Exceptions ***
+---
+
+# Testing Exceptions in Unit Tests
+
+## 1. The Function Under Test
+
+We are testing the `registerUser` function, which behaves as follows:
+
+* It takes a `username`.
+* If `username` is **falsy**, it **throws an exception**.
+* Otherwise, it returns an object:
+
+-------------------code----------------------
+{ id: new Date().getTime(), username: username }
+-------------------code----------------------
+
+This means the function has **two execution paths**, so we need **at least two tests**.
+
+---
+
+# 2. Setting Up the Test Suite
+
+Add a new `describe` block for `registerUser`:
+
+-------------------code----------------------
+describe('registerUser', () => {
+});
+-------------------code----------------------
+
+---
+
+# 3. Test Case 1: Should Throw If Username Is Falsy
+
+### Falsy values in JavaScript include:
+
+* `null`
+* `undefined`
+* `NaN`
+* `''` (empty string)
+* `0`
+* `false`
+
+All of these must cause the function to throw an exception.
+
+### Incorrect approach (explained)
+
+Using something like:
+
+-------------------code----------------------
+const result = lib.registerUser(null);
+expect(result).toThrow();
+-------------------code----------------------
+
+does not work because:
+
+* We never get a `result` (the function throws before returning anything).
+* The `toThrow` matcher must be given a callback function, not a returned value.
+
+### Correct approach
+
+Wrap the function call inside an arrow function:
+
+-------------------code----------------------
+expect(() => { lib.registerUser(null); }).toThrow();
+-------------------code----------------------
+
+This allows Jest to check whether an exception is thrown.
+
+---
+
+## 3.1 Parameterized Testing (Manual Approach)
+
+Since Jest does not natively support parameterized tests at the time of recording, we manually loop over falsy values.
+
+Define an array of arguments:
+
+-------------------code----------------------
+const args = [null, undefined, NaN, '', 0, false];
+-------------------code----------------------
+
+Then loop:
+
+-------------------code----------------------
+args.forEach(a => {
+  expect(() => { lib.registerUser(a); }).toThrow();
+});
+-------------------code----------------------
+
+This keeps the test clean and avoids duplicating code in multiple `it` blocks.
+
+---
+
+## 3.2 About the Single Assertion Principle
+
+Some developers interpret the principle as allowing only one `expect` call per test.
+However, the principle refers to **logical assertions**, not the literal number of expectations.
+
+Here:
+
+* All falsy values represent one logical concept.
+* One test covering all falsy values is valid, clean, and avoids duplication.
+
+If someone prefers one `it` block per value, that is acceptable but unnecessary in this case.
+
+---
+
+# 4. Test Case 2: Should Return a Valid User Object (Happy Path)
+
+Test name:
+
+-------------------code----------------------
+it('should return a user object if valid username is passed', () => { ... })
+-------------------code----------------------
+
+### Steps:
+
+1. Call `registerUser` with a valid username:
+
+   -------------------code----------------------
+   const result = lib.registerUser('mosh');
+   -------------------code----------------------
+
+2. Use `toMatchObject` to check the `username`:
+
+   -------------------code----------------------
+   expect(result).toMatchObject({ username: 'mosh' });
+   -------------------code----------------------
+
+3. Assert that `id` is a positive number:
+
+   -------------------code----------------------
+   expect(result.id).toBeGreaterThan(0);
+   -------------------code----------------------
+
+We cannot test the exact value of `id` because it is based on the current timestamp, which varies between the function call and the assertion.
+
+These two assertions together test a single logical concept:
+The returned user object is valid.
+
+---
+
+# 5. Final Result: All Tests Passing
+
+After running:
+
+-------------------code----------------------
+npm test
+-------------------code----------------------
+
+All tests pass successfully.
+
+---
+
