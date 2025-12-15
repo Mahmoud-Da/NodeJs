@@ -107,3 +107,116 @@ Before starting integration tests for the Vidly application, several updates are
    * Temporarily disable the Winston MongoDB plugin by commenting out its configuration and transport setup.
 
 ---
+
+*** 3- Setting Up the Test Db ***
+---
+
+# Setting Up a Test Database for Integration Testing
+
+## 1. Why We Need a Separate Test Database
+
+* Integration tests use a real database.
+* These tests add and remove documents from the database.
+* Because of this behavior, the test database must be **separate** from both development and production databases.
+* This prevents accidental modification or corruption of real data.
+
+---
+
+## 2. Adding a Database Key to Configuration
+
+### Step 1: Modify `default.json`
+
+* Go to the `config` folder and open `default.json`.
+* Add a new key named `db`.
+* Set `db` to your default MongoDB connection string.
+* Ensure that no single quotes are used.
+
+**Example structure:**
+
+-------------------code----------------------
+{
+  "db": "mongodb://localhost/vidly"
+}
+-------------------code----------------------
+
+---
+
+## 3. Move the Connection String to Configuration
+
+* Open `db.js`.
+* Cut the MongoDB connection string from the file.
+* Paste it into `default.json` under the new `db` key.
+* This centralizes configuration and keeps environment settings clean.
+
+---
+
+## 4. Create a Test-Specific Configuration
+
+### Step 1: Modify `test.json`
+
+* Open `test.json` in the same configuration folder.
+* Copy the new `db` key from `default.json`.
+* Change the database name to something like `vidly_test`.
+
+**Example:**
+
+-------------------code----------------------
+"db": "mongodb://localhost/vidly_test"
+-------------------code----------------------
+
+This ensures tests run against a separate database.
+
+---
+
+## 5. Updating `db.js` to Use Environment-Based Configuration
+
+### Step 1: Load the Configuration Module
+
+* In `db.js`, add:
+
+  -------------------code----------------------
+  const config = require('config');
+  -------------------code----------------------
+* Replace hardcoded connection strings with:
+
+  -------------------code----------------------
+  config.get('db')
+  -------------------code----------------------
+
+### Step 2: Improve Code Clarity
+
+* Create a constant for the database connection:
+
+  -------------------code----------------------
+  const db = config.get('db');
+  -------------------code----------------------
+* Use this constant both when connecting and when logging the active database.
+
+---
+
+## 6. Verifying Environment-Based Database Selection
+
+* When running the application normally, it connects to the development database.
+* When running tests, it should connect to the test database.
+
+### Manual simulation:
+
+1. Set the environment variable:
+
+   -------------------code----------------------
+   NODE_ENV=test
+   -------------------code----------------------
+2. Run the app:
+
+   -------------------code----------------------
+   node index.js
+   -------------------code----------------------
+3. The console should show a connection to the test database.
+
+---
+
+## 7. Next Step
+
+* With the test database configured, the next lecture will focus on writing the first integration test.
+
+---
