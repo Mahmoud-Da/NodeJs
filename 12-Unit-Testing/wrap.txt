@@ -648,3 +648,153 @@ module.exports = {
 -------------------code----------------------
 
 ---
+
+
+*** 7- Testing Numbers ***
+---
+
+# Unit Testing the `absolute` Function
+
+## Lecture Notes
+
+### 1. Overview
+
+We are writing unit tests for the `absolute` function.
+The behavior of the function is as follows:
+
+* If the input number is positive → return the same number.
+* If the input number is negative → return its positive equivalent.
+* If the input is zero → return zero.
+
+The goal is to write tests that cover all execution paths.
+
+---
+
+## 2. Determining Number of Test Cases
+
+A general guideline:
+**Number of unit tests ≥ Number of execution paths**
+
+Execution paths in this function:
+
+1. Input is positive
+2. Input is negative
+3. Input is zero
+
+So we need at least three tests.
+
+---
+
+## 3. Writing Tests in `lib.test.js`
+
+### 3.1 Importing the Module
+
+-------------------code----------------------
+const lib = require('../lib');
+-------------------code----------------------
+
+### 3.2 First Test Case
+
+**Description:** Should return a positive number if input is positive.
+
+Use simple, non-magic numbers such as `1` instead of arbitrary values like `857`.
+
+-------------------code----------------------
+it('should return a positive number if input is positive', () => {
+    const result = lib.absolute(1);
+    expect(result).toBe(1);
+});
+-------------------code----------------------
+
+Run the test:
+
+-------------------code----------------------
+npm test
+-------------------code----------------------
+
+The test passes.
+
+---
+
+## 4. Jest Matcher Functions
+
+Jest provides various matchers used with `expect()`.
+Examples include:
+
+* `toBe`
+* `toEqual`
+* `toBeNull`
+* `toBeUndefined`
+* `toBeTruthy`
+* `toBeFalsy`
+* `toBeGreaterThan`
+* `toBeLessThan`
+* `toBeCloseTo` (important for floating point numbers)
+
+Floating point values should not use `toBe` or `toEqual` due to precision issues.
+
+---
+
+## 5. Completing All Test Cases
+
+### 5.1 Test for Negative Input
+
+-------------------code----------------------
+it('should return a positive number if input is negative', () => {
+    const result = lib.absolute(-1);
+    expect(result).toBe(1);
+});
+-------------------code----------------------
+
+### 5.2 Test for Zero Input
+
+-------------------code----------------------
+it('should return 0 if input is 0', () => {
+    const result = lib.absolute(0);
+    expect(result).toBe(0);
+});
+-------------------code----------------------
+
+Run the test suite again:
+
+-------------------code----------------------
+npm test
+-------------------code----------------------
+
+All three tests should pass.
+
+---
+
+## 6. Demonstrating a Failing Test
+
+If we intentionally change the expected value in the zero-input test:
+
+-------------------code----------------------
+expect(result).toBe(1);
+-------------------code----------------------
+
+Then run the test suite:
+
+-------------------code----------------------
+npm test
+-------------------code----------------------
+
+Jest output will show:
+
+* Expected: 1
+* Received: 0
+
+Use these messages to identify whether the error is in the test or the production code.
+
+---
+
+## 7. Summary
+
+* The `absolute` function has three execution paths.
+* We wrote three unit tests to cover each path.
+* Jest matchers help verify correct behavior.
+* Jest error outputs are essential for debugging failing tests.
+
+The next lecture covers grouping tests.
+
+---
