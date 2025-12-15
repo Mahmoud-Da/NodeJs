@@ -861,4 +861,88 @@ After running the tests, all tests pass successfully.
 
 ---
 
-If you need the full before-and-after code comparison, I can prepare that as well.
+*** 9- Testing the Authorization ***
+
+---
+
+# Testing the Route Handler for Creating a New Genre
+
+### Endpoint: `POST /api/genres`
+
+---
+
+## 1. Determining the Number of Tests
+
+A test suite must include at least as many tests as the number of execution paths in the route handler.
+
+### Execution paths:
+
+1. **User not logged in**
+   Should return `401 Unauthorized`.
+
+2. **Invalid genre (fails validation)**
+   Should return `400 Bad Request`.
+
+3. **Valid genre**
+   This requires two separate tests:
+
+   * Ensure the genre is saved in the database.
+   * Ensure the created genre is returned in the response body.
+
+Total tests needed: **4**
+
+---
+
+## 2. Creating the Test Suite
+
+In the test file, create a new `describe` block for:
+
+-------------------code----------------------
+POST /api/genres
+-------------------code----------------------
+
+---
+
+## 3. First Test: Unauthorized Access
+
+### Goal:
+
+Verify that the endpoint returns `401` if the client is not logged in.
+
+### Steps:
+
+1. Use `request(server)` to call the endpoint.
+2. Use `.post("/api/genres")`.
+3. Send a genre object:
+
+   -------------------code----------------------
+   { name: "genre1" }
+   -------------------code----------------------
+4. Expect the status to be `401`.
+
+### Important:
+
+The test function must be `async` because the post operation returns a promise.
+
+---
+
+## 4. Example Test Code (First Test)
+
+-------------------code----------------------
+it("should return 401 if client is not logged in", async () => {
+  const res = await request(server)
+    .post("/api/genres")
+    .send({ name: "genre1" });
+
+  expect(res.status).toBe(401);
+});
+-------------------code----------------------
+
+---
+
+## 5. Result
+
+After adding `async` and saving, running the test confirms that it passes successfully.
+
+---
+
