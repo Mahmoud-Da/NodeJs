@@ -1,0 +1,213 @@
+*** 1- Introduction ***
+### Lecture Notes: Handling Unexpected Errors in Node.js and MongoDB (Vid.ly App)
+
+---
+
+#### 1. **Introduction**
+
+In the current implementation of the Vid.ly application, the system assumes an *ideal environment* where all operations succeed.
+However, in real-world applications, unexpected errors are inevitable — for example, the MongoDB connection might drop unexpectedly.
+
+To build a reliable application, it is crucial to:
+
+* Handle unexpected situations gracefully.
+* Send meaningful error responses to the client.
+* Log exceptions on the server for future debugging and improvement.
+
+---
+
+#### 2. **Demonstration of a Real-World Scenario**
+
+**Setup:**
+
+* The application runs with **Nodemon**.
+* MongoDB server (`mongod`) runs in another terminal, listening on port `27017`.
+* A **GET** request is sent from **Postman** to `/api/genres`.
+
+**Normal Behavior:**
+
+* The request returns a `200` response as expected.
+
+**Simulated Failure:**
+
+1. The MongoDB process is stopped using `Ctrl + C`.
+2. A new GET request to `/api/genres` is sent.
+3. The request hangs for about **30 seconds**.
+4. The server terminal displays an **error message**:
+
+   -------------------code----------------------
+   UnhandledPromiseRejectionWarning: Unhandled promise rejection.
+   Failed to reconnect after 30 attempts with interval 1000 milliseconds.
+   -------------------code----------------------
+
+---
+
+#### 3. **MongoDB Driver Behavior**
+
+* By default, if a MongoDB connection fails, the driver retries **30 times**, with **1-second intervals** between attempts.
+* After 30 failed attempts, it throws an *unhandled promise rejection*.
+
+---
+
+#### 4. **Deprecation Warning and Node.js Behavior**
+
+A warning appears:
+
+-------------------code----------------------
+DeprecationWarning: Unhandled promise rejections are deprecated.
+In the future, unhandled rejections will terminate the Node.js process with a non-zero exit code.
+-------------------code----------------------
+
+**Implication:**
+
+* Future versions of Node.js will automatically terminate the process if an unhandled promise rejection occurs.
+* If the MongoDB server goes down temporarily (e.g., for 1 minute) and then restarts, the Node.js server will have already stopped and won’t be able to handle new client requests.
+
+---
+
+#### 5. **Why Proper Error Handling Matters**
+
+* Without proper handling, a **temporary database outage** can completely **crash the Node process**.
+* This means users will experience downtime, even if the database becomes available again shortly afterward.
+
+---
+
+#### 6. **Goal for This Section**
+
+You will learn how to:
+
+* Handle errors from MongoDB and other sources gracefully.
+* Prevent the Node process from terminating unexpectedly.
+* Log exceptions in a structured way for analysis.
+* Maintain application availability during transient failures.
+
+---
+
+#### 7. **Key Takeaways**
+
+* Always anticipate unexpected failures (database, network, etc.).
+* Never leave promises unhandled.
+* Implement global error handling to prevent server crashes.
+* Log all exceptions for monitoring and improvement.
+* Aim for fault-tolerant and resilient application design.
+
+#### 8. how to run mango demon in split terminal?
+
+To **run the MongoDB daemon (`mongod`) in a split terminal** while working on your Node.js app, follow these steps depending on your setup:
+
+---
+
+### **1. If You’re Using VS Code**
+
+#### **Step-by-step:**
+
+1. **Open the integrated terminal**
+   Press <kbd>Ctrl</kbd> + <kbd>`</kbd> (backtick) or go to
+   **View → Terminal**.
+
+2. **Split the terminal**
+   Click the **split terminal icon** (looks like two rectangles side by side), or press:
+
+   -------------------code----------------------
+   Ctrl + Shift + 5  (Windows/Linux)
+   Cmd + Shift + 5   (macOS)
+   -------------------code----------------------
+
+3. **In the first terminal**, start your Node.js app:
+
+   -------------------code----------------------
+   npm start
+   -------------------code----------------------
+
+   or if using Nodemon:
+
+   -------------------code----------------------
+   nodemon index.js
+   -------------------code----------------------
+
+4. **In the second terminal**, start the MongoDB daemon:
+
+   -------------------code----------------------
+   mongod
+   -------------------code----------------------
+
+   This will start MongoDB’s background service, usually listening on port `27017`.
+
+---
+
+### **2. If You’re Using a System Installation (Mac/Linux/Windows)**
+
+#### **Check if `mongod` is available**
+
+-------------------code----------------------
+mongod --version
+-------------------code----------------------
+
+If it’s not found, you need to install MongoDB:
+
+* **macOS (Homebrew):**
+
+  -------------------code----------------------
+  brew services start mongodb-community@6.0
+  -------------------code----------------------
+* **Ubuntu/Debian:**
+
+  -------------------code----------------------
+  sudo systemctl start mongod
+  -------------------code----------------------
+* **Windows (using MongoDB Shell):**
+
+  * Open a **new terminal** or **PowerShell** window.
+  * Navigate to the MongoDB `bin` folder (e.g., `C:\Program Files\MongoDB\Server\6.0\bin`)
+  * Run:
+
+    -------------------code----------------------powershell
+    mongod
+    -------------------code----------------------
+
+---
+
+### **3. Using Two Tabs Instead of Split View (Optional)**
+
+If your terminal doesn’t support splits:
+
+* Open two terminal **tabs** or **windows**.
+* In the first, run `mongod`.
+* In the second, run your Node.js app.
+
+---
+
+### **4. Common Troubleshooting**
+
+* **Port in use error**:
+
+  -------------------code----------------------
+  Address already in use on port 27017
+  -------------------code----------------------
+
+  → MongoDB may already be running. Check with:
+
+  -------------------code----------------------
+  ps aux | grep mongod
+  -------------------code----------------------
+
+  or stop it first:
+
+  -------------------code----------------------
+  brew services stop mongodb-community@6.0
+  -------------------code----------------------
+
+* **Data directory missing error**:
+
+  -------------------code----------------------
+  data/db not found
+  -------------------code----------------------
+
+  → Create it manually:
+
+  -------------------code----------------------
+  mkdir -p /data/db
+  sudo chown -R $(whoami) /data/db
+  -------------------code----------------------
+
+---
