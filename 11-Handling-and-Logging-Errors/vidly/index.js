@@ -5,10 +5,10 @@ require("winston-mongodb");
 const winston = require("winston");
 const Joi = require("joi");
 Joi.objectId = require("joi-objectid")(Joi);
-const mongoose = require("mongoose");
 const express = require("express");
 const app = express();
 require("./startup/routes")(app);
+require("./startup/db")();
 
 process.on("uncaughtException", (exception) => {
   console.log("We got an uncaught exception");
@@ -33,11 +33,6 @@ winston.add(
     collection: "log", // optional: name of log collection
   })
 );
-
-mongoose
-  .connect("mongodb://localhost/vidly")
-  .then(() => console.log("Connected to MongoDB..."))
-  .catch((err) => console.error("Could not connect to MongoDB..."));
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`Listening on port ${port}...`));
