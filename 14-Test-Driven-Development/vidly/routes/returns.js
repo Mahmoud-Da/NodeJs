@@ -1,4 +1,3 @@
-const moment = require("moment");
 const validate = require("../middleware/validate");
 const { Rental } = require("../models/rental");
 const { Movie } = require("../models/movie");
@@ -17,8 +16,7 @@ router.post("/", [auth, validate(validateReturn)], async (req, res) => {
 
   rental.dateReturned = new Date();
 
-  const rentalDays = moment().diff(rental.dateOut, "days");
-  rental.rentalFee = rentalDays * rental.movie.dailyRentalRate;
+  rental.return();
   await rental.save();
 
   await Movie.update(
