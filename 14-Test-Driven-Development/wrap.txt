@@ -1162,3 +1162,109 @@ Where:
 * All tests should pass.
 
 
+*** 13- Testing the Movie Stock ***
+---
+
+# Test-Driven Development Lecture Notes
+
+### Increasing Movie Stock When Processing a Return
+
+## 1. Preparing the Movie in `beforeEach`
+
+* Before sending the request, the movie must already exist in the database.
+* This allows the test to verify that the movie stock increases by one.
+
+### Steps:
+
+1. Define a `movie` variable at the top of the test file.
+2. In `beforeEach`, initialize it:
+
+   * Set `_id` to the same `movieId` used in the rental.
+   * Set `title` to a placeholder value.
+   * Set `dailyRentalRate` to `2`.
+   * Set `genre` with a required name field.
+   * Set `numberInStock` to `10`.
+3. Save the movie and await the operation.
+
+---
+
+## 2. Writing the Test
+
+* Duplicate the previous test and rename it:
+  **"it should increase the movie stock"**.
+* Remove any irrelevant setup lines from the duplicated test.
+* Import the Movie model at the top of the test file.
+* Replace rental lookup with a movie lookup:
+
+-------------------code----------------------
+const movieInDb = await Movie.findById(movieId);
+-------------------code----------------------
+
+* Assert that `numberInStock` has increased by one:
+
+  -------------------code----------------------
+  expect(movieInDb.numberInStock).toBe(11);
+  -------------------code----------------------
+
+### Alternative Assertion
+
+To avoid a magic number inside the expectation:
+
+-------------------code----------------------
+expect(movieInDb.numberInStock).toBe(movie.numberInStock + 1);
+-------------------code----------------------
+
+This makes the intention clearer.
+
+---
+
+## 3. Running the Test
+
+* Save and run the test suite.
+* The test should fail, which is the correct behavior at this stage.
+
+---
+
+## 4. Implementing the Production Code
+
+* Open the return route handler.
+* Import the Movie model.
+* After saving the rental changes, update the movie stock.
+
+### Using the update-first approach:
+
+-------------------code----------------------
+await Movie.update(
+  { _id: rental.movie._id },
+  {
+    $inc: { numberInStock: 1 }
+  }
+);
+-------------------code----------------------
+
+* The important detail: this operation returns a promise.
+  You must use `await` or the test will read the old value before the update completes.
+
+---
+
+## 5. Fixing the Bug
+
+* If the test shows that stock remains `10`, it means the update was not awaited.
+* Adding `await` ensures the stock is incremented before returning the response.
+
+---
+
+## 6. Cleaning Up
+
+* After adding movies in `beforeEach`, ensure you delete them in `afterEach`:
+
+  -------------------code----------------------
+  await Movie.remove({});
+  -------------------code----------------------
+
+---
+
+## 7. Next Exercise
+
+**Implement the last test case:**
+When a return is processed successfully, the API should return the rental object in the body of the response.
