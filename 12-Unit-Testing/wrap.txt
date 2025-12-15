@@ -700,7 +700,7 @@ const lib = require('../lib');
 Use simple, non-magic numbers such as `1` instead of arbitrary values like `857`.
 
 -------------------code----------------------
-it('should return a positive number if input is positive', () => {
+test('absolute - should return a positive number if input is positive', () => {
     const result = lib.absolute(1);
     expect(result).toBe(1);
 });
@@ -740,7 +740,7 @@ Floating point values should not use `toBe` or `toEqual` due to precision issues
 ### 5.1 Test for Negative Input
 
 -------------------code----------------------
-it('should return a positive number if input is negative', () => {
+test('absolute - should return a positive number if input is negative', () => {
     const result = lib.absolute(-1);
     expect(result).toBe(1);
 });
@@ -749,7 +749,7 @@ it('should return a positive number if input is negative', () => {
 ### 5.2 Test for Zero Input
 
 -------------------code----------------------
-it('should return 0 if input is 0', () => {
+test('absolute - should return 0 if input is 0', () => {
     const result = lib.absolute(0);
     expect(result).toBe(0);
 });
@@ -798,3 +798,85 @@ Use these messages to identify whether the error is in the test or the productio
 The next lecture covers grouping tests.
 
 ---
+
+
+*** 8- Grouping Tests ***
+---
+
+# Grouping Unit Tests with `describe`
+
+## 1. Importance of Clean and Maintainable Tests
+
+As the number of tests increases, organizing them becomes essential.
+Tests should be treated as first-class citizens in your codebase, meaning they are as important as production code.
+
+Poorly structured tests become difficult to maintain and understand. In many cases, poorly written tests can be worse than having no tests at all.
+
+---
+
+## 2. Using `describe` to Group Related Tests
+
+Jest (and Jasmine) provide a `describe` function that allows grouping related tests.
+Since all current tests are for the `absolute` function, they should be grouped under a single `describe` block.
+
+### Example Structure
+
+-------------------code----------------------
+describe('absolute', () => {
+    // tests go here
+});
+-------------------code----------------------
+
+Inside this block you place all tests related to the `absolute` function.
+
+---
+
+## 3. Cleaning Test Names
+
+After moving tests inside the `describe` block, you no longer need to repeat the function name in each test title.
+
+Before grouping:
+
+* absolute should return a positive number if input is positive
+* absolute should return a positive number if input is negative
+
+After grouping:
+
+* should return a positive number if input is positive
+* should return a positive number if input is negative
+
+This makes the test suite read more naturally.
+
+---
+
+## 4. Using `it` Instead of `test`
+
+Jest provides both `test` and `it`.
+Using `it` often makes tests read like plain English when combined with a `describe` block.
+
+Example:
+
+-------------------code----------------------
+describe('absolute', () => {
+    it('should return a positive number if input is positive', () => { ... });
+    it('should return a positive number if input is negative', () => { ... });
+});
+-------------------code----------------------
+
+This results in a clear and expressive test suite.
+
+---
+
+## 5. Final Reading Flow
+
+When properly grouped, the test file reads naturally:
+
+* describing absolute
+* it should return a positive number if input is positive
+* it should return a positive number if input is negative
+* it should return zero if input is zero
+
+This structure makes tests easier to follow, maintain, and extend.
+
+---
+
