@@ -655,3 +655,136 @@ module.exports = router;
   * A centralized error handler (in `error.js`).
   * A reusable async wrapper (in `async.js`).
   * Clean route handlers free of redundant try-catch logic.
+
+
+*** 5- Express Async Errors ***
+### Lecture Notes: Simplifying Async Error Handling with `express-async-errors`
+
+---
+
+#### 1. Background
+
+* In the previous lecture, we created a custom `asyncMiddleware` function to handle asynchronous errors.
+* This solved the problem of repetitive `try-catch` blocks but introduced another issue:
+
+  * We had to **remember to wrap every route handler** with `asyncMiddleware`.
+  * This added extra code noise and slightly reduced readability.
+
+---
+
+#### 2. Goal
+
+* To **simplify the code further** by eliminating the need to manually wrap route handlers.
+* We will use an existing **npm module** that automatically handles async errors in Express route handlers.
+
+---
+
+#### 3. Introducing the `express-async-errors` Module
+
+* This module automatically patches Express to catch errors from asynchronous route handlers.
+* It works by **monkey patching** Express’s internal behavior at runtime.
+* Once imported, it wraps all async route handlers internally, so we don’t have to use our custom wrapper.
+
+---
+
+#### 4. Installing the Module
+
+In the terminal, run:
+
+-------------------code----------------------bash
+npm install express-async-errors
+-------------------code----------------------
+
+**Note:**
+
+* Be careful not to confuse it with a similar package called `express-async-error`.
+* We are using `express-async-errors` (plural).
+* Version used in the lecture: **2.1.0**
+
+---
+
+#### 5. Using the Module
+
+In your main application file (`index.js`):
+
+-------------------code----------------------
+require('express-async-errors');
+-------------------code----------------------
+
+**Explanation:**
+
+* You don’t need to assign the result to a constant.
+* Just importing it is enough to enable its functionality.
+* This must be done **at the start** of your application so it patches Express early.
+
+---
+
+#### 6. Simplifying Route Handlers
+
+Now that `express-async-errors` is installed and loaded:
+
+* You can remove the custom `asyncMiddleware` wrapper entirely.
+* Your route handlers can return to their original, simpler form.
+
+**Before (with asyncMiddleware):**
+
+-------------------code----------------------
+router.get('/', asyncMiddleware(async (req, res) => {
+  const genres = await Genre.find();
+  res.send(genres);
+}));
+-------------------code----------------------
+
+**After (with express-async-errors):**
+
+-------------------code----------------------
+router.get('/', async (req, res) => {
+  const genres = await Genre.find();
+  res.send(genres);
+});
+-------------------code----------------------
+
+**Also:**
+
+* Remove the `require('../middleware/async')` line at the top of your file.
+* The routes are now cleaner and more readable.
+
+---
+
+#### 7. Testing the Implementation
+
+**Steps:**
+
+1. Start MongoDB (`mongod`).
+2. Run your application.
+3. Test the endpoint (e.g., `GET /api/genres`) using Postman — it should return the expected data.
+4. Stop MongoDB to simulate a database failure.
+5. Send the same request again.
+
+**Expected Result:**
+
+* You should receive a **500 Internal Server Error** response.
+* The global error-handling middleware in your app will handle and respond to the error automatically.
+
+---
+
+#### 8. Summary
+
+* The `express-async-errors` module eliminates the need for manual `try-catch` or custom async wrappers.
+* It provides a **cleaner and more maintainable** way to handle async errors in Express.
+* Recommended approach:
+
+  * Use `express-async-errors` for simplicity.
+  * If it does not work properly in your environment, fall back to using your custom `asyncMiddleware` function.
+
+---
+
+#### 9. Final Recommendation
+
+* For most modern Express applications, **`express-async-errors`** is the preferred solution for handling asynchronous errors.
+* It offers:
+
+  * **Less boilerplate**
+  * **Better readability**
+  * **Automatic error propagation** to centralized middleware
+* Keep the `asyncMiddleware` file as a **backup** in case you encounter compatibility issues in the future.
