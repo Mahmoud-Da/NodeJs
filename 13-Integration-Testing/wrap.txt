@@ -220,3 +220,175 @@ This ensures tests run against a separate database.
 * With the test database configured, the next lecture will focus on writing the first integration test.
 
 ---
+
+
+*** 4- Your First Integration Test ***
+
+# Writing Integration Tests with Supertest
+
+## 1. Installing Supertest
+
+* Integration tests for Express applications require a library called **supertest**.
+* Supertest allows sending HTTP requests to your endpoints programmatically, similar to Postman.
+* Install it as a development dependency:
+  `npm install supertest --save-dev`
+* The version used in the lecture is 3.0.0.
+
+---
+
+## 2. Exporting the Server from index.js
+
+* Open `index.js`.
+* The `app.listen()` call returns a server object.
+* Store the returned object in a variable, for example:
+
+  -------------------code----------------------
+  const server = app.listen(...)
+  -------------------code----------------------
+* Export the server:
+
+  -------------------code----------------------
+  module.exports = server;
+  -------------------code----------------------
+* This allows test files to load and control the server instance.
+
+---
+
+## 3. Creating the Integration Test Structure
+
+### Step 1: Create a Test Directory
+
+* Inside the `tests` folder, create a new folder named `integration`.
+* Inside that folder, create a test file:
+
+  -------------------code----------------------
+  genres.test.js
+  -------------------code----------------------
+
+### Step 2: Create the Test Suite Structure
+
+* Start with a top-level describe block:
+
+  -------------------code----------------------
+  describe('/api/genres', () => { ... });
+  -------------------code----------------------
+
+* Inside it, add another describe block for GET requests:
+
+  -------------------code----------------------
+  describe('GET /', () => { ... });
+  -------------------code----------------------
+
+* Inside this block, write your test:
+
+  -------------------code----------------------
+  it('should return all genres', () => { ... });
+  -------------------code----------------------
+
+---
+
+## 4. Loading and Managing the Server in Tests
+
+### Problem
+
+* If the server is loaded globally, Jest will restart tests after code changes.
+* This causes an error because the server is already listening on port 3000.
+
+### Solution
+
+* Load the server inside a `beforeEach` block.
+* Close the server in an `afterEach` block.
+
+### Example:
+
+-------------------code----------------------
+let server;
+
+beforeEach(() => {
+  server = require('../../../index');
+});
+
+afterEach(() => {
+  server.close();
+});
+-------------------code----------------------
+
+This ensures:
+
+* A fresh server instance is used for each test.
+* No port conflicts occur.
+
+---
+
+## 5. Using Supertest
+
+### Step 1: Import Supertest
+
+-------------------code----------------------
+const request = require('supertest');
+-------------------code----------------------
+
+### Step 2: Sending a Request
+
+* The `request()` function takes the server object.
+* You can then chain request methods such as `.get()`, `.post()`, `.put()`, `.delete()`.
+
+### Example GET request:
+
+-------------------code----------------------
+const res = await request(server).get('/api/genres');
+-------------------code----------------------
+
+* Since `await` is used, the test function must be marked as `async`.
+
+---
+
+## 6. Making Assertions
+
+* A simple initial assertion is to check the response status:
+
+  -------------------code----------------------
+  expect(res.status).toBe(200);
+  -------------------code----------------------
+
+* Running the test:
+
+  -------------------code----------------------
+  npm test
+  -------------------code----------------------
+
+* If everything is set up correctly, tests will pass and the GET endpoint will be successfully called.
+
+-------------------code----------------------
+const request = require("supertest");
+let server;
+
+describe("/api/genres", () => {
+  beforeEach(() => {
+    server = require("../../index");
+  });
+
+  afterEach(() => {
+    server.close();
+  });
+
+  describe("GET /", () => {
+    it("should return all genres", async () => {
+      const res = await request(server).get("/api/genres");
+      expect(res.status).toBe(200);
+    });
+  });
+});
+-------------------code----------------------
+
+---
+
+## 7. Next Steps
+
+* This first test only checks the status code.
+* It does not verify whether the response actually contains genres.
+* In the next lecture, the test database will be pre-populated with sample genres.
+* The test will then be updated to confirm that the returned genres match the data stored in the database.
+
+---
+
