@@ -770,3 +770,95 @@ In the next lecture, this logic will be refactored into a reusable middleware fu
 
 ---
 
+*** 8- Refactoring with Confidence ***
+---
+
+# Refactoring ObjectId Validation Into a Middleware
+
+## 1. Goal
+
+Move the repeated ObjectId validation logic into a dedicated middleware function so it can be reused across multiple routes.
+
+---
+
+## 2. Creating the Middleware File
+
+### Location:
+
+`middleware/validateObjectId.js`
+
+### Steps:
+
+1. Inside the `middleware` folder, create a new file named `validateObjectId.js`.
+
+2. Export a middleware function with the standard signature:
+
+   -------------------code----------------------
+   module.exports = function (req, res, next) { ... }
+   -------------------code----------------------
+
+3. Move the validation logic from the route handler into this middleware.
+
+---
+
+## 3. Middleware Implementation
+
+### Function behavior:
+
+* If the route parameter `id` is not a valid MongoDB ObjectId:
+  Return a 404 response.
+* Otherwise:
+  Call `next()` to pass control to the next middleware or route handler.
+
+### Required dependency:
+
+Since the logic uses Mongoose validation, import Mongoose at the top.
+
+---
+
+## 4. Updated Middleware Code
+
+-------------------code----------------------
+const mongoose = require("mongoose");
+
+module.exports = function (req, res, next) {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id))
+    return res.status(404).send("Invalid ID");
+
+  next();
+};
+-------------------code----------------------
+
+---
+
+## 5. Applying the Middleware in the Route
+
+### Steps:
+
+1. Import the middleware at the top of the genres route file:
+
+   -------------------code----------------------
+   const validateObjectId = require("../middleware/validateObjectId");
+   -------------------code----------------------
+
+2. Apply it in the route definition:
+
+   -------------------code----------------------
+   router.get("/:id", validateObjectId, async (req, res) => {
+     const genre = await Genre.findById(req.params.id);
+     if (!genre) return res.status(404).send("Genre not found");
+     res.send(genre);
+   });
+   -------------------code----------------------
+
+---
+
+## 6. Verifying With Tests
+
+Because the integration tests cover all execution paths, saving and running the test suite will confirm that the refactor did not break anything.
+
+After running the tests, all tests pass successfully.
+
+---
+
+If you need the full before-and-after code comparison, I can prepare that as well.
