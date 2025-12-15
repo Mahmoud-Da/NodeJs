@@ -913,3 +913,52 @@ it("should return 400 if a return is already processed", async () => {
 * Implement the test case for **Return 200** when a valid request is received.
 
 ---
+
+*** 10- Testing the Valid Request ***
+---
+
+### Lecture Topic: TDD – Handling Valid Return Requests
+
+**1. Objective:**
+
+* Test case: Return **200** if we have a valid request.
+
+**2. Steps to Implement the Test Case:**
+
+1. Duplicate the last test.
+2. Set the test title: `should return 200 if we have a valid request`.
+3. Remove unnecessary lines from the previous test.
+4. Send a valid request and assert that the response status is **200**.
+
+**3. Observations in Terminal:**
+
+* Initial failing test appears (expected, since route logic is not complete).
+
+**4. Simplest Route Handler Logic to Pass Test:**
+
+1. Check if the rental is already processed.
+2. If not, it is a valid request → return:
+
+   -------------------code----------------------
+   res.status(200).send();
+   -------------------code----------------------
+
+   * **Important:** Always call `send()` to actually return a response.
+
+**5. Handling Authorization:**
+
+* After implementing the 200 response, the first test for authentication fails (should return **401** for unauthenticated clients).
+* Fix: Import and apply authorization middleware:
+
+  -------------------code----------------------
+  const auth = require('../middleware/auth');
+  router.post('/', auth, async (req, res) => { ... });
+  -------------------code----------------------
+* After adding middleware, all tests should pass.
+
+**6. Next Exercise:**
+
+* When processing a return, ensure that the `dateReturned` is **set on the rental object**.
+* Solution will be provided next.
+
+---
