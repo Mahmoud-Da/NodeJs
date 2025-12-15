@@ -503,3 +503,155 @@ To improve **separation of concerns**, move the error-handling logic to its own 
 * This repetition can be avoided by improving the design further.
 * The next lecture will cover how to **eliminate repetitive try-catch blocks** and make error handling even cleaner.
 
+*** 4- Removing Try Catch Blocks ***
+### Lecture Notes: Eliminating Repetitive Try-Catch Blocks Using Async Middleware in Express
+
+---
+
+#### 1. Problem with Repetitive Try-Catch Blocks
+
+* Each route handler currently uses its own `try-catch` block to handle errors.
+* This leads to:
+
+  * **Repetition**: The same pattern appears in every route handler.
+  * **Code clutter**: It distracts from the actual business logic of each route.
+* The goal is to **remove repetitive try-catch logic** and handle it in one reusable function.
+
+---
+
+#### 2. Introducing the Async Middleware Pattern
+
+* The idea is to create a **higher-order function** that wraps route handlers.
+* This wrapper automatically catches errors and forwards them to the centralized error-handling middleware.
+
+---
+
+#### 3. Defining the Async Middleware Function
+
+We start by creating a template function for handling async route functions:
+
+-------------------code----------------------
+function asyncMiddleware(handler) {
+  return async (req, res, next) => {
+    try {
+      await handler(req, res);
+    } catch (ex) {
+      next(ex);
+    }
+  };
+}
+-------------------code----------------------
+
+**Explanation:**
+
+* The function `asyncMiddleware` takes a **route handler function** (`handler`) as an argument.
+* It **returns a new function** that Express can call as a route handler.
+* This returned function:
+
+  * Accepts `(req, res, next)` — the standard Express parameters.
+  * Executes the given handler inside a `try` block.
+  * If an exception occurs, it automatically calls `next(ex)` to pass the error to the global error handler.
+
+---
+
+#### 4. Why We Return a Function
+
+* In Express, when we define a route:
+
+  -------------------code----------------------
+  router.get('/', (req, res) => { ... });
+  -------------------code----------------------
+
+  we **pass a reference** to a handler function.
+* Express itself calls that handler later and injects `req`, `res`, and `next`.
+* Therefore, our middleware must **return** a function that Express can call later — not call it immediately.
+* The `asyncMiddleware` serves as a **factory function**, producing a handler that Express can invoke.
+
+---
+
+#### 5. Using the Async Middleware in a Route
+
+Instead of writing:
+
+-------------------code----------------------
+router.get('/', async (req, res, next) => {
+  try {
+    const genres = await Genre.find();
+    res.send(genres);
+  } catch (ex) {
+    next(ex);
+  }
+});
+-------------------code----------------------
+
+We can now simplify it to:
+
+-------------------code----------------------
+router.get('/', asyncMiddleware(async (req, res) => {
+  const genres = await Genre.find();
+  res.send(genres);
+}));
+-------------------code----------------------
+
+**Benefits:**
+
+* No need to manually handle `try-catch` in each route.
+* Cleaner and more readable route handlers.
+* Errors are still properly forwarded to the central error middleware.
+
+---
+
+#### 6. Moving the Middleware to a Separate Module
+
+To make this utility reusable, we extract it into its own file.
+
+**File:** `middleware/async.js`
+
+-------------------code----------------------
+module.exports = function (handler) {
+  return async (req, res, next) => {
+    try {
+      await handler(req, res);
+    } catch (ex) {
+      next(ex);
+    }
+  };
+};
+-------------------code----------------------
+
+**Usage in a Route File (e.g., `genres.js`):**
+
+-------------------code----------------------
+const express = require('express');
+const router = express.Router();
+const asyncMiddleware = require('../middleware/async');
+
+router.get('/', asyncMiddleware(async (req, res) => {
+  const genres = await Genre.find();
+  res.send(genres);
+}));
+
+module.exports = router;
+-------------------code----------------------
+
+---
+
+#### 7. Benefits of This Approach
+
+* **Removes repetitive try-catch blocks** from route handlers.
+* **Improves readability**: The core logic of each route is clearer.
+* **Promotes reuse**: The same `asyncMiddleware` function can be used across all routes.
+* **Maintains centralized error handling**: All exceptions are still routed through the global error middleware.
+
+---
+
+#### 8. Summary
+
+* We introduced an **async middleware** function that wraps route handlers.
+* It automatically handles exceptions by passing them to Express’s error middleware.
+* This approach enhances code **cleanliness**, **reusability**, and **maintainability**.
+* The application now has:
+
+  * A centralized error handler (in `error.js`).
+  * A reusable async wrapper (in `async.js`).
+  * Clean route handlers free of redundant try-catch logic.
