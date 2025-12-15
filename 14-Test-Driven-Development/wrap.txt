@@ -962,3 +962,98 @@ it("should return 400 if a return is already processed", async () => {
 * Solution will be provided next.
 
 ---
+
+*** 11- Testing the ReturnDate ***
+---
+
+# Test-Driven Development Lecture Notes
+
+### Setting the Return Date and Preparing the Next Exercise
+
+## 1. Duplicating the Test
+
+* Create a new test with the title:
+  **"it should set the return date if input is valid"**.
+* In this test, send a valid request to the return endpoint.
+
+## 2. Reloading the Rental Document
+
+* After executing the request, load the updated rental from the database:
+
+  * Use `Rental.findById(rental._id)` and store the result in `rentalInDb`.
+  * Do not rely on the in-memory `rental` object because the database has been modified elsewhere.
+
+## 3. Initial Assertion (General)
+
+* Assert that `rentalInDb.dateReturned` is defined.
+* This is intentionally general, because the property could be set to an incorrect value such as a boolean or a number.
+-------------------code----------------------
+it("should return returnDate if input is valid", async () => {
+    const res = await exec();
+
+    const rentalInDb = await Rental.findById(rental._id);
+    const diff = new Date() - rentalInDb.dateReturned;
+    expect(diff).toBeLessThan(10 * 1000);
+  });
+-------------------code----------------------
+## 4. Running the Test
+
+* Save and run the test; it will fail as expected.
+
+## 5. Writing Minimal Production Code
+
+* In the route handler, set:
+
+  -------------------code----------------------
+  rental.dateReturned = 1;
+  await rental.save();
+  -------------------code----------------------
+* Run the test again; it will pass.
+* This demonstrates why the original assertion is too general.
+
+## 6. Improving the Assertion
+
+* In production, `dateReturned` must be set to the current time.
+* In tests, you cannot assert the exact timestamp because the test time and production time will differ.
+* Proper approach:
+
+  * Compute `Date.now() - rentalInDb.dateReturned`.
+  * Assert that the difference is less than a threshold, such as 10 seconds.
+  * This covers worst-case situations where the test execution is slow.
+
+## 7. Updating Production Code
+
+* Replace the incorrect placeholder:
+
+  -------------------code----------------------
+  rental.dateReturned = new Date();
+  -------------------code----------------------
+* Save and run tests again; all tests should pass.
+
+---
+
+# Next Exercise
+
+Write a new test case for the next requirement:
+
+### **Requirement**
+
+When processing a valid return request:
+
+* The system must calculate and set the **rental fee**.
+
+### **Definition**
+
+`rentalFee = numberOfDays * movie.dailyRentalRate`
+
+Where:
+
+* `numberOfDays` = difference between `dateOut` and `dateReturned` (rounded appropriately).
+* `dailyRentalRate` comes from the referenced movie document.
+
+### **Your task**
+
+1. Write the test for this behavior.
+2. Run the test, confirm that it fails.
+3. Implement production code to make the test pass.
+
