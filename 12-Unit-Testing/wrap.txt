@@ -1499,3 +1499,92 @@ All tests pass successfully.
 
 ---
 
+*** 14- Continuously Running Tests ***
+
+---
+
+# Automatically Rerunning Tests with Jest Watch Mode
+
+## 1. The Problem
+
+Up to this point, every time you made a change to:
+
+* your **test code**, or
+* your **production code**
+
+you had to manually return to the terminal and run:
+
+-------------------code----------------------
+npm test
+-------------------code----------------------
+
+This becomes tedious and inefficient, especially in large applications.
+
+---
+
+# 2. Enabling Watch Mode
+
+Jest provides a feature that automatically reruns your tests whenever files change.
+
+To enable it:
+
+### Step 1: Edit `package.json`
+
+In the `scripts` section, update the `test` command to include the `--watchAll` flag:
+
+-------------------code----------------------
+"scripts": {
+  "test": "jest --watchAll"
+}
+-------------------code----------------------
+
+This tells Jest to continuously watch **all** project files for changes.
+
+---
+
+# 3. Running Tests in Watch Mode
+
+Now return to the terminal and run:
+
+-------------------code----------------------
+npm test
+-------------------code----------------------
+
+Jest will:
+
+1. Run all existing tests once.
+2. Enter watch mode and wait for file changes.
+
+---
+
+# 4. Demonstration
+
+### Example:
+
+1. Open the production code file, such as `registerUser`.
+2. Make a small change (for example, remove the exclamation mark in the validation logic).
+3. Save the file.
+
+As soon as you save:
+
+* Jest detects the file change.
+* Jest automatically reruns your tests.
+* You immediately see which test fails, without manually running any command.
+
+This shortens feedback loops significantly.
+
+---
+
+# 5. Improving Your Workflow
+
+For optimal productivity during development:
+
+* Keep your editor and terminal visible at the same time.
+* On dual-monitor setups, place:
+
+  * the **test console** on one screen, and
+  * the **source code** on the other.
+
+This allows you to immediately see test failures as soon as you save your code.
+
+---
