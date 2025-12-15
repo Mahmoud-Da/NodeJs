@@ -606,3 +606,73 @@ JWT private key is not defined
 * This indicates a missing **environment variable** that the application depends on.
 
 * The next step is to define the required environment variables to prevent crashes.
+
+
+*** 8- Setting Environment Variables ***
+---
+
+## Setting Environment Variables on Heroku
+
+Heroku allows you to define environment variables for your application using the Heroku CLI.
+
+---
+
+### 1. Setting Environment Variables
+
+Use the command:
+
+-------------------code----------------------
+heroku config:set VAR_NAME=value
+-------------------code----------------------
+
+* Example for your application:
+
+-------------------code----------------------
+heroku config:set vidly_JWT_PRIVATE_KEY=your_jwt_secret
+heroku config:set NODE_ENV=production
+-------------------code----------------------
+
+* `NODE_ENV=production` improves performance and reduces verbose logging.
+* Environment variables are **case sensitive**. Always use the correct casing.
+
+---
+
+### 2. Viewing Environment Variables
+
+Run:
+
+-------------------code----------------------
+heroku config
+-------------------code----------------------
+
+* Displays all environment variables set for the application.
+* Example output:
+
+-------------------code----------------------
+NODE_ENV: production
+vidly_JWT_PRIVATE_KEY: your_jwt_secret
+-------------------code----------------------
+
+---
+
+### 3. How Environment Variables Work on Heroku
+
+* Heroku applications run on servers called **dynos**.
+* Each dyno has a **temporary file system** that is wiped when restarted.
+* Dynos share only **environment variables**, which are replicated automatically across all dynos.
+* Setting variables at the application level means you do **not** need to configure each dyno individually.
+* Any changes to environment variables automatically restart the application.
+
+---
+
+### 4. Common Issues
+
+* After setting environment variables, your app may still crash if it depends on services not available in Heroku.
+* Example:
+
+-------------------code----------------------
+MongoNetworkError: failed to connect to server
+-------------------code----------------------
+
+* Cause: The connection string points to `localhost`, but Heroku does not have a local MongoDB instance by default.
+* Resolution: Connect to a cloud-hosted MongoDB service. This will be covered in the next lecture.
