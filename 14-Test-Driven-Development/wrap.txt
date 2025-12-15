@@ -1512,3 +1512,130 @@ router.post(
 * Next lecture will continue cleaning up and improving the route handler.
 
 ---
+
+*** 16- Mongoose Static Methods ***
+
+---
+
+### Improving Rental Lookup
+
+* **Problem:** Current rental lookup uses:
+
+  -------------------code----------------------
+  await Rental.findOne({ "customer._id": req.body.customerId, "movie._id": req.body.movieId });
+  -------------------code----------------------
+
+  * Inconvenient if we need to look up a rental in multiple places.
+  * We want a simpler interface:
+
+    -------------------code----------------------
+    const rental = await Rental.lookup(customerId, movieId);
+    -------------------code----------------------
+
+---
+
+### Terminology
+
+* **Instance Method**
+
+  * Defined on an object (instance of a class).
+  * Example: `user.generateAuthToken()`.
+  * Works on a particular object.
+
+* **Static Method**
+
+  * Defined on the class itself.
+  * Example: `Rental.lookup()`.
+  * Used when the method doesn’t operate on a specific object but rather the class as a whole.
+
+---
+
+### Adding a Static Method to Rental
+
+1. **Extract Schema**
+
+   -------------------code----------------------
+   const rentalSchema = new mongoose.Schema({
+     customer: {
+       _id: mongoose.Schema.Types.ObjectId,
+       name: String,
+       phone: String
+     },
+     movie: {
+       _id: mongoose.Schema.Types.ObjectId,
+       title: String,
+       dailyRentalRate: Number
+     },
+     dateOut: { type: Date, default: Date.now },
+     dateReturned: Date,
+     rentalFee: Number
+   });
+   -------------------code----------------------
+
+2. **Add Static Method**
+
+   -------------------code----------------------
+   rentalSchema.statics.lookup = function(customerId, movieId) {
+     return this.findOne({
+       "customer._id": customerId,
+       "movie._id": movieId
+     });
+   };
+   -------------------code----------------------
+
+3. **Export the Model**
+
+   -------------------code----------------------
+   const Rental = mongoose.model("Rental", rentalSchema);
+   module.exports = { Rental };
+   -------------------code----------------------
+
+---
+
+### Updating the Returns Module
+
+* Replace the old `findOne` code with the new static method:
+
+  -------------------code----------------------
+  const rental = await Rental.lookup(req.body.customerId, req.body.movieId);
+  -------------------code----------------------
+* **Important Notes**
+
+  * Do **not** use `request.body` inside the static method.
+  * Do **not** use arrow functions for methods that use `this` inside Mongoose schema.
+
+---
+
+### Benefits
+
+* Cleaner code when looking up rentals.
+* Centralized logic for rental lookup.
+* Reduces repetition across the codebase.
+* Automated tests catch mistakes immediately, preventing tedious manual testing.
+
+---
+
+### Common Pitfall
+
+* Accidentally including `req.body` inside the static method.
+
+  -------------------code----------------------
+  // Mistake
+  rentalSchema.statics.lookup = function() {
+    return this.findOne({
+      "customer._id": req.body.customerId, // should not reference req
+      "movie._id": req.body.movieId
+    });
+  };
+  -------------------code----------------------
+
+  * Fix: Pass arguments to the method explicitly.
+
+---
+
+### Result
+
+* After removing the incorrect `req.body` reference and using `Rental.lookup(customerId, movieId)`, all tests pass.
+* Code is now cleaner, more reusable, and easier to maintain.
+
+---
