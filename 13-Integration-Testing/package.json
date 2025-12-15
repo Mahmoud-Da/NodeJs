@@ -1,0 +1,20 @@
+{
+  "name": "13-integration-testing",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "fawn": "^2.1.5",
+    "mongoose": "^8.19.2"
+  },
+  "devDependencies": {
+    "jest": "^22.2.2"
+  }
+}
