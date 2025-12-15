@@ -221,3 +221,129 @@ These test cases define how the `/api/returns` endpoint should behave under diff
 In the next steps, each test will be implemented using the TDD cycle.
 
 ---
+
+*** 4- Populating the Database ***
+---
+
+### Setting Up the Test Environment for the Returns Endpoint
+
+We begin by creating a new integration test file for the returns feature.
+
+---
+
+## 1. Creating the Test File
+
+* Navigate to the `tests/integration` folder.
+* Add a new file named `returns.test.js`.
+* Start with a test suite titled `/api/returns`.
+
+---
+
+## 2. Preparing the Test Suite Structure
+
+Just like other integration tests:
+
+* Load the server in `beforeEach`.
+* Close the server in `afterEach`.
+* Prepare necessary database records before each test.
+* Clean up after each test.
+
+To save time, copy the `beforeEach` and `afterEach` code from `genres.test.js` and modify as needed.
+
+---
+
+## 3. Importing Required Modules
+
+Inside `returns.test.js`:
+
+* Define `let server;` at the top.
+* Import the `Rental` model from `models/rental`.
+* Import `mongoose` to create object IDs.
+
+---
+
+## 4. Creating the Rental Object in beforeEach
+
+Inside `beforeEach`:
+
+1. **Create a new rental instance**:
+
+   * The `rental` object must include:
+
+     * `customer`
+     * `movie`
+   * `dateOut` is automatically set by Mongoose because it has a default value.
+
+2. **Setting up the customer**:
+
+   The customer subdocument requires:
+
+   * `name` (minimum 5 characters)
+   * `isGold` (has a default value, so no need to set manually)
+   * `phone`
+
+   Also, an `_id` must be provided because it will be used during tests.
+
+   Steps:
+
+   * Create `customerId = mongoose.Types.ObjectId()`.
+   * Assign it to both:
+
+     * The rental’s `customer._id`
+     * A variable for later use in requests.
+
+3. **Setting up the movie**:
+
+   Similar to the customer:
+
+   * Create `movieId = mongoose.Types.ObjectId()`.
+   * Assign to `movie._id`.
+   * Set `title` to a value of at least 5 characters.
+   * Set `dailyRentalRate`, for example, to 2.
+
+4. **Save the rental** to the database using `await rental.save()`.
+
+Because the rental object will be reused across tests, declare it as a variable outside of `beforeEach`.
+
+---
+
+## 5. Cleaning Up After Each Test
+
+Inside `afterEach`:
+
+* Close the server.
+* Remove all rentals with `await Rental.remove({})`.
+
+---
+
+## 6. Verifying That Setup Works
+
+Before writing production code, ensure that test setup is correct.
+
+Add a simple test:
+
+* Title: `it("should work", ...)`
+* In the test:
+
+  * Use `Rental.findById(rental._id)` to fetch the rental.
+  * Expect the result to be non-null.
+
+Remember to mark both `beforeEach` and the test function as `async`.
+
+Example corrections:
+
+* Add `async` to `beforeEach`.
+* Add `async` to the test function.
+
+Once corrected:
+
+* Run tests in the terminal.
+* The test should pass, confirming that setup code works properly.
+
+---
+
+### Conclusion
+
+The environment for the returns endpoint tests is now correctly set up.
+In the next step, the first real test case will be implemented.
+
