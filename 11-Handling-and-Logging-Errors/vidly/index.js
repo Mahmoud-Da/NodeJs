@@ -1,4 +1,6 @@
+require("express-async-errors");
 require("dotenv").config();
+const winston = require("winston");
 const Joi = require("joi");
 Joi.objectId = require("joi-objectid")(Joi);
 const mongoose = require("mongoose");
@@ -11,6 +13,8 @@ const auth = require("./routes/auth");
 const error = require("./middleware/error");
 const express = require("express");
 const app = express();
+
+winston.add(new winston.transports.File({ filename: "logfile.log" }));
 
 mongoose
   .connect("mongodb://localhost/vidly")
