@@ -661,3 +661,112 @@ All tests should now pass.
 The next lecture will cover writing the second integration test for this endpoint.
 
 ---
+
+*** 7- Validating ObjectIDs ***
+---
+
+## Integration Test: GET /api/genres/:id
+
+### Test 2: Invalid ID Should Return 404
+
+### 1. Duplicating the First Test
+
+Start by duplicating the previous test and renaming it to reflect the new scenario:
+
+**Test name:**
+`it("should return 404 if invalid ID is passed", ...)`
+
+---
+
+## 2. No Need to Insert a Genre
+
+For this test:
+
+* There is no need to create or save a genre in the database.
+* Whether the collection is empty or full makes no difference.
+* Passing an invalid ID should result in a 404 regardless of the database content.
+
+Remove the `new Genre()` and `save()` lines to make the test simpler, cleaner, and faster.
+
+---
+
+## 3. Calling the Endpoint with an Invalid ID
+
+Instead of using `genre._id`, pass a blatantly invalid ID like:
+
+-------------------code----------------------
+/api/genres/1
+-------------------code----------------------
+
+This should trigger a failure because `1` is not a valid MongoDB ObjectId.
+
+Your expectation:
+
+-------------------code----------------------js
+expect(res.status).toBe(404);
+-------------------code----------------------
+
+Checking the response message is optional since the status code is what matters for clients.
+
+---
+
+## 4. Test Failure and Debugging the Issue
+
+Running the test initially results in:
+
+* Expected: 404
+* Received: 500 (internal server error)
+
+### Reason:
+
+The invalid ID causes Mongoose to throw a `CastError` because it attempts to convert `"1"` into an ObjectId.
+
+This error reaches your error middleware, where Winston logs it, and the middleware returns status 500.
+
+### Meaning:
+
+The route handler does not handle invalid route parameters before calling `findById`.
+
+---
+
+## 5. Fixing the Route Handler
+
+Before calling:
+
+-------------------code----------------------js
+Genre.findById(req.params.id)
+-------------------code----------------------
+
+you must validate the ID.
+
+### Use Mongoose's built-in validator:
+
+-------------------code----------------------js
+if (!mongoose.Types.ObjectId.isValid(req.params.id))
+  return res.status(404).send("Invalid ID");
+-------------------code----------------------
+
+This ensures:
+
+* No cast error is thrown.
+* The client receives the expected 404.
+
+Save the file and re-run the tests.
+
+---
+
+## 6. Result
+
+All tests now pass correctly.
+
+---
+
+## 7. Next Step
+
+Multiple endpoints in your application fetch a single resource by ID.
+Each will need the same ObjectId validation logic.
+
+In the next lecture, this logic will be refactored into a reusable middleware function to avoid duplication.
+
+---
+

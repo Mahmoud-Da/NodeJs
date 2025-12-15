@@ -4,6 +4,7 @@ const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
 const asyncMiddleware = require("../middleware/async");
 const router = express.Router();
+const mongoose = require("mongoose");
 
 router.get("/", async (req, res, next) => {
   try {
@@ -52,6 +53,9 @@ router.delete("/:id", [auth, admin], async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id))
+    return res.status(404).send("Invalid ID");
+
   const genre = await Genre.findById(req.params.id);
 
   if (!genre)
