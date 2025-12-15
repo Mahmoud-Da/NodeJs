@@ -1,0 +1,71 @@
+*** 1- What is Test-driven Development ***
+### Test-Driven Development (TDD)
+
+#### 1. Definition
+
+Test-driven development (TDD), also called *test first*, is a software development approach in which tests are written **before** the application (production) code.
+
+---
+
+### 2. The TDD Workflow
+
+TDD consists of a simple repetitive cycle:
+
+1. **Write a failing test**
+
+   * The test must fail initially because no application code exists to satisfy it.
+
+2. **Write the simplest code to make the test pass**
+
+   * Implement only the minimal logic required.
+   * Avoid over-engineering, premature class design, or unnecessary complexity.
+
+3. **Refactor the code**
+
+   * Clean up the implementation while keeping all tests passing.
+
+These three steps are repeated until the entire feature is implemented.
+
+---
+
+### 3. Why Use TDD?
+
+#### a. Immediate Testability
+
+Your code is testable from the first line since tests come before implementation.
+
+#### b. High Test Coverage
+
+Every line of production code exists only because a test required it.
+This leads to complete test coverage, making refactoring and deployment safer.
+
+#### c. Reduced Complexity
+
+Starting with tests prevents over-engineering.
+If all tests pass and the system meets all requirements, additional code is unnecessary.
+New requirements start with new failing tests.
+
+---
+
+### 4. TDD vs. Code-First Approach
+
+#### TDD (Test First)
+
+* Tests drive the design and implementation.
+* Offers strong safety through full test coverage.
+* Often leads to simpler and cleaner designs.
+
+#### Code First
+
+* The developer writes application code first, then tests afterward.
+* This is how most beginners and many teams naturally work.
+
+---
+
+### 5. Which Approach Is Better?
+
+* **In theory:** TDD provides better quality, better design, and safer refactoring.
+* **In practice:** TDD can grow complex and sometimes slow down development.
+* When TDD becomes impractical, switching to the code-first approach is reasonable.
+
+---
