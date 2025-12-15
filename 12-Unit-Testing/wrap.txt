@@ -163,3 +163,125 @@ In the next lecture, the focus will shift to the **different types of automated 
 
 ---
 
+*** 3- Types of Tests ***
+# Types of Automated Tests
+
+## Lecture Notes
+
+In automated testing, there are three main categories of tests:
+
+1. Unit tests
+2. Integration tests
+3. End-to-end (E2E) tests
+
+---
+
+## 1. Unit Tests
+
+### Definition
+
+A unit test verifies a small unit of the application **without** its external dependencies.
+
+**External dependencies** include:
+
+* Files
+* Databases
+* Message queues
+* Web services
+* External APIs
+
+The absence of these dependencies is the defining characteristic of a true unit test.
+
+### Characteristics
+
+* Fast to write
+* Extremely fast to run
+* Can run hundreds or thousands within seconds
+* Verify that individual building blocks behave correctly
+
+### Limitation
+
+Because unit tests do not involve real external systems, they provide limited confidence about the overall reliability of the application.
+
+---
+
+## 2. Integration Tests
+
+### Definition
+
+An integration test verifies how a class or component works **with its external dependencies**.
+
+This means the test uses real systems such as:
+
+* Actual databases
+* File systems
+* Concrete services
+
+### Characteristics
+
+* Slower than unit tests
+* Provide higher confidence in system reliability
+* Test the real integration between code and dependencies
+
+### Misconception: Integrating Classes vs True Integration
+
+Many people define integration testing as testing two or more classes together.
+However:
+
+* If none of the tested classes relies on an external resource, the test is still a **unit test**.
+* Testing multiple classes together without external dependencies leads to fragile tests tightly coupled to implementation details.
+* These tests break easily during refactoring and waste development time.
+
+This flawed definition is one of the main reasons developers struggle with unit testing.
+
+### Correct Definition Recap
+
+* **Unit test:** Tests a class or group of classes without external dependencies.
+* **Integration test:** Tests a class or group of classes with external dependencies.
+
+---
+
+## 3. End-to-End (E2E) Tests
+
+### Definition
+
+End-to-end tests verify the entire application flow through the **user interface**, simulating real user interactions.
+
+Tools designed for these tests include:
+
+* Selenium (a popular option)
+
+These tools:
+
+* Record user interactions
+* Replay them
+* Confirm that the application behaves correctly from the user’s perspective
+
+### Strength
+
+* Provide the highest level of confidence in the system
+* Test the application exactly as the user experiences it
+
+### Major Drawbacks
+
+1. **Very slow**
+
+   * They require launching the full application
+   * Often involve logging in, navigating, submitting forms, and checking results
+
+2. **Very brittle**
+
+   * Small UI changes can break tests
+   * Frequent maintenance required
+   * Not ideal for covering large test suites
+
+---
+
+## Summary
+
+* **Unit tests**: Fast, cheap, isolated, no external dependencies
+* **Integration tests**: Slower, involve real external systems, higher confidence
+* **End-to-end tests**: Highest confidence, but slow and fragile
+
+---
+
