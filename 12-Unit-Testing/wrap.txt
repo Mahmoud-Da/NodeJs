@@ -1719,3 +1719,130 @@ Running the test file confirms that all conditions are handled correctly, and Je
 ---
 
 
+*** 16- Creating Simple Mock Functions ***
+---
+
+# Unit Testing Functions with External Dependencies
+
+## 1. The Problem
+
+Most of the functions we’ve tested so far **do not rely on external resources**.
+
+* Example: functions that operate only on input arguments.
+* In contrast, functions like `applyDiscount` **depend on external resources**, e.g., a database or an HTTP service.
+
+---
+
+## 2. Example Function: `applyDiscount`
+
+### Behavior
+
+* Takes an **order object** with properties like `customerId` and `totalPrice`.
+* Retrieves the customer using `getCustomerSync(id)`.
+* If the customer has **more than 10 points**, applies a **10% discount** to the order.
+
+### Example of the Database Module
+
+-------------------code----------------------
+// database.js
+module.exports.getCustomerSync = function(id) {
+  console.log('Reading customer from MongoDB...');
+  return { id: id, points: 10 }; // Simulated customer object
+};
+-------------------code----------------------
+
+---
+
+## 3. Why External Dependencies Are a Problem
+
+* **Unit tests should not interact with external resources** (databases, HTTP services, etc.).
+* Benefits of avoiding real external calls:
+
+  * Tests are **fast and reliable**.
+  * Tests are **isolated** from environment issues (e.g., database down, service unavailable).
+  * Avoids **false failures** caused by external service downtime.
+
+**Key Concept:** If your test interacts with a real database or HTTP service, you are writing an **integration test**, not a unit test.
+
+---
+
+## 4. Solution: Using a Mock / Fake
+
+* Replace the real implementation of `getCustomerSync` with a **fake implementation** in your test.
+* The fake:
+
+  * Accepts the same input (`customerId`).
+  * Returns a customer object with the required properties (`id`, `points`).
+  * Does **not** interact with a database or HTTP service.
+
+---
+
+## 5. Implementing the Fake in Tests
+
+### Step 1: Import the database module
+
+-------------------code----------------------
+const db = require('../db');
+const lib = require('../lib');
+-------------------code----------------------
+
+### Step 2: Replace `getCustomerSync` with a fake
+
+-------------------code----------------------
+db.getCustomerSync = function(customerId) {
+  console.log('Fake reading customer...');
+  return { id: customerId, points: 20 }; // Points > 10 to trigger discount
+};
+-------------------code----------------------
+
+---
+
+## 6. Writing the Test for `applyDiscount`
+
+-------------------code----------------------
+describe('applyDiscount', () => {
+  it('should apply 10% discount if customer has more than 10 points', () => {
+    // Order object
+    const order = { customerId: 1, totalPrice: 10 };
+
+    // Call the function under test
+    lib.applyDiscount(order);
+
+    // Assert discount applied
+    expect(order.totalPrice).toBe(9); // 10% discount
+  });
+});
+-------------------code----------------------
+
+---
+
+## 7. Running the Test
+
+* When the test runs, you will see:
+
+-------------------code----------------------
+Fake reading customer...
+-------------------code----------------------
+
+* All tests pass successfully.
+* The real database is **never called**.
+
+---
+
+## 8. Key Takeaways
+
+1. **Unit tests should be independent of external resources.**
+2. Replace external calls with **fakes or mocks**.
+3. In JavaScript, replacing a function is straightforward:
+
+   -------------------code----------------------
+   db.getCustomerSync = function(id) { ... };
+   -------------------code----------------------
+4. Fakes should match the **interface** of the real function but implement custom, controlled behavior.
+5. This approach ensures:
+
+   * Tests are **fast**.
+   * Tests are **reliable**.
+   * Tests remain **isolated** and focused on the function under test.
+
+---
