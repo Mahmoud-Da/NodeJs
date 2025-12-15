@@ -880,3 +880,83 @@ This structure makes tests easier to follow, maintain, and extend.
 
 ---
 
+*** 9- Refactoring with Confidence ***
+# Refactoring with Confidence Using Unit Tests
+
+## 1. Purpose of Refactoring
+
+Refactoring means improving or restructuring code **without changing its external behavior**.
+Unit tests give us confidence during refactoring because they verify that the function still behaves correctly after changes.
+
+---
+
+## 2. Why Tests Make Refactoring Safe
+
+If all execution paths in a function are covered by tests, you can safely modify the internal implementation.
+After making changes, you simply run the tests.
+If they pass, you can be confident your refactor did not break anything.
+
+Without tests, refactoring is risky.
+You would need to run the entire application, navigate to the feature, and manually verify behavior.
+
+---
+
+## 3. Simplifying the Implementation
+
+Given the `absolute` function, all execution paths were already tested.
+This allows rewriting the function internally.
+
+### Example Refactor
+
+* Change the first line to return the number directly if it is greater than or equal to zero.
+* Remove the last return statement because it is no longer needed.
+* For negative values, convert them to positive.
+
+After simplifying, you run:
+
+-------------------code----------------------
+npm test
+-------------------code----------------------
+
+If tests fail, you check whether the problem is in the tests or in the code.
+
+In this case, the failure came from an intentional bug in a test.
+Fixing the test and running again resulted in all tests passing.
+
+---
+
+## 4. Running Tests After Each Change
+
+After correcting the test, running `npm test` again showed three passing tests.
+The grouped structure using `describe` also helped produce a clear hierarchical output, displaying:
+
+* absolute
+
+  * should return a positive number if input is positive
+  * should return a positive number if input is negative
+  * should return zero if input is zero
+
+---
+
+## 5. Refactoring Again Using a Ternary Operator
+
+The implementation was further simplified using a single-line ternary expression:
+
+-------------------code----------------------
+return number >= 0 ? number : -number
+-------------------code----------------------
+
+After removing unnecessary code and running tests again:
+
+-------------------code----------------------
+npm test
+-------------------code----------------------
+
+All tests passed successfully.
+
+---
+
+## 6. Key Takeaway
+
+Unit tests enable safe refactoring.
+You can freely change the internal implementation of a function, run the tests, and if everything passes, you know the behavior remains correct. This is one of the greatest advantages of having a strong test suite.
