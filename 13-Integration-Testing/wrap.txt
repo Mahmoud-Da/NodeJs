@@ -1216,3 +1216,97 @@ Result:
 | `new Array([3], [2])`            | `[ [3], [2] ]`        | `"3a2"`                |
 
 ---
+
+
+*** 11- Testing the Happy Path ***
+
+---
+
+# Testing the POST `/api/genres` Endpoint – Happy Path
+
+In this section, we focus on the **successful execution paths** where the input is valid.
+
+---
+
+## 1. Number of Tests
+
+* For each execution path, multiple tests may be required to cover all possibilities.
+* Previously, we wrote tests for invalid input (too short, too long).
+* Now we test the **happy path** (valid input).
+
+---
+
+## 2. Test 1: Saving the Genre in the Database
+
+### Purpose
+
+Ensure that when a valid genre is sent, it is actually saved in the database.
+
+### Steps
+
+1. Duplicate the last valid input test.
+2. Rename it:
+
+-------------------code----------------------
+it("should save the genre if it is valid", ...)
+-------------------code----------------------
+
+3. Send a valid genre:
+
+-------------------code----------------------
+{ name: "genre1" }
+-------------------code----------------------
+
+4. Query the database using the `Genre` model:
+
+-------------------code----------------------
+const genreInDb = await Genre.find({ name: "genre1" });
+-------------------code----------------------
+
+5. Assert that the genre exists:
+
+-------------------code----------------------
+expect(genreInDb).not.toBeNull();
+-------------------code----------------------
+
+* Note: The `afterEach` function will clean up the database after each test.
+
+---
+
+## 3. Test 2: Returning the Genre in the Response
+
+### Purpose
+
+Ensure that the created genre is returned in the response body with the correct properties.
+
+### Steps
+
+1. Duplicate the previous test.
+2. Rename it:
+
+-------------------code----------------------
+it("should return the genre if it is valid", ...)
+-------------------code----------------------
+
+3. Check the response body:
+
+-------------------code----------------------
+expect(res.body).toHaveProperty("_id");           // Ensure an id is present
+expect(res.body).toHaveProperty("name", "genre1"); // Ensure the name matches
+-------------------code----------------------
+
+* No need to query the database for this test.
+* We only check the response body.
+
+---
+
+## 4. Summary
+
+For the happy path:
+
+1. Test that the genre is **saved in the database**.
+2. Test that the genre is **returned in the response**.
+
+After running the tests, all should pass successfully.
+
+---
