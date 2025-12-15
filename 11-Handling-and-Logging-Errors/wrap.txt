@@ -2412,3 +2412,96 @@ This confirms:
 
 ---
 
+*** 16- Showing Unhandled Exceptions on the Console ***
+# Lecture Notes: Adding Console Transport for Unhandled Exceptions
+
+## 1. The Problem
+
+In the current implementation, when running the application on a new machine using:
+
+-------------------code----------------------
+node index.js
+-------------------code----------------------
+
+the application immediately terminates without showing any error message on the console.
+
+### Reason
+
+Winston is configured to handle exceptions, but only through a **file transport**.
+This works well in production, but it is not helpful for:
+
+* New developers
+* Debugging on development machines
+* Quick error visibility
+
+The error gets written to `uncaughtExceptions.log`, but nothing appears on the console.
+
+---
+
+## 2. The Solution: Add a Console Transport for Exceptions
+
+We enhance the logging configuration so that Winston also prints unhandled exceptions to the console.
+
+### Step 1: Add Winston Console Transport
+
+Inside the logging module (`startup/logging.js`), add a console transport:
+
+-------------------code----------------------
+new winston.transports.Console({
+  colorize: true,
+  prettyPrint: true
+});
+-------------------code----------------------
+
+### Purpose of the Options
+
+* **colorize: true**
+  Makes the output easier to visually identify
+* **prettyPrint: true**
+  Formats the logged exception for easy reading
+
+This ensures that when an error causes the application to stop, a readable error message appears directly in the terminal.
+
+---
+
+## 3. Result After Adding Console Transport
+
+### Before
+
+* Application terminates silently
+* Only log file contains information
+* Confusing for new developers
+
+### After
+
+Running:
+
+-------------------code----------------------
+node index.js
+-------------------code----------------------
+
+produces a clear, colorized error message in the terminal.
+Example:
+
+-------------------code----------------------
+Error: FATAL: JWT private key is not defined
+-------------------code----------------------
+
+This makes debugging straightforward and improves developer experience.
+
+---
+
+## 4. Final Verification
+
+After updating Winston’s transports, run the application again.
+
+You will see:
+
+* A clear error in the console
+* The same error stored in the log file
+
+This provides the best of both worlds:
+developer-friendly console output and production-safe file logging.
+
+---
+
