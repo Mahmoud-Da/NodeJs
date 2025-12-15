@@ -406,9 +406,9 @@ Following TDD, we now write the simplest production code that makes this test pa
 
 Inside `routes/`, create a new file:
 
-```
+-------------------code----------------------
 returns.js
-```
+-------------------code----------------------
 
 Load Express, create a router, and define a POST route. Start by copying the basic structure from the genres route file.
 
@@ -416,9 +416,9 @@ Load Express, create a router, and define a POST route. Start by copying the bas
 
 Use:
 
-```
+-------------------code----------------------
 module.exports = router;
-```
+-------------------code----------------------
 
 ### Step 3: Register the Route in the Application
 
@@ -427,9 +427,9 @@ Open the `startup/routes.js` file and:
 * Require the new returns module.
 * Add:
 
-  ```
+  -------------------code----------------------
   app.use("/api/returns", returns);
-  ```
+  -------------------code----------------------
 
 This connects the new endpoint to the application.
 
@@ -441,9 +441,9 @@ With TDD, the goal is to write **the simplest possible code** that makes the tes
 
 Inside `returns.js`, modify the route handler to:
 
-```
+-------------------code----------------------
 res.status(401).send();
-```
+-------------------code----------------------
 
 There is no need yet to handle authentication properly.
 TDD will force us to improve this later when other tests fail.
@@ -499,3 +499,80 @@ You will see the solution in the next lecture.
 
 ---
 
+*** 6- Testing the Input ***
+---
+
+# Lecture Notes: Validating Input in Test-Driven Development (TDD)
+
+## 1. Second Test Case: Missing Customer ID
+
+**Goal:** Ensure the API returns `400 Bad Request` if `customerId` is not provided.
+
+### Steps in the Test
+
+1. Duplicate the previous test and rename it to
+   **"should return 400 if customer ID is not provided"**.
+2. The test requires an authentication token:
+
+   * Load the `User` class.
+   * Create a new `User` instance.
+   * Generate an authentication token using `generateAuthToken()`.
+3. Attach the token to the request header:
+
+   * `x-auth-token: token`.
+4. Modify the request body by removing `customerId`.
+5. Expect the response status to be **400**.
+
+### Observed Test Failure
+
+* Expected: `400`
+* Received: `401`
+  This happens because the route handler always returns `401` for invalid input.
+
+### Fix in Production Code
+
+Add the simplest possible input validation:
+
+-------------------code----------------------
+if (!req.body.customerId)
+  return res.status(400).send("Customer ID not provided");
+-------------------code----------------------
+
+Refactoring to use Joi or other validation libraries can be done later once the test suite is complete.
+
+### Result
+
+After fixing, the test passes.
+
+---
+
+## 2. Third Test Case: Missing Movie ID
+
+**Goal:** Ensure the API returns `400 Bad Request` when `movieId` is missing.
+
+### Steps in the Test
+
+1. Duplicate the previous test and rename it to
+   **"should return 400 if movie ID is not provided"**.
+2. Keep `customerId` but remove `movieId` from the request body.
+3. Expect the response to be **400**.
+
+### Observed Test Failure
+
+* Expected: `400`
+* Received: `401`
+
+### Fix in Production Code
+
+Duplicate the earlier validation and adjust it:
+
+-------------------code----------------------
+if (!req.body.movieId)
+  return res.status(400).send("Movie ID not provided");
+-------------------code----------------------
+
+### Result
+
+All tests pass successfully.
+
+---
