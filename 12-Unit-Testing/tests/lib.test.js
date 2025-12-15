@@ -1,5 +1,6 @@
 const lib = require("../lib");
 const db = require("../db");
+const mail = require("../mail");
 
 describe("absolute", () => {
   it("should return a positive number if input is positive", () => {
@@ -99,5 +100,23 @@ describe("applyDiscount", () => {
 
     // Assert discount applied
     expect(order.totalPrice).toBe(9); // 10% discount
+  });
+});
+
+describe("notifyCustomer", () => {
+  it("should send an email to the customer", () => {
+    db.getCustomerSync = function (customerId) {
+      return { id: customerId, email: "a@example.com" };
+    };
+
+    let mailSent = false;
+    mail.send = function (email, message) {
+      mailSent = true; // Track that send was called
+    };
+
+    const order = { customerId: 1 };
+    lib.notifyCustomer(order);
+
+    expect(mailSent).toBe(true);
   });
 });

@@ -1846,3 +1846,115 @@ Fake reading customer...
    * Tests remain **isolated** and focused on the function under test.
 
 ---
+
+*** 17- Interaction Testing ***
+---
+
+# Unit Testing Functions That Interact with Other Modules
+
+## 1. The Problem
+
+We are testing the function `notifyCustomer`, which:
+
+* Uses the **database module** to get a customer by ID.
+* Uses the **mail module** to send an email to that customer.
+
+### Example Function Behavior
+
+-------------------code----------------------
+function notifyCustomer(order) {
+  const customer = db.getCustomerSync(order.customerId);
+  mail.send(customer.email, 'Your order was processed');
+}
+-------------------code----------------------
+
+### Goal
+
+* Write a **unit test** to ensure that `notifyCustomer` calls the mail module properly.
+* Avoid calling **real external resources** (database or mail server).
+
+---
+
+## 2. Setting Up the Test
+
+### Step 1: Import Modules
+
+-------------------code----------------------
+const lib = require('../lib');
+const db = require('../database');
+const mail = require('../mail');
+-------------------code----------------------
+
+### Step 2: Replace Real Implementations with Fakes
+
+#### 2.1 Replace `db.getCustomerSync`
+
+* Purpose: avoid talking to a real database.
+
+-------------------code----------------------
+db.getCustomerSync = function(customerId) {
+  return { id: customerId, email: 'a@example.com' };
+};
+-------------------code----------------------
+
+#### 2.2 Replace `mail.send`
+
+* Purpose: avoid sending real emails.
+
+-------------------code----------------------
+let mailSent = false;
+
+mail.send = function(email, message) {
+  mailSent = true; // Track whether send was called
+};
+-------------------code----------------------
+
+---
+
+## 3. Writing the Test
+
+### Describe Block
+
+-------------------code----------------------
+describe('notifyCustomer', () => {
+  it('should send an email to the customer', () => {
+    const order = { customerId: 1 };
+
+    lib.notifyCustomer(order);
+
+    expect(mailSent).toBe(true); // Assert that mail.send was called
+  });
+});
+-------------------code----------------------
+
+### Explanation
+
+* We **mock both external dependencies** (`db` and `mail`) to isolate the function.
+* The test **does not require a real database or mail server**.
+* The test focuses on **interaction between objects**:
+
+  * `notifyCustomer` should call `mail.send` with the correct data.
+
+---
+
+## 4. Key Concepts
+
+1. **Unit Test Principle**: test code in isolation, without external dependencies.
+2. **Interaction Testing**: verify that one object interacts correctly with another.
+3. **Module Caching in Node.js**:
+
+   * A module is loaded **once** and cached.
+   * Requiring the same module elsewhere in the app returns the **same instance**.
+4. **Mock Functions**:
+
+   * Temporary replacement of real functions for testing.
+   * Track whether and how a function was called (e.g., using a boolean flag).
+
+---
+
+## 5. Next Steps
+
+* While this approach works, JavaScript provides **simpler and more powerful ways** to create mock functions.
+* The next lecture introduces these improved techniques (e.g., using `jest.fn()`).
+
+---
