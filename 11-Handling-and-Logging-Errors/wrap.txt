@@ -1471,3 +1471,177 @@ The next lecture will cover **unhandled promise rejections**, which occur when a
 
 ---
 
+
+*** 9- Unhandled Promise Rejections ***
+
+---
+
+# Handling Unhandled Promise Rejections in Node.js
+
+## 1. Recap: Uncaught Exceptions
+
+* In the previous lecture, you learned how to handle **uncaught exceptions** using:
+
+  -------------------code----------------------
+  process.on('uncaughtException', (ex) => { ... });
+  -------------------code----------------------
+* This catches exceptions thrown in **synchronous** code only.
+* It does not work for rejected promises.
+
+---
+
+# 2. Why Uncaught Exception Handlers Do Not Catch Promise Rejections
+
+* Promises operate asynchronously.
+* If a promise is rejected and no `.catch()` handler is provided, you get an **unhandled promise rejection**, not an uncaught exception.
+* The uncaughtException event does **not** detect this scenario.
+
+### Demonstration
+
+Replace a thrown exception with a rejected promise:
+
+-------------------code----------------------
+const p = Promise.reject(new Error('Failed miserably'));
+
+p.then(() => console.log('Done')); // No catch
+-------------------code----------------------
+
+Running the app:
+
+* Node prints a warning: *unhandled promise rejection*
+* The process does **not** terminate in current Node versions.
+* Future Node versions will terminate the process on unhandled promise rejections.
+
+---
+
+# 3. Introducing the `unhandledRejection` Event
+
+Node's `process` object emits another important event:
+
+### `unhandledRejection`
+
+Triggered when:
+
+* A promise is rejected
+* No `.catch()` handler is provided
+
+### Adding a handler
+
+-------------------code----------------------
+process.on('unhandledRejection', (reason) => {
+    winston.error(reason.message, reason);
+});
+-------------------code----------------------
+
+This allows Winston to log promise-related errors that previously went unnoticed.
+
+---
+
+# 4. Verifying Logging Behavior
+
+Before running the application:
+
+* The log file only contains uncaught exceptions.
+* After adding `unhandledRejection` handling:
+
+  * Run the app again.
+  * The log file now includes a new entry for the unhandled rejection.
+  * This confirms Winston successfully logs asynchronous errors.
+
+---
+
+# 5. Best Practice: Exit the Process After Catching These Errors
+
+Whether you catch:
+
+* `uncaughtException`, or
+* `unhandledRejection`
+
+You should terminate the process:
+
+-------------------code----------------------
+process.exit(1);
+-------------------code----------------------
+
+### Why exit?
+
+* The application may now be in an undefined or corrupted state.
+* Restarting ensures a clean and predictable environment.
+
+### How to restart in production?
+
+* Use a **process manager** such as PM2, forever, or systemd.
+* These tools automatically restart the application when it exits.
+
+---
+
+# 6. Using Winston’s `handleExceptions` Instead of Manual Handlers
+
+Winston provides a built-in helper:
+
+-------------------code----------------------
+winston.handleExceptions(
+    new winston.transports.File({ filename: 'uncaughtExceptions.log' })
+);
+-------------------code----------------------
+
+Key points:
+
+* This automatically logs uncaught exceptions.
+* You can use one or multiple transports.
+* You may log to a file, MongoDB, or both.
+
+### Choosing file vs database logging
+
+* Databases are better for querying and analyzing logs.
+* File system is more reliable when the database is down.
+* The recommended approach is to use **both** transports.
+
+---
+
+# 7. Handling Unhandled Rejections with Winston’s Exception Handler
+
+At the time this lecture was recorded:
+
+* `handleExceptions` works only for **uncaught exceptions**, not unhandled rejections.
+
+### Making it work for rejected promises
+
+Instead of manually logging the rejection:
+
+-------------------code----------------------
+process.on('unhandledRejection', (ex) => {
+    throw ex;
+});
+-------------------code----------------------
+
+This converts the rejection into an uncaught exception:
+
+* Winston’s `handleExceptions` handler catches it
+* Logs it automatically
+* Terminates the process
+
+This keeps error handling unified and centralized.
+
+---
+
+# 8. Summary
+
+### What we now handle:
+
+1. **Uncaught Exceptions**
+
+   * Using `winston.handleExceptions` or `process.on('uncaughtException')`
+
+2. **Unhandled Promise Rejections**
+
+   * Using `process.on('unhandledRejection')`
+   * Then rethrowing the error to let Winston handle it
+
+### Best practice:
+
+* **Always exit the process** after handling these fatal errors.
+* Use a **process manager** in production to restart the application.
+
+---
+
