@@ -1063,3 +1063,334 @@ npm list winston
 -------------------code----------------------
 
 If it shows **3.x or 4.x**, the new syntax above is required.
+
+
+*** 7- Logging to MongoDB ***
+### Lecture Notes: Logging Messages to MongoDB with Winston
+
+---
+
+#### 1. Introduction
+
+In this lecture, we extend our logging setup to store log messages in **MongoDB** using the **winston-mongodb** transport module.
+
+Logging to MongoDB is useful for centralizing logs, analyzing them, or integrating them into monitoring tools.
+
+---
+
+#### 2. Installing the MongoDB Transport
+
+There is a known issue with the latest release candidate (`4.0.0`) of `winston-mongodb`, so we install the stable version `3.0.0` instead.
+
+**Command:**
+
+-------------------code----------------------
+npm install winston-mongodb@3.0.0
+-------------------code----------------------
+
+Make sure to use this exact version, as the newer release candidate may not work with the examples shown here.
+
+---
+
+#### 3. Setting Up Winston with MongoDB Transport
+
+In **index.js**, after requiring Winston, we also require `winston-mongodb`.
+
+**Example setup:**
+
+-------------------code----------------------
+const winston = require('winston');
+require('winston-mongodb');
+-------------------code----------------------
+
+We don’t need to assign the `require('winston-mongodb')` result to a variable — simply requiring it adds the MongoDB transport to Winston.
+
+Now we can add a new transport to Winston.
+
+**Example:**
+
+-------------------code----------------------
+winston.add(winston.transports.MongoDB, {
+  db: 'mongodb://localhost/vidly'
+});
+-------------------code----------------------
+
+This tells Winston to log messages to the MongoDB database named `vidly`.
+
+---
+
+#### 4. Logging in Practice
+
+We already have Winston configured to log errors (from our error middleware).
+Now, every time an error occurs, Winston will automatically:
+
+* Log it to the console
+* Log it to a log file
+* Log it to MongoDB (via the new transport)
+
+---
+
+#### 5. Testing the Configuration
+
+1. Run the application:
+
+   -------------------code----------------------
+   node index.js
+   -------------------code----------------------
+
+2. In **Postman**, send a request to the `/api/genres` endpoint (which throws an error).
+
+3. Open **MongoDB Compass** and refresh the `vidly` database.
+
+4. You’ll see a new collection named **log**.
+
+Each document in the **log** collection includes:
+
+* **timestamp** – when the error occurred
+* **level** – the logging level (e.g., `error`)
+* **message** – the log message
+* **meta** – the metadata (stack trace and error details)
+
+Example structure:
+
+-------------------code----------------------on
+{
+  "_id": "...",
+  "timestamp": "2025-11-13T10:25:00Z",
+  "level": "error",
+  "message": "Could not get the genres",
+  "meta": {
+    "message": "Could not get the genres",
+    "name": "Error",
+    "stack": "Error: Could not get the genres\n   at ..."
+  }
+}
+-------------------code----------------------
+
+---
+
+#### 6. Logging Levels
+
+Winston supports multiple logging levels:
+
+1. **error**
+2. **warn**
+3. **info**
+4. **verbose**
+5. **debug**
+6. **silly**
+
+You can restrict which levels get stored in MongoDB.
+
+For example, if you only want to log **errors**, modify the transport configuration:
+
+-------------------code----------------------
+winston.add(winston.transports.MongoDB, {
+  db: 'mongodb://localhost/vidly',
+  level: 'error'
+});
+-------------------code----------------------
+
+If you set the level to `info`, Winston will log **error**, **warn**, and **info** messages — but not `debug` or `verbose`.
+
+---
+
+#### 7. Summary
+
+| Step            | Description                                                                    |
+| --------------- | ------------------------------------------------------------------------------ |
+| Install package | `npm install winston-mongodb@3.0.0`                                            |
+| Require module  | `require('winston-mongodb')`                                                   |
+| Add transport   | `winston.add(winston.transports.MongoDB, { db: 'mongodb://localhost/vidly' })` |
+| Test            | Trigger an error and view the `log` collection in MongoDB                      |
+| Optional        | Limit log level with `{ level: 'error' }`                                      |
+
+---
+
+This setup allows Winston to log errors to both a **file** and **MongoDB**, providing a robust and scalable logging system for production applications.
+
+That error —
+
+-------------------code----------------------
+Error: You should provide db to log to.
+-------------------code----------------------
+
+— means Winston’s MongoDB transport didn’t receive the `db` connection string properly when you called `winston.add()`.
+
+Let’s fix this cleanly and make sure it works with `winston-mongodb@3.0.0`.
+
+---
+
+### Correct Setup for `winston-mongodb@3.0.0`
+
+In your **index.js**, make sure this section looks like the following:
+
+-------------------code----------------------
+const winston = require('winston');
+require('winston-mongodb');
+
+// Add file transport
+winston.add(new winston.transports.File({ filename: 'logfile.log' }));
+
+// Add MongoDB transport
+winston.add(new winston.transports.MongoDB({
+  db: 'mongodb://localhost/vidly', // make sure this matches your database name
+  level: 'error' // optional — only log errors
+}));
+-------------------code----------------------
+
+**Important points:**
+
+1. You must use `new winston.transports.MongoDB(...)`, **not** `winston.add(winston.transports.MongoDB, {...})`.
+2. The `db` field must be a **valid MongoDB URI** string.
+3. Make sure MongoDB is running locally (`mongod`).
+
+---
+
+### ⚙️ Why the Error Happened
+
+In older tutorials or Winston v2 code, you might see:
+
+-------------------code----------------------
+winston.add(winston.transports.MongoDB, { db: 'mongodb://localhost/vidly' });
+-------------------code----------------------
+
+That syntax no longer works with Winston v3+.
+The correct syntax uses the `new` keyword to create the transport instance.
+
+---
+
+Example Full Snippet
+
+Your top section of **index.js** should look like:
+
+-------------------code----------------------
+const express = require('express');
+const winston = require('winston');
+require('winston-mongodb');
+
+const app = express();
+
+// Winston transports
+winston.add(new winston.transports.File({ filename: 'logfile.log' }));
+winston.add(new winston.transports.MongoDB({
+  db: 'mongodb://localhost/vidly',
+  level: 'error'
+}));
+
+app.listen(3001, () => winston.info('Listening on port 3001...'));
+-------------------code----------------------
+
+---
+
+### Test Steps
+
+1. Ensure MongoDB is running:
+
+   -------------------code----------------------
+   mongod
+   -------------------code----------------------
+2. Start your app:
+
+   -------------------code----------------------
+   nodemon index.js
+   -------------------code----------------------
+3. Trigger an error (e.g., from your `/api/genres` route).
+4. Check **MongoDB Compass** → `vidly` database → `log` collection.
+
+You should now see log documents appearing there with fields like:
+
+-------------------code----------------------on
+{
+  "level": "error",
+  "message": "Could not get the genres",
+  "timestamp": "2025-11-13T10:35:00Z"
+}
+-------------------code----------------------
+
+---
+
+Would you like me to show you how to move this Winston configuration into a dedicated `startup/logging.js` module (for a cleaner structure, like in real-world apps)?
+
+Good question — you can check your **MongoDB database name** in several simple ways depending on how you’re connected.
+Here are the most common options:
+
+---
+
+### **1. If You’re Using MongoDB Compass (GUI)**
+
+1. Open **MongoDB Compass**.
+2. Connect to your server (e.g., `mongodb://localhost:27017`).
+3. On the left sidebar, you’ll see a list of databases such as:
+
+   -------------------code----------------------
+   admin
+   config
+   local
+   vidly
+   test
+   -------------------code----------------------
+4. The name you use in your Winston configuration should match exactly one of those —
+   for example:
+
+   -------------------code----------------------
+   db: 'mongodb://localhost/vidly'
+   -------------------code----------------------
+
+If you don’t see **vidly**, it means your app hasn’t yet created that database (MongoDB creates databases automatically when data is first inserted).
+
+---
+
+### **2. If You’re Using the Mongo Shell (`mongosh`)**
+
+Run these commands in your terminal:
+
+-------------------code----------------------
+mongosh
+-------------------code----------------------
+
+Then inside the shell:
+
+-------------------code----------------------
+show dbs
+-------------------code----------------------
+
+You’ll see something like:
+
+-------------------code----------------------
+admin       0.000GB
+config      0.000GB
+local       0.000GB
+vidly       0.002GB
+-------------------code----------------------
+
+The database name is `vidly`.
+If you want to use or inspect it:
+
+-------------------code----------------------
+use vidly
+show collections
+-------------------code----------------------
+
+---
+
+### **3. If You Want to Confirm from Your App Code**
+
+In your Node.js code (for example, in your MongoDB connection module), check the URI used to connect:
+
+-------------------code----------------------
+mongoose.connect('mongodb://localhost/vidly', { useNewUrlParser: true, useUnifiedTopology: true });
+-------------------code----------------------
+
+Here, `vidly` at the end of the URI is your **database name**.
+
+---
+
+### **4. If You Haven’t Created Any Collections Yet**
+
+MongoDB won’t show an empty database.
+You’ll only see it after your app writes data to it (for example, when you create a collection like `genres` or when Winston writes logs).
+
+---
+
+
