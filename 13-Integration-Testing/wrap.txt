@@ -1738,3 +1738,129 @@ describe("Auth Middleware", () => {
 
 ---
 
+*** 15- Code Coverage ***
+---
+
+# Using Jest to Measure Code Coverage
+
+## 1. Purpose of Code Coverage
+
+* When writing **unit and integration tests**, you might wonder:
+
+  * How much of your code is actually covered?
+  * What scenarios are not yet tested?
+* Code coverage tools help answer these questions by analyzing which parts of your code are exercised by tests.
+
+---
+
+## 2. Enabling Code Coverage in Jest
+
+1. Open `package.json`.
+2. Modify the test script to include the coverage flag:
+
+-------------------code----------------------
+"scripts": {
+  "test": "jest --coverage"
+}
+-------------------code----------------------
+
+3. Run tests again in the terminal:
+
+-------------------code----------------------
+npm test
+-------------------code----------------------
+
+---
+
+## 3. Viewing Coverage Reports
+
+* Jest generates a **coverage report** in the terminal and an **HTML report**.
+* The HTML report can be found at:
+
+-------------------code----------------------
+<project-folder>/coverage/lcov-report/index.html
+-------------------code----------------------
+
+* Open `index.html` in a browser for a visual report.
+
+---
+
+## 4. Understanding the Report
+
+* The report includes coverage per folder and file.
+
+* Columns include:
+
+  * **Statements:** Number of statements executed by tests.
+  * **Branches:** Execution paths tested (if/else, try/catch).
+  * **Functions:** Number of functions tested.
+  * **Lines:** Number of lines executed.
+
+* **Example:** `models/genre.js` shows 100% coverage because tests for routes exercise the model, even if there is no direct test for the model itself.
+
+---
+
+## 5. Analyzing Execution Paths
+
+* For `auth.js` middleware:
+
+  * Statements: 11, 100% covered
+  * Branches: 2, 100% covered
+  * Functions: 1, 100% covered
+  * Lines: 16
+
+* Branches represent return statements and different paths through the function.
+
+* JWT validation has multiple paths: valid, invalid, missing token.
+
+---
+
+## 6. Identifying Untested Code
+
+* Coverage highlights untested lines in **red** in the HTML report.
+
+* Example: A route handler line is not covered if there is no test for:
+
+  * A valid object ID that does not exist in the database.
+
+* Solution: Add a test for this scenario:
+
+-------------------code----------------------js
+it("should return 404 if no genre with the given id exists", async () => {
+  const id = mongoose.Types.ObjectId(); // valid ObjectId
+  const res = await request(server).get("/api/genres/" + id);
+  expect(res.status).toBe(404);
+});
+-------------------code----------------------
+
+---
+
+## 7. Updating Coverage
+
+* Every time you run tests with the coverage flag, Jest regenerates the report.
+* Refresh the HTML report to see updated coverage.
+
+---
+
+## 8. Ignoring Coverage Folder in Git
+
+* The `coverage` folder is auto-generated and should not be checked into version control.
+* Add it to `.gitignore`:
+
+-------------------code----------------------
+coverage/
+-------------------code----------------------
+
+* This prevents unnecessary files from being committed to the repository.
+
+---
+
+### Summary
+
+1. Use `jest --coverage` to measure how much code your tests cover.
+2. Review the HTML report to identify untested areas.
+3. Write additional tests to cover missing execution paths.
+4. Exclude the `coverage` folder from Git since it can be regenerated.
+
+---
+
