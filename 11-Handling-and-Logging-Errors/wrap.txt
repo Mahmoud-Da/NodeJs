@@ -2273,3 +2273,142 @@ The lecture instructs you to perform this refactoring next.
 
 ---
 
+*** 15- Extracting the Validation Logic ***
+# Lecture Notes: Extracting Joi Validation Setup into `validation.js`
+
+## 1. Creating the Validation Module
+
+### Step 1: Add `validation.js`
+
+Inside the `startup` folder, create a new file:
+
+-------------------code----------------------
+startup/validation.js
+-------------------code----------------------
+
+Export a function from this file:
+
+-------------------code----------------------
+module.exports = function () {
+  // Joi ObjectId setup will be placed here
+};
+-------------------code----------------------
+
+---
+
+## 2. Moving Joi ObjectId Extension
+
+### Step 2: Relocate the Joi Extension Logic
+
+In the previous `index.js`, there was a line that extended Joi with `objectId`:
+
+-------------------code----------------------
+Joi.objectId = require('joi-objectid')(Joi);
+-------------------code----------------------
+
+Cut that line from `index.js` and paste it inside the exported function of `validation.js`.
+
+Example structure inside `validation.js`:
+
+-------------------code----------------------
+const Joi = require('joi');
+module.exports = function () {
+  Joi.objectId = require('joi-objectid')(Joi);
+};
+-------------------code----------------------
+
+---
+
+## 3. Importing Dependencies
+
+### Step 3: Move the Joi Import
+
+Back in `index.js`, cut the Joi import:
+
+-------------------code----------------------
+const Joi = require('joi');
+-------------------code----------------------
+
+Place it at the top of `validation.js` so the module is fully self-contained.
+
+---
+
+## 4. Loading Validation Module in `index.js`
+
+### Step 4: Load the New Module
+
+In `index.js`, load and invoke the validation module:
+
+-------------------code----------------------
+require('./startup/validation')();
+-------------------code----------------------
+
+This ensures Joi is properly extended during application startup.
+
+---
+
+## 5. Resulting Project Structure Benefits
+
+### Clean Separation of Responsibilities
+
+Previously, `index.js` contained 60 to 70 lines with multiple responsibilities:
+
+* Logging setup
+* Database connection
+* Joi setup
+* Route setup
+* Error handling
+* Configuration checking
+
+This violated the single responsibility principle.
+
+After the refactoring:
+
+* Each concern lives in its own module
+* `index.js` now focuses only on high-level application initialization
+
+This leads to improved readability, maintainability, and scalability.
+
+---
+
+## 6. Replacing Console Logging with Winston
+
+### Step 5: Update Startup Logging
+
+In `index.js`, replace any `console.log` statements with Winston logging for consistency.
+
+Example:
+
+-------------------code----------------------
+const winston = require('winston');
+winston.info('Listening on port...');
+-------------------code----------------------
+
+Winston provides structured logging, transports, and integration with file logs and databases. Using it instead of console output ensures consistent logging throughout the application.
+
+---
+
+## 7. Verifying the Application
+
+### Step 6: Run the Application
+
+In the terminal, run:
+
+-------------------code----------------------
+node index.js
+-------------------code----------------------
+
+You should now see the following Winston info logs:
+
+1. Listening on the configured port
+2. Successfully connected to MongoDB
+
+This confirms:
+
+* Logging works
+* Database initialization works
+* Validation setup works
+* The refactoring is successful
+
+---
+
