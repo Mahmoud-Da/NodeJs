@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": "24.10.0"
   },
   "keywords": [],
   "author": "",

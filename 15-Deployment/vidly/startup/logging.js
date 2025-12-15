@@ -11,7 +11,7 @@ module.exports = function () {
     throw ex;
   });
 
-  winston.add(winston.transports.File, { filename: "logfile.log" });
+  winston.add(new winston.transports.File({ filename: "logfile.log" }));
   // winston.add(
   //   new winston.transports.MongoDB({
   //     db: "mongodb://localhost:27017/vidly", // make sure to include port 27017
